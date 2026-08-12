@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">設定</string>
+
+    <string name="settings_section_display">表示</string>
+    <string name="settings_theme">テーマ</string>
+    <string name="settings_theme_system">端末の設定に従う</string>
+    <string name="settings_theme_light">ライト</string>
+    <string name="settings_theme_dark">ダーク</string>
+    <string name="settings_theme_night_red">暗所（赤）</string>
+    <string name="settings_theme_night_red_desc">FOHで暗順応を壊さないよう赤系のみで描画</string>
+    <string name="settings_theme_outdoor">屋外（高コントラスト）</string>
+    <string name="settings_theme_outdoor_desc">直射日光下で読めるよう白背景・最大コントラスト</string>
+
+    <string name="settings_section_measure">計測</string>
+    <string name="settings_keep_screen_on">計測中は画面を消さない</string>
+    <string name="settings_keep_screen_on_desc">長時間のSPLログ中に画面が落ちるのを防ぐ</string>
+
+    <string name="settings_section_pro">Pro</string>
+    <string name="settings_pro_status">現在の状態: %1$s</string>
+    <string name="settings_pro_status_free">無料版</string>
+    <string name="settings_pro_status_pro">Pro 有効</string>
+    <string name="settings_debug_pro">［開発用］Pro を強制的に有効にする</string>
+    <string name="settings_debug_pro_desc">デバッグビルドのみ。Free/Pro 両方の画面を実機で確認するために使う</string>
+
+    <string name="settings_section_legal">計測精度と利用範囲</string>
+    <string name="settings_disclaimer">スマートフォンの内蔵マイクにはAGC・周波数特性の癖・最大SPLの制約があり、無校正の測定値は数dB〜十数dBずれることがあります。本アプリの測定値は現場調整・社内記録のための参考値です。\n\n計量法上の「取引・証明」に用いる測定（騒音規制法の届出など）には使用できません。法定の測定には検定を受けた騒音計を使用してください。\n\n業務・有償の現場で参考測定として利用することは許諾しています。</string>
+    <string name="settings_licenses">オープンソースライセンス</string>
+    <string name="settings_licenses_desc">Phase 5 で一覧画面を追加します</string>
+</resources>

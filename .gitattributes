@@ -1,0 +1,13 @@
+# リポジトリ内は LF で統一する。
+# gradlew が CRLF で入ると Linux の CI で "bad interpreter" になるため明示している。
+* text=auto eol=lf
+
+gradlew text eol=lf
+*.bat text eol=crlf
+
+*.jar binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.keystore binary
+*.wav binary

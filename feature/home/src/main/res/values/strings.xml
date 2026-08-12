@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">PA Toolbox</string>
+    <string name="home_search_hint">ツールを検索（例: SPL、ディレイ、パッチ）</string>
+    <string name="home_section_favorites">よく使う</string>
+    <string name="home_no_results">「%1$s」に一致するツールはありません</string>
+    <string name="home_settings">設定</string>
+    <string name="home_pro_active">Pro 有効（%1$s）</string>
+    <string name="home_pro_inactive">Pro は Phase 5 で購入できるようになります</string>
+    <string name="home_tool_count">%1$d ツール</string>
+</resources>

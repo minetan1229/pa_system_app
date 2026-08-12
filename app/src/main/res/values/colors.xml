@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 起動時の一瞬だけ見える色。Compose のテーマ背景と合わせて白飛び/黒飛びを避ける -->
+    <color name="window_background">#FFF7F9FF</color>
+    <color name="ic_launcher_background">#FF00344D</color>
+</resources>

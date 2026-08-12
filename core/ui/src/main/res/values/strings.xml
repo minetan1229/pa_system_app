@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  既定ロケールを日本語にしている（主な利用者が日本のPA現場のため）。
+  英語は values-en/ を後で追加する。
+-->
+<resources>
+    <!-- カテゴリ -->
+    <string name="category_measure">計測</string>
+    <string name="category_calc">計算・リファレンス</string>
+    <string name="category_document">現場ドキュメント</string>
+    <string name="category_business">見積・稼働管理</string>
+
+    <!-- 課金バッジ -->
+    <string name="badge_pro">PRO</string>
+    <string name="badge_free_limited">無料（制限あり）</string>
+    <string name="badge_free">無料</string>
+
+    <!-- 準備中 -->
+    <string name="coming_soon">準備中</string>
+    <string name="coming_soon_phase">Phase %1$d で実装予定</string>
+    <string name="placeholder_note">この画面はまだ実装されていません。プランの Phase %1$d で追加されます。</string>
+    <string name="back">戻る</string>
+
+    <!-- お気に入り -->
+    <string name="favorite_add">よく使うツールに追加</string>
+    <string name="favorite_remove">よく使うツールから外す</string>
+
+    <!-- A. 計測 -->
+    <string name="tool_spl_meter_title">SPLメーター</string>
+    <string name="tool_spl_meter_desc">dBA/dBC/dBZ、Leq、Lmax/Lpeak。校正状態を常時表示</string>
+    <string name="tool_spl_logger_title">SPLロガー</string>
+    <string name="tool_spl_logger_desc">時系列で記録してCSV/PDF出力。規制値アラートと曲マーカー</string>
+    <string name="tool_rta_title">RTA</string>
+    <string name="tool_rta_desc">1/1・1/3オクターブ（Proで1/6・1/12）、ピークホールド</string>
+    <string name="tool_fft_title">FFTアナライザ</string>
+    <string name="tool_fft_desc">高分解能スペクトラム、窓関数選択、ハーモニクスカーソル</string>
+    <string name="tool_spectrogram_title">スペクトログラム</string>
+    <string name="tool_spectrogram_desc">ウォーターフォール表示で時間変化を追う</string>
+    <string name="tool_signal_generator_title">シグナルジェネレータ</string>
+    <string name="tool_signal_generator_desc">サイン/スイープ/ピンクノイズ/デュアルトーン/1kHz基準</string>
+    <string name="tool_feedback_finder_title">ハウリング周波数検出</string>
+    <string name="tool_feedback_finder_desc">発振周波数を検出して音名・帯域・推奨EQを提示</string>
+    <string name="tool_delay_finder_title">ディレイタイム実測</string>
+    <string name="tool_delay_finder_desc">スピーカー間の到達時間差を実測。気温補正込み</string>
+    <string name="tool_polarity_check_title">極性・位相チェック</string>
+    <string name="tool_polarity_check_desc">極性判定と2ch位相差、配線ミスの切り分け</string>
+    <string name="tool_room_measure_title">室内特性測定</string>
+    <string name="tool_room_measure_desc">スイープからIRを取得して振幅・位相・RT60（T20/T30/EDT）</string>
+    <string name="tool_tuner_title">チューナー</string>
+    <string name="tool_tuner_desc">クロマチック、A基準可変、ストロボ表示</string>
+    <string name="tool_metronome_title">メトロノーム</string>
+    <string name="tool_metronome_desc">タップテンポ、拍子、ヘッドフォン出力</string>
+    <string name="tool_recorder_title">2ch録音</string>
+    <string name="tool_recorder_desc">リハ・会場録音をメモ付きで保存</string>
+
+    <!-- B. 計算・リファレンス -->
+    <string name="tool_delay_calc_title">ディレイ計算</string>
+    <string name="tool_delay_calc_desc">距離↔ms、気温・湿度による音速補正、ディレイタワー</string>
+    <string name="tool_bpm_calc_title">BPM↔ms</string>
+    <string name="tool_bpm_calc_desc">ディレイ/リバーブのタイム合わせ（4分・8分・3連・付点）</string>
+    <string name="tool_db_calc_title">dB換算</string>
+    <string name="tool_db_calc_desc">dBu/dBV/dBFS/dBSPL/V/W、ゲインステージとヘッドルーム</string>
+    <string name="tool_impedance_calc_title">インピーダンス計算</string>
+    <string name="tool_impedance_calc_desc">直列/並列、アンプ負荷、ハイインピーダンス（70V/100V）タップ</string>
+    <string name="tool_power_calc_title">電源計算</string>
+    <string name="tool_power_calc_desc">消費電力→電流、ブレーカー容量、ケーブル電圧降下</string>
+    <string name="tool_coverage_calc_title">距離減衰・カバレッジ</string>
+    <string name="tool_coverage_calc_desc">逆二乗則、開き角とカバー範囲、スロー距離</string>
+    <string name="tool_connector_ref_title">ケーブル・コネクタ図鑑</string>
+    <string name="tool_connector_ref_desc">XLR/TRS/Speakon/DI、ファンタム、グランドリフト</string>
+    <string name="tool_freq_chart_title">楽器帯域チャート</string>
+    <string name="tool_freq_chart_desc">基音・倍音・おいしい帯域・切る帯域のEQ早見表</string>
+    <string name="tool_troubleshoot_title">トラブルシュート</string>
+    <string name="tool_troubleshoot_desc">音が出ない/ハウる/ハムノイズを分岐式で切り分け</string>
+    <string name="tool_glossary_title">PA用語辞典</string>
+    <string name="tool_glossary_desc">用語と略語（FOH/AUX/DCAなど）を日英で引く</string>
+    <string name="tool_wireless_coord_title">ワイヤレス周波数調整</string>
+    <string name="tool_wireless_coord_desc">使用可能帯域、ch間隔、3次相互変調の衝突チェック</string>
+
+    <!-- C. 現場ドキュメント -->
+    <string name="tool_patch_sheet_title">パッチ表・インプットリスト</string>
+    <string name="tool_patch_sheet_desc">ch・楽器・マイク・スタンド・ファンタム・マルチ番号</string>
+    <string name="tool_stage_plot_title">ステージプロット</string>
+    <string name="tool_stage_plot_desc">ドラッグ配置の平面図、モニター番号、電源位置</string>
+    <string name="tool_pdf_export_title">PDF出力・共有</string>
+    <string name="tool_pdf_export_desc">パッチ表・進行表・図面をPDFにして共有</string>
+    <string name="tool_run_sheet_title">進行表・タイムテーブル</string>
+    <string name="tool_run_sheet_desc">リハ・本番の時間割、押し巻きの自動再計算</string>
+    <string name="tool_show_timer_title">本番タイマー</string>
+    <string name="tool_show_timer_desc">カウントダウン・経過・押し表示を巨大表示</string>
+    <string name="tool_job_manager_title">案件管理</string>
+    <string name="tool_job_manager_desc">会場・日時・搬入時間・連絡先・写真を案件単位で管理</string>
+    <string name="tool_snapshot_title">セッティング再現</string>
+    <string name="tool_snapshot_desc">前回の卓設定・EQ・ディレイ値を写真と数値で保存</string>
+    <string name="tool_gear_inventory_title">機材台帳・貸出管理</string>
+    <string name="tool_gear_inventory_desc">在庫、QR、貸出返却、点検記録</string>
+
+    <!-- D. ビジネス -->
+    <string name="tool_invoice_title">見積書・請求書</string>
+    <string name="tool_invoice_desc">案件から機材・人件費で作成、消費税・インボイス番号対応</string>
+    <string name="tool_work_log_title">稼働記録</string>
+    <string name="tool_work_log_desc">現場ごとの稼働時間・移動費・収支を集計</string>
+    <string name="tool_cloud_backup_title">クラウドバックアップ</string>
+    <string name="tool_cloud_backup_desc">端末故障に備えた任意のバックアップ</string>
+</resources>

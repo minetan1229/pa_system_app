@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  レベルメーターを模したマーク。108x108 のうち中央 72x72 がセーフゾーン。
+  文字やロゴ画像を使わないので、外部素材のライセンス確認が不要。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 4本のバー（左から順に伸びる） -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M38,58 h6 v14 h-6 z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M48,46 h6 v26 h-6 z" />
+    <path
+        android:fillColor="#FF87CEFF"
+        android:pathData="M58,38 h6 v34 h-6 z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M68,52 h6 v20 h-6 z" />
+
+    <!-- 底のベースライン -->
+    <path
+        android:fillColor="#FF87CEFF"
+        android:pathData="M36,74 h40 v3 h-40 z" />
+</vector>

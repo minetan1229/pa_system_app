@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      実際の配色は Compose 側（PaTheme）が持つ。ここは起動時の窓の色だけを決める。
+    -->
+    <style name="Theme.PaToolbox" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>
