@@ -14,9 +14,12 @@ import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.home.HomeScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
+import com.patoolbox.feature.patch.PatchListScreen
+import com.patoolbox.feature.patch.PatchSheetScreen
 import com.patoolbox.feature.rta.RtaScreen
 import com.patoolbox.feature.siggen.SigGenScreen
 import com.patoolbox.feature.settings.SettingsScreen
+import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplScreen
 import com.patoolbox.feature.tuner.TunerScreen
 import kotlinx.serialization.Serializable
@@ -38,6 +41,14 @@ data object SettingsRoute
 /** マイク校正。ツール一覧には出さず、計測画面と設定から入る。 */
 @Serializable
 data object CalibrationRoute
+
+/**
+ * パッチ表の編集。
+ * property 名は PatchSheetViewModel.KEY_SHEET_ID と一致させる必要がある
+ * （SavedStateHandle がこの名前で引数を受け取る）。
+ */
+@Serializable
+data class PatchSheetRoute(val sheetId: Long)
 
 @Composable
 fun PaNavHost(
@@ -66,6 +77,9 @@ fun PaNavHost(
                     tool = tool,
                     onBack = { navController.popBackStack() },
                     onOpenCalibration = { navController.navigate(CalibrationRoute) },
+                    onOpenPatchSheet = { sheetId ->
+                        navController.navigate(PatchSheetRoute(sheetId))
+                    },
                 )
             }
         }
@@ -76,6 +90,10 @@ fun PaNavHost(
 
         composable<CalibrationRoute> {
             CalibrationScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<PatchSheetRoute> {
+            PatchSheetScreen(onBack = { navController.popBackStack() })
         }
     }
 }
@@ -89,6 +107,7 @@ private fun ToolDestination(
     tool: ToolId,
     onBack: () -> Unit,
     onOpenCalibration: () -> Unit,
+    onOpenPatchSheet: (Long) -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -103,6 +122,13 @@ private fun ToolDestination(
         ToolId.TUNER -> TunerScreen(onBack = onBack)
 
         ToolId.METRONOME -> MetronomeScreen(onBack = onBack)
+
+        ToolId.PATCH_SHEET -> PatchListScreen(
+            onOpenSheet = onOpenPatchSheet,
+            onBack = onBack,
+        )
+
+        ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
 
         else -> {
             // 計算機系は1画面のタブ集合なので、該当タブを開いた状態で入る

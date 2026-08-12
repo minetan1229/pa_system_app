@@ -67,6 +67,8 @@ dependencies {
     implementation(project(":feature:tuner"))
     implementation(project(":feature:metronome"))
     implementation(project(":feature:calc"))
+    implementation(project(":feature:patch"))
+    implementation(project(":feature:showtimer"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

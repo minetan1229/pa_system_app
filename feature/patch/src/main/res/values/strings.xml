@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="patch_title">パッチ表</string>
+    <string name="patch_empty">パッチ表がありません。右下の追加から作成してください</string>
+    <string name="patch_add">パッチ表を追加</string>
+    <string name="patch_new_name">名前</string>
+    <string name="patch_new_channels">チャンネル数</string>
+    <string name="patch_create">作成</string>
+    <string name="patch_cancel">キャンセル</string>
+    <string name="patch_delete">削除</string>
+    <string name="patch_delete_confirm">「%1$s」を削除します。元に戻せません</string>
+    <string name="patch_row_count">%1$d ch</string>
+    <string name="patch_updated">更新 %1$s</string>
+
+    <string name="patch_limit_reached">無料版で保存できるパッチ表は %1$d 件までです。Pro で無制限になります</string>
+
+    <string name="patch_channel">CH</string>
+    <string name="patch_source">音源・楽器</string>
+    <string name="patch_mic">マイク・DI</string>
+    <string name="patch_stand">スタンド</string>
+    <string name="patch_phantom">48V</string>
+    <string name="patch_multi">マルチ番号</string>
+    <string name="patch_notes">備考</string>
+    <string name="patch_add_channel">CHを追加</string>
+    <string name="patch_delete_row">この行を削除</string>
+    <string name="patch_phantom_count">48V 使用 %1$d ch</string>
+    <string name="patch_filled_count">記入済み %1$d / %2$d ch</string>
+    <string name="patch_expand_hint">行をタップすると編集できます</string>
+</resources>

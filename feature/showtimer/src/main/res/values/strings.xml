@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timer_title">本番タイマー</string>
+
+    <string name="timer_mode">モード</string>
+    <string name="timer_mode_countdown">残り時間</string>
+    <string name="timer_mode_elapsed">経過時間</string>
+
+    <string name="timer_target">持ち時間 (分)</string>
+    <string name="timer_start">スタート</string>
+    <string name="timer_pause">一時停止</string>
+    <string name="timer_reset">リセット</string>
+
+    <string name="timer_over">押し %1$s</string>
+    <string name="timer_remaining_label">残り</string>
+    <string name="timer_elapsed_label">経過</string>
+    <string name="timer_preset">%1$d 分</string>
+    <string name="timer_note">画面は自動で消えません。ステージから見えるように置いて使えます</string>
+</resources>

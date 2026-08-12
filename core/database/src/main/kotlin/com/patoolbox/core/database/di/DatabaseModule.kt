@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.patoolbox.core.database.PaDatabase
 import com.patoolbox.core.database.dao.CalibrationProfileDao
 import com.patoolbox.core.database.dao.JobDao
+import com.patoolbox.core.database.dao.PatchSheetDao
+import com.patoolbox.core.database.dao.ScheduleItemDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,4 +34,11 @@ object DatabaseModule {
     @Provides
     fun provideCalibrationProfileDao(database: PaDatabase): CalibrationProfileDao =
         database.calibrationProfileDao()
+
+    @Provides
+    fun providePatchSheetDao(database: PaDatabase): PatchSheetDao = database.patchSheetDao()
+
+    @Provides
+    fun provideScheduleItemDao(database: PaDatabase): ScheduleItemDao =
+        database.scheduleItemDao()
 }
