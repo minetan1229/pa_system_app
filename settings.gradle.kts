@@ -32,6 +32,8 @@ include(":app")
 
 // core: 全 feature が共有する土台
 include(":core:model")
+// 計測の数値処理。Android に依存しない純 Kotlin なので、JVM テストで理論値と突き合わせられる
+include(":core:dsp")
 include(":core:designsystem")
 include(":core:ui")
 include(":core:data")
