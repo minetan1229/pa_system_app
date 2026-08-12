@@ -35,8 +35,8 @@ enum class ToolId(
     DELAY_FINDER(ToolCategory.MEASURE, ToolAccess.PRO, "DLY", phase = 4),
     POLARITY_CHECK(ToolCategory.MEASURE, ToolAccess.PRO, "POL", phase = 4),
     ROOM_MEASURE(ToolCategory.MEASURE, ToolAccess.PRO, "IR", phase = 4),
-    TUNER(ToolCategory.MEASURE, ToolAccess.FREE, "TUN", phase = 1),
-    METRONOME(ToolCategory.MEASURE, ToolAccess.FREE, "CLK", phase = 1),
+    TUNER(ToolCategory.MEASURE, ToolAccess.FREE, "TUN", phase = 1, implemented = true),
+    METRONOME(ToolCategory.MEASURE, ToolAccess.FREE, "CLK", phase = 1, implemented = true),
     RECORDER(ToolCategory.MEASURE, ToolAccess.PRO, "REC", phase = 6),
 
     // --- B. 計算・リファレンス ---

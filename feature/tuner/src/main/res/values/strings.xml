@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tuner_title">チューナー</string>
+
+    <string name="tuner_listening">音を出してください</string>
+    <string name="tuner_no_pitch">--</string>
+    <string name="tuner_frequency">%1$s Hz（目標 %2$s Hz）</string>
+    <string name="tuner_cents">%1$s セント</string>
+    <string name="tuner_in_tune">合っています</string>
+    <string name="tuner_reference">A の基準: %1$s Hz</string>
+    <string name="tuner_reference_down">−1 Hz</string>
+    <string name="tuner_reference_up">+1 Hz</string>
+    <string name="tuner_reference_reset">440 に戻す</string>
+    <string name="tuner_clarity">安定度 %1$d%%</string>
+</resources>

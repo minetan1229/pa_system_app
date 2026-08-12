@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metronome_title">メトロノーム</string>
+
+    <string name="metronome_bpm">BPM</string>
+    <string name="metronome_tap">タップでテンポ入力</string>
+    <string name="metronome_beats">拍子</string>
+    <string name="metronome_beats_value">%1$d/4</string>
+    <string name="metronome_accent">1拍目にアクセント</string>
+    <string name="metronome_level">クリックの音量</string>
+    <string name="metronome_minus">−1</string>
+    <string name="metronome_plus">+1</string>
+    <string name="metronome_minus_ten">−10</string>
+    <string name="metronome_plus_ten">+10</string>
+    <string name="metronome_headphone_note">スピーカーから出すとマイクに回り込みます。クリックはヘッドフォンかイヤモニで聞いてください。</string>
+</resources>

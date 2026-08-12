@@ -64,6 +64,8 @@ dependencies {
     implementation(project(":feature:calibration"))
     implementation(project(":feature:siggen"))
     implementation(project(":feature:rta"))
+    implementation(project(":feature:tuner"))
+    implementation(project(":feature:metronome"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
