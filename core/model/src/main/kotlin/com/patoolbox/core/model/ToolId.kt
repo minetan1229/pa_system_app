@@ -25,7 +25,7 @@ enum class ToolId(
     val implemented: Boolean = false,
 ) {
     // --- A. 計測 ---
-    SPL_METER(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "SPL", phase = 1),
+    SPL_METER(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "SPL", phase = 1, implemented = true),
     SPL_LOGGER(ToolCategory.MEASURE, ToolAccess.PRO, "LOG", phase = 4),
     RTA(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "RTA", phase = 1),
     FFT(ToolCategory.MEASURE, ToolAccess.PRO, "FFT", phase = 4),

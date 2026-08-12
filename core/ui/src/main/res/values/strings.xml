@@ -25,6 +25,25 @@
     <string name="favorite_add">よく使うツールに追加</string>
     <string name="favorite_remove">よく使うツールから外す</string>
 
+    <!-- マイク権限 -->
+    <string name="mic_permission_title">マイクの使用許可が必要です</string>
+    <string name="mic_permission_rationale">音圧レベルや周波数特性を測るためにマイクを使います。録音した音は端末内で処理するだけで、外部に送信しません。</string>
+    <string name="mic_permission_grant">マイクを許可する</string>
+    <string name="mic_permission_denied">許可されていないため測定できません。端末の設定アプリからも変更できます。</string>
+
+    <!-- 校正状態 -->
+    <string name="calibration_uncalibrated">未校正（参考値）</string>
+    <string name="calibration_manual">手動校正済み</string>
+    <string name="calibration_calibrator">校正器で校正済み</string>
+    <string name="calibration_external">外部マイク校正済み</string>
+
+    <!-- 計測共通 -->
+    <string name="measure_start">測定開始</string>
+    <string name="measure_stop">停止</string>
+    <string name="measure_reset">リセット</string>
+    <string name="measure_clipping">過大入力（クリップ）</string>
+    <string name="measure_elapsed">経過 %1$s</string>
+
     <!-- A. 計測 -->
     <string name="tool_spl_meter_title">SPLメーター</string>
     <string name="tool_spl_meter_desc">dBA/dBC/dBZ、Leq、Lmax/Lpeak。校正状態を常時表示</string>

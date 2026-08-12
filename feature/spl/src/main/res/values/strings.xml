@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="spl_title">SPLメーター</string>
+
+    <string name="spl_leq">Leq</string>
+    <string name="spl_max">Lmax</string>
+    <string name="spl_min">Lmin</string>
+    <string name="spl_peak">Lpeak</string>
+    <string name="spl_l10">L10</string>
+    <string name="spl_l50">L50</string>
+    <string name="spl_l90">L90</string>
+
+    <string name="spl_weighting">周波数重み付け</string>
+    <string name="spl_time_weighting">時間重み付け</string>
+    <string name="spl_time_fast">Fast (125ms)</string>
+    <string name="spl_time_slow">Slow (1s)</string>
+    <string name="spl_time_impulse">Impulse (35ms)</string>
+
+    <string name="spl_waiting">測定開始を押してください</string>
+    <string name="spl_uncalibrated_note">未校正です。基準となる騒音計と並べて校正すると精度が上がります。</string>
+    <string name="spl_calibrate">校正する</string>
+    <string name="spl_source">入力: %1$s</string>
+    <string name="spl_no_value">--.-</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 権限を必要とするモジュール自身が宣言する（app のマニフェストにマージされる） -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- マイクが無い端末では測定機能が成立しないが、計算機やパッチ表は使えるので required=false -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <!-- USB Audio Class の外部測定マイクに対応するため -->
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
+</manifest>

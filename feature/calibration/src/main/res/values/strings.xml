@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calibration_title">マイク校正</string>
+
+    <string name="calibration_intro">内蔵マイクは機種ごとに感度が違うため、無校正の測定値は数dB〜十数dBずれます。基準となる騒音計か音響校正器で一度合わせておくと、以降の測定が実用になります。</string>
+
+    <string name="calibration_measured">現在の入力レベル</string>
+    <string name="calibration_current_offset">現在のオフセット: %1$s dB（%2$s）</string>
+
+    <string name="calibration_manual_title">方法1: 騒音計と合わせる</string>
+    <string name="calibration_manual_desc">基準の騒音計を端末のマイクの隣に置き、同じ音を測って、騒音計の読みを入力してください。</string>
+    <string name="calibration_reference_label">騒音計の読み (dB)</string>
+    <string name="calibration_apply">この値で校正する</string>
+
+    <string name="calibration_calibrator_title">方法2: 音響校正器を使う</string>
+    <string name="calibration_calibrator_desc">校正器をマイクに装着し、出力レベルのボタンを押してください。こちらの方が精度が出ます。</string>
+    <string name="calibration_apply_94">94 dB で校正</string>
+    <string name="calibration_apply_114">114 dB で校正</string>
+
+    <string name="calibration_clear">校正を消す</string>
+    <string name="calibration_saved">校正しました</string>
+    <string name="calibration_need_measure">先に測定を開始してレベルを安定させてください</string>
+    <string name="calibration_invalid_input">数値を入力してください</string>
+    <string name="calibration_device">対象: %1$s</string>
+</resources>

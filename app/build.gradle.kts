@@ -60,6 +60,8 @@ dependencies {
 
     implementation(project(":feature:home"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:spl"))
+    implementation(project(":feature:calibration"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

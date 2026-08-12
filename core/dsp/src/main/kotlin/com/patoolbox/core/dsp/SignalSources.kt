@@ -33,8 +33,8 @@ const val DEFAULT_LEVEL_DB_FS = -20.0
 
 class SineSource(
     override val sampleRate: Int,
-    var frequencyHz: Double = 1000.0,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var frequencyHz: Double = 1000.0,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
 ) : SignalSource {
     private var phase = 0.0
 
@@ -56,9 +56,9 @@ class SineSource(
 /** 相互変調（IMD）の確認用。2音を同レベルで出す。 */
 class DualToneSource(
     override val sampleRate: Int,
-    var lowHz: Double = 250.0,
-    var highHz: Double = 8000.0,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var lowHz: Double = 250.0,
+    @Volatile var highHz: Double = 8000.0,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
     maxBlockSize: Int = DEFAULT_MAX_BLOCK,
 ) : SignalSource {
     private val low = SineSource(sampleRate)
@@ -96,8 +96,8 @@ class DualToneSource(
 /** 矩形波。位相チェックや簡易的な高調波確認に使う。 */
 class SquareSource(
     override val sampleRate: Int,
-    var frequencyHz: Double = 1000.0,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var frequencyHz: Double = 1000.0,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
 ) : SignalSource {
     private var phase = 0.0
 
@@ -124,7 +124,7 @@ class SquareSource(
  */
 class WhiteNoiseSource(
     override val sampleRate: Int,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
     private val seed: Long = 1L,
 ) : SignalSource {
     private var state = seed
@@ -166,7 +166,7 @@ class WhiteNoiseSource(
  */
 class PinkNoiseSource(
     override val sampleRate: Int,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
     private val seed: Long = 1L,
 ) : SignalSource {
     private val white = WhiteNoiseSource(sampleRate, levelDbFs = 0.0, seed = seed)
@@ -238,11 +238,11 @@ class PinkNoiseSource(
  */
 class LogSweepSource(
     override val sampleRate: Int,
-    var startHz: Double = 20.0,
-    var endHz: Double = 20000.0,
-    var durationSeconds: Double = 5.0,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
-    var loop: Boolean = false,
+    @Volatile var startHz: Double = 20.0,
+    @Volatile var endHz: Double = 20000.0,
+    @Volatile var durationSeconds: Double = 5.0,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var loop: Boolean = false,
 ) : SignalSource {
     private var sampleIndex = 0L
 
@@ -274,11 +274,11 @@ class LogSweepSource(
 /** リニアスイープ。共振の探索など、低域を等間隔で見たいとき。 */
 class LinearSweepSource(
     override val sampleRate: Int,
-    var startHz: Double = 20.0,
-    var endHz: Double = 20000.0,
-    var durationSeconds: Double = 5.0,
-    var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
-    var loop: Boolean = false,
+    @Volatile var startHz: Double = 20.0,
+    @Volatile var endHz: Double = 20000.0,
+    @Volatile var durationSeconds: Double = 5.0,
+    @Volatile var levelDbFs: Double = DEFAULT_LEVEL_DB_FS,
+    @Volatile var loop: Boolean = false,
 ) : SignalSource {
     private var sampleIndex = 0L
 
@@ -312,8 +312,8 @@ class LinearSweepSource(
  */
 class BurstSource(
     private val source: SignalSource,
-    var onSeconds: Double = 0.5,
-    var offSeconds: Double = 0.5,
+    @Volatile var onSeconds: Double = 0.5,
+    @Volatile var offSeconds: Double = 0.5,
 ) : SignalSource {
     override val sampleRate: Int get() = source.sampleRate
 

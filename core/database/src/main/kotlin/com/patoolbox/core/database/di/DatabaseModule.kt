@@ -3,6 +3,7 @@ package com.patoolbox.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.patoolbox.core.database.PaDatabase
+import com.patoolbox.core.database.dao.CalibrationProfileDao
 import com.patoolbox.core.database.dao.JobDao
 import dagger.Module
 import dagger.Provides
@@ -27,4 +28,8 @@ object DatabaseModule {
 
     @Provides
     fun provideJobDao(database: PaDatabase): JobDao = database.jobDao()
+
+    @Provides
+    fun provideCalibrationProfileDao(database: PaDatabase): CalibrationProfileDao =
+        database.calibrationProfileDao()
 }

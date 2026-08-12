@@ -9,8 +9,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
+import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.home.HomeScreen
 import com.patoolbox.feature.settings.SettingsScreen
+import com.patoolbox.feature.spl.SplScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,7 +20,7 @@ data object HomeRoute
 
 /**
  * ツール画面への共通ルート。
- * 実装済みのツールは [toolScreen] で実画面に振り分け、未実装は PlaceholderScreen に落とす。
+ * 実装済みのツールは [ToolDestination] で実画面に振り分け、未実装は PlaceholderScreen に落とす。
  * Phase が進んで画面が増えても、ホーム側は ToolId を渡すだけで済む。
  */
 @Serializable
@@ -26,6 +28,10 @@ data class ToolRoute(val toolId: String)
 
 @Serializable
 data object SettingsRoute
+
+/** マイク校正。ツール一覧には出さず、計測画面と設定から入る。 */
+@Serializable
+data object CalibrationRoute
 
 @Composable
 fun PaNavHost(
@@ -53,6 +59,7 @@ fun PaNavHost(
                 ToolDestination(
                     tool = tool,
                     onBack = { navController.popBackStack() },
+                    onOpenCalibration = { navController.navigate(CalibrationRoute) },
                 )
             }
         }
@@ -60,17 +67,29 @@ fun PaNavHost(
         composable<SettingsRoute> {
             SettingsScreen(onBack = { navController.popBackStack() })
         }
+
+        composable<CalibrationRoute> {
+            CalibrationScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
 /**
  * ToolId → 実画面の振り分け。
- * Phase 1 で :feature:spl などが入ったら、ここに分岐を足していく。
+ * 実装が済んだツールをここに足し、ToolId 側の implemented を true にする。
  */
 @Composable
 private fun ToolDestination(
     tool: ToolId,
     onBack: () -> Unit,
+    onOpenCalibration: () -> Unit,
 ) {
-    PlaceholderScreen(tool = tool, onBack = onBack)
+    when (tool) {
+        ToolId.SPL_METER -> SplScreen(
+            onBack = onBack,
+            onOpenCalibration = onOpenCalibration,
+        )
+
+        else -> PlaceholderScreen(tool = tool, onBack = onBack)
+    }
 }

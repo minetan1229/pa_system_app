@@ -34,6 +34,8 @@ include(":app")
 include(":core:model")
 // 計測の数値処理。Android に依存しない純 Kotlin なので、JVM テストで理論値と突き合わせられる
 include(":core:dsp")
+// マイク入力とスピーカー出力。core:dsp を Android の音声APIに繋ぐ層
+include(":core:audio")
 include(":core:designsystem")
 include(":core:ui")
 include(":core:data")
@@ -41,6 +43,8 @@ include(":core:database")
 include(":core:billing")
 include(":core:testing")
 
-// feature: 画面単位。Phase が進むごとに増える（:feature:spl, :feature:rta, ...）
+// feature: 画面単位。Phase が進むごとに増える
 include(":feature:home")
 include(":feature:settings")
+include(":feature:spl")
+include(":feature:calibration")

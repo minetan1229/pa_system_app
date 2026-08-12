@@ -12,4 +12,6 @@ dependencies {
     api(project(":core:designsystem"))
 
     implementation(libs.androidx.core.ktx)
+    // 権限リクエスト（rememberLauncherForActivityResult）に使う
+    implementation(libs.androidx.activity.compose)
 }
