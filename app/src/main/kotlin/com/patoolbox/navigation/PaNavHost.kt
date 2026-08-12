@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
+import com.patoolbox.feature.calc.CalcScreen
+import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.home.HomeScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
@@ -102,6 +104,14 @@ private fun ToolDestination(
 
         ToolId.METRONOME -> MetronomeScreen(onBack = onBack)
 
-        else -> PlaceholderScreen(tool = tool, onBack = onBack)
+        else -> {
+            // 計算機系は1画面のタブ集合なので、該当タブを開いた状態で入る
+            val calcTab = tool.toCalcTabOrNull()
+            if (calcTab != null) {
+                CalcScreen(initialTab = calcTab, onBack = onBack)
+            } else {
+                PlaceholderScreen(tool = tool, onBack = onBack)
+            }
+        }
     }
 }

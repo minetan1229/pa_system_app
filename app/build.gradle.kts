@@ -66,6 +66,7 @@ dependencies {
     implementation(project(":feature:rta"))
     implementation(project(":feature:tuner"))
     implementation(project(":feature:metronome"))
+    implementation(project(":feature:calc"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

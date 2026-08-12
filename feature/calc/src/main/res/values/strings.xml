@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calc_title">計算機</string>
+
+    <string name="calc_tab_delay">ディレイ</string>
+    <string name="calc_tab_bpm">BPM</string>
+    <string name="calc_tab_db">dB換算</string>
+    <string name="calc_tab_impedance">インピーダンス</string>
+
+    <!-- ディレイ -->
+    <string name="calc_delay_conditions">気温と湿度</string>
+    <string name="calc_delay_temperature">気温 (℃)</string>
+    <string name="calc_delay_humidity">湿度 (%)</string>
+    <string name="calc_delay_speed">音速 %1$s m/s</string>
+    <string name="calc_delay_distance">距離 (m)</string>
+    <string name="calc_delay_time">時間 (ms)</string>
+    <string name="calc_delay_hint">どちらかを入力すると、もう一方が出ます</string>
+    <string name="calc_delay_feet">%1$s ft</string>
+    <string name="calc_delay_samples">%1$s サンプル (48kHz)</string>
+    <string name="calc_delay_cancellation">最初の打ち消し %1$s Hz</string>
+    <string name="calc_delay_tower">ディレイタワー</string>
+    <string name="calc_delay_tower_offset">追加オフセット (ms)</string>
+    <string name="calc_delay_tower_result">タワーに入れる値 %1$s ms</string>
+    <string name="calc_delay_tower_note">メインより数ms遅らせると音像がメイン側に寄ります</string>
+
+    <!-- BPM -->
+    <string name="calc_bpm_label">BPM</string>
+    <string name="calc_bpm_note">音符</string>
+    <string name="calc_bpm_ms">ms</string>
+    <string name="calc_bpm_hz">Hz</string>
+    <string name="calc_bpm_from_ms">ms から BPM を逆算 (1/4 基準)</string>
+    <string name="calc_bpm_from_ms_result">%1$s BPM</string>
+
+    <!-- dB換算 -->
+    <string name="calc_db_voltage">電圧レベル</string>
+    <string name="calc_db_value">値</string>
+    <string name="calc_db_unit_dbu">dBu</string>
+    <string name="calc_db_unit_dbv">dBV</string>
+    <string name="calc_db_unit_volts">V (rms)</string>
+    <string name="calc_db_power">電力</string>
+    <string name="calc_db_watts">電力 (W)</string>
+    <string name="calc_db_impedance">負荷 (Ω)</string>
+    <string name="calc_db_volts_needed">必要な電圧 %1$s V（%2$s dBu）</string>
+    <string name="calc_db_distance">距離によるレベル差</string>
+    <string name="calc_db_from">元の距離 (m)</string>
+    <string name="calc_db_to">先の距離 (m)</string>
+    <string name="calc_db_distance_result">%1$s dB</string>
+    <string name="calc_db_reference">基準: 0 dBu = 0.775 V / 0 dBV = 1 V / 差は 2.2 dB</string>
+
+    <!-- インピーダンス -->
+    <string name="calc_imp_speaker">スピーカー 1台 (Ω)</string>
+    <string name="calc_imp_count">台数</string>
+    <string name="calc_imp_wiring">結線</string>
+    <string name="calc_imp_parallel">並列</string>
+    <string name="calc_imp_series">直列</string>
+    <string name="calc_imp_result">合成インピーダンス %1$s Ω</string>
+    <string name="calc_imp_amp_min">アンプの最低負荷 (Ω)</string>
+    <string name="calc_imp_safe">この負荷で問題ありません</string>
+    <string name="calc_imp_unsafe">最低負荷を割っています。台数を減らしてください</string>
+    <string name="calc_imp_max_count">並列にできるのは %1$d 台まで</string>
+    <string name="calc_imp_amp_power">アンプ定格</string>
+    <string name="calc_imp_rated_watts">定格 (W)</string>
+    <string name="calc_imp_rated_ohms">定格時の負荷 (Ω)</string>
+    <string name="calc_imp_power_result">この負荷での上限 約 %1$s W（1台あたり %2$s W）</string>
+    <string name="calc_imp_power_note">アンプを定電圧源と見た近似です。電源とサーマルの制限で実際はこれより下がります</string>
+    <string name="calc_imp_high_z">ハイインピーダンス (70V / 100V)</string>
+    <string name="calc_imp_line">ライン電圧</string>
+    <string name="calc_imp_tap">タップ合計 (W)</string>
+    <string name="calc_imp_high_z_amp">アンプ定格 (W)</string>
+    <string name="calc_imp_high_z_remaining">残り %1$s W（定格の80%%まで）</string>
+    <string name="calc_imp_high_z_over">容量オーバーです</string>
+    <string name="calc_imp_high_z_load">タップ合計から見た負荷 %1$s Ω</string>
+</resources>

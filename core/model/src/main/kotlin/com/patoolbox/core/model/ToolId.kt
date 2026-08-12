@@ -40,10 +40,10 @@ enum class ToolId(
     RECORDER(ToolCategory.MEASURE, ToolAccess.PRO, "REC", phase = 6),
 
     // --- B. 計算・リファレンス ---
-    DELAY_CALC(ToolCategory.CALC, ToolAccess.FREE, "ms", phase = 2),
-    BPM_CALC(ToolCategory.CALC, ToolAccess.FREE, "BPM", phase = 2),
-    DB_CALC(ToolCategory.CALC, ToolAccess.FREE, "dB", phase = 2),
-    IMPEDANCE_CALC(ToolCategory.CALC, ToolAccess.FREE, "Ω", phase = 2),
+    DELAY_CALC(ToolCategory.CALC, ToolAccess.FREE, "ms", phase = 2, implemented = true),
+    BPM_CALC(ToolCategory.CALC, ToolAccess.FREE, "BPM", phase = 2, implemented = true),
+    DB_CALC(ToolCategory.CALC, ToolAccess.FREE, "dB", phase = 2, implemented = true),
+    IMPEDANCE_CALC(ToolCategory.CALC, ToolAccess.FREE, "Ω", phase = 2, implemented = true),
     POWER_CALC(ToolCategory.CALC, ToolAccess.PRO, "kW", phase = 4),
     COVERAGE_CALC(ToolCategory.CALC, ToolAccess.PRO, "COV", phase = 4),
     CONNECTOR_REF(ToolCategory.CALC, ToolAccess.FREE, "PIN", phase = 2),
