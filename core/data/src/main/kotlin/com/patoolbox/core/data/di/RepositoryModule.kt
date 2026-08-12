@@ -5,6 +5,8 @@ import com.patoolbox.core.data.JobRepository
 import com.patoolbox.core.data.PatchSheetRepository
 import com.patoolbox.core.data.RoomJobRepository
 import com.patoolbox.core.data.RoomPatchSheetRepository
+import com.patoolbox.core.data.RoomScheduleRepository
+import com.patoolbox.core.data.ScheduleRepository
 import com.patoolbox.core.data.DataStoreUserPreferencesRepository
 import com.patoolbox.core.data.RoomCalibrationRepository
 import com.patoolbox.core.data.UserPreferencesRepository
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     abstract fun bindPatchSheetRepository(
         impl: RoomPatchSheetRepository,
     ): PatchSheetRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindScheduleRepository(impl: RoomScheduleRepository): ScheduleRepository
 }

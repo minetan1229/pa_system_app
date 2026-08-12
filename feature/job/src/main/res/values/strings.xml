@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="job_title">案件管理</string>
+    <string name="job_empty">案件がありません。右下の追加から作成してください</string>
+    <string name="job_add">案件を追加</string>
+    <string name="job_create">作成</string>
+    <string name="job_cancel">キャンセル</string>
+    <string name="job_delete">削除</string>
+    <string name="job_delete_confirm">「%1$s」を削除します。この案件のパッチ表と進行表も一緒に消えます</string>
+    <string name="job_limit_reached">無料版で保存できる案件は %1$d 件までです。Pro で無制限になります</string>
+
+    <string name="job_name">案件名</string>
+    <string name="job_venue">会場</string>
+    <string name="job_date">日付 (yyyy-MM-dd)</string>
+    <string name="job_load_in">搬入 (HH:mm)</string>
+    <string name="job_show">開演 (HH:mm)</string>
+    <string name="job_client">依頼元</string>
+    <string name="job_contact">連絡先</string>
+    <string name="job_notes">メモ</string>
+
+    <string name="job_detail_title">案件</string>
+    <string name="job_open_schedule">進行表</string>
+    <string name="job_open_patch">パッチ表</string>
+    <string name="job_saved">保存しました</string>
+    <string name="job_save">保存</string>
+    <string name="job_summary">%1$s / 搬入 %2$s / 開演 %3$s</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="schedule_title">進行表</string>
+    <string name="schedule_empty">項目がありません。下の追加から作成してください</string>
+    <string name="schedule_add">項目を追加</string>
+    <string name="schedule_item_title">項目名</string>
+    <string name="schedule_duration">長さ (分)</string>
+    <string name="schedule_owner">担当</string>
+    <string name="schedule_fixed_time">固定時刻 (HH:mm・空欄なら積み上げ)</string>
+    <string name="schedule_delete">削除</string>
+    <string name="schedule_up">↑</string>
+    <string name="schedule_down">↓</string>
+
+    <string name="schedule_anchor_label">固定</string>
+    <string name="schedule_range">%1$s〜%2$s</string>
+    <string name="schedule_total">合計 %1$d 時間 %2$d 分</string>
+    <string name="schedule_note">時刻は長さから自動で積み上げます。1つ伸ばせば以降が全部後ろにずれます</string>
+    <string name="schedule_overrun">固定時刻に間に合いません: %1$s</string>
+    <string name="schedule_anchor_start">搬入 %1$s から積み上げ</string>
+    <string name="schedule_no_anchor">案件に搬入時刻が入っていないので、今日の0時から積み上げています</string>
+</resources>

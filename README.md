@@ -11,14 +11,16 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ---
 
-## 現在の状態: Phase 1 完了（計測コアが動く）
+## 現在の状態: Phase 3 途中（計測・計算機・現場ドキュメントが動く）
 
 | Phase | 内容 | 状態 |
 |---|---|---|
 | 0 | マルチモジュール構成、テーマ3種、ツールランチャー、ProGate、CI | 実装済み |
 | 1 | 計測コア（SPL / RTA / シグナルジェネレータ / チューナー / メトロノーム / 校正） | 実装済み |
-| 2 | 計算機・リファレンス（ディレイ、dB、インピーダンス、結線図…） | 未着手 |
-| 3 | 現場ドキュメント（パッチ表、進行表、案件管理、PDF出力） | 未着手 |
+| 2 | 計算機4種（ディレイ / BPM / dB換算 / インピーダンス） | 実装済み |
+| 2 | リファレンス4種（結線図 / 帯域チャート / トラブルシュート / 用語辞典） | 未着手 |
+| 3 | 案件管理 / パッチ表 / 進行表 / 本番タイマー | 実装済み |
+| 3 | PDF出力 | 未着手 |
 | 4 | 高度計測（ロガー、FFT、ハウリング検出、IR/RT60、ステージプロット） | 未着手 |
 | 5 | 課金（Play Billing 9）・法務・Play 公開 | 未着手 |
 | 6 | 録音、機材台帳、見積、稼働記録、クラウドバックアップ | 未着手 |
@@ -72,6 +74,7 @@ build-logic/convention  Gradle convention plugin（各モジュールの定型�
 core/
   model                 純Kotlin。ToolId カタログ、ProStatus、校正プロファイル
   dsp                   純Kotlin。A/C重み、FFT、オクターブバンド、騒音計、信号生成、ピッチ検出
+  calc                  純Kotlin。音速・ディレイ・BPM・dB換算・インピーダンス
   audio                 AudioRecord / AudioTrack。core:dsp を Android の音声APIに繋ぐ
   designsystem          テーマ4種、寸法、BigReadout（巨大数値表示）
   ui                    ToolCard、チップ、権限ゲート、校正バッジ
@@ -83,6 +86,11 @@ feature/
   home                  ツールランチャー（検索・お気に入り・カテゴリ別）
   settings              テーマ切替、計測設定、Pro状態、免責表示
   spl                   SPLメーター（Leq / Lmax / 統計レベル / A-C-Z / F-S-I）
+  calc                  計算機4種（タブ構成）
+  job                   案件管理（一覧・詳細）
+  patch                 パッチ表（一覧・行編集）
+  schedule              進行表（時刻は長さから自動計算）
+  showtimer             本番タイマー
   rta                   RTA（1/1・1/3、Proで1/6・1/12、ピークホールド）
   siggen                シグナルジェネレータ（サイン/ノイズ/スイープ/バースト）
   tuner                 チューナー（音名・セント・A基準可変）
@@ -90,12 +98,12 @@ feature/
   calibration           マイク校正（騒音計合わせ / 音響校正器）
 ```
 
-**計測の数値の正しさは `core:dsp` の JVM テストで担保している**（118テスト）。
+**数値の正しさは `core:dsp` と `core:calc` の JVM テストで担保している**（合わせて187テスト）。
 Android を挟まないので、A特性の減衰量やピンクノイズのフラット性を
 理論値と直接突き合わせられる。DSP を変更したらまずここを回すこと。
 
 ```bash
-./gradlew :core:dsp:test
+./gradlew :core:dsp:test :core:calc:test
 ```
 
 モジュールを追加するときは `settings.gradle.kts` に `include` して、

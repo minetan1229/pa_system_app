@@ -69,6 +69,8 @@ dependencies {
     implementation(project(":feature:calc"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
+    implementation(project(":feature:job"))
+    implementation(project(":feature:schedule"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

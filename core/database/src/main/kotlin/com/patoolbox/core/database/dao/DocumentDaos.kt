@@ -82,4 +82,10 @@ interface ScheduleItemDao {
 
     @Query("SELECT COALESCE(MAX(sortOrder), -1) + 1 FROM schedule_items WHERE jobId = :jobId")
     suspend fun nextSortOrder(jobId: Long): Int
+
+    @Query("SELECT sortOrder FROM schedule_items WHERE id = :id")
+    suspend fun sortOrderOf(id: Long): Int?
+
+    @Query("UPDATE schedule_items SET sortOrder = :sortOrder WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, sortOrder: Int)
 }

@@ -56,9 +56,9 @@ enum class ToolId(
     PATCH_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "CH", phase = 3, implemented = true),
     STAGE_PLOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "図", phase = 4),
     PDF_EXPORT(ToolCategory.DOCUMENT, ToolAccess.PRO, "PDF", phase = 3),
-    RUN_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "進行", phase = 3),
+    RUN_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "進行", phase = 3, implemented = true),
     SHOW_TIMER(ToolCategory.DOCUMENT, ToolAccess.FREE, "TMR", phase = 3, implemented = true),
-    JOB_MANAGER(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "案件", phase = 3),
+    JOB_MANAGER(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "案件", phase = 3, implemented = true),
     SNAPSHOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "再現", phase = 6),
     GEAR_INVENTORY(ToolCategory.DOCUMENT, ToolAccess.PRO, "台帳", phase = 6),
 

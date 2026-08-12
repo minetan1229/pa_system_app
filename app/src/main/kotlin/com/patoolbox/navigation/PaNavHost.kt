@@ -13,11 +13,14 @@ import com.patoolbox.feature.calc.CalcScreen
 import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.home.HomeScreen
+import com.patoolbox.feature.job.JobDetailScreen
+import com.patoolbox.feature.job.JobListScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
 import com.patoolbox.feature.patch.PatchListScreen
 import com.patoolbox.feature.patch.PatchSheetScreen
 import com.patoolbox.feature.rta.RtaScreen
 import com.patoolbox.feature.siggen.SigGenScreen
+import com.patoolbox.feature.schedule.ScheduleScreen
 import com.patoolbox.feature.settings.SettingsScreen
 import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplScreen
@@ -50,6 +53,14 @@ data object CalibrationRoute
 @Serializable
 data class PatchSheetRoute(val sheetId: Long)
 
+/** 案件の詳細。property 名は JobDetailViewModel.KEY_JOB_ID と一致させる。 */
+@Serializable
+data class JobDetailRoute(val jobId: Long)
+
+/** 進行表。property 名は ScheduleViewModel.KEY_JOB_ID と一致させる。 */
+@Serializable
+data class ScheduleRoute(val jobId: Long)
+
 @Composable
 fun PaNavHost(
     navController: NavHostController = rememberNavController(),
@@ -80,6 +91,7 @@ fun PaNavHost(
                     onOpenPatchSheet = { sheetId ->
                         navController.navigate(PatchSheetRoute(sheetId))
                     },
+                    onOpenJob = { jobId -> navController.navigate(JobDetailRoute(jobId)) },
                 )
             }
         }
@@ -95,6 +107,17 @@ fun PaNavHost(
         composable<PatchSheetRoute> {
             PatchSheetScreen(onBack = { navController.popBackStack() })
         }
+
+        composable<JobDetailRoute> {
+            JobDetailScreen(
+                onOpenSchedule = { jobId -> navController.navigate(ScheduleRoute(jobId)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable<ScheduleRoute> {
+            ScheduleScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
@@ -108,6 +131,7 @@ private fun ToolDestination(
     onBack: () -> Unit,
     onOpenCalibration: () -> Unit,
     onOpenPatchSheet: (Long) -> Unit,
+    onOpenJob: (Long) -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -129,6 +153,12 @@ private fun ToolDestination(
         )
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
+
+        ToolId.JOB_MANAGER, ToolId.RUN_SHEET -> JobListScreen(
+            // 進行表は案件に紐づくので、どちらから来ても案件一覧を経由する
+            onOpenJob = onOpenJob,
+            onBack = onBack,
+        )
 
         else -> {
             // 計算機系は1画面のタブ集合なので、該当タブを開いた状態で入る
