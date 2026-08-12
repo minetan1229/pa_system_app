@@ -27,10 +27,10 @@ enum class ToolId(
     // --- A. 計測 ---
     SPL_METER(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "SPL", phase = 1, implemented = true),
     SPL_LOGGER(ToolCategory.MEASURE, ToolAccess.PRO, "LOG", phase = 4),
-    RTA(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "RTA", phase = 1),
+    RTA(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "RTA", phase = 1, implemented = true),
     FFT(ToolCategory.MEASURE, ToolAccess.PRO, "FFT", phase = 4),
     SPECTROGRAM(ToolCategory.MEASURE, ToolAccess.PRO, "SPEC", phase = 4),
-    SIGNAL_GENERATOR(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "GEN", phase = 1),
+    SIGNAL_GENERATOR(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "GEN", phase = 1, implemented = true),
     FEEDBACK_FINDER(ToolCategory.MEASURE, ToolAccess.PRO, "FB", phase = 4),
     DELAY_FINDER(ToolCategory.MEASURE, ToolAccess.PRO, "DLY", phase = 4),
     POLARITY_CHECK(ToolCategory.MEASURE, ToolAccess.PRO, "POL", phase = 4),

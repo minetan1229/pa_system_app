@@ -11,6 +11,8 @@ import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
 import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.home.HomeScreen
+import com.patoolbox.feature.rta.RtaScreen
+import com.patoolbox.feature.siggen.SigGenScreen
 import com.patoolbox.feature.settings.SettingsScreen
 import com.patoolbox.feature.spl.SplScreen
 import kotlinx.serialization.Serializable
@@ -89,6 +91,10 @@ private fun ToolDestination(
             onBack = onBack,
             onOpenCalibration = onOpenCalibration,
         )
+
+        ToolId.RTA -> RtaScreen(onBack = onBack)
+
+        ToolId.SIGNAL_GENERATOR -> SigGenScreen(onBack = onBack)
 
         else -> PlaceholderScreen(tool = tool, onBack = onBack)
     }

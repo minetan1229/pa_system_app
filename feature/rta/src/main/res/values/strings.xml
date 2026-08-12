@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rta_title">RTA</string>
+
+    <string name="rta_resolution">分解能</string>
+    <string name="rta_weighting">重み付け</string>
+    <string name="rta_peak_hold">ピークホールド</string>
+    <string name="rta_averaging">平均化</string>
+    <string name="rta_avg_fast">速い</string>
+    <string name="rta_avg_normal">標準</string>
+    <string name="rta_avg_slow">遅い</string>
+
+    <string name="rta_total">合計 %1$s dB</string>
+    <string name="rta_waiting">測定開始を押してください</string>
+    <string name="rta_pro_required">1/6・1/12オクターブは Pro で使えます</string>
+</resources>

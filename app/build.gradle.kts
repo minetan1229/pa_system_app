@@ -62,6 +62,8 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:spl"))
     implementation(project(":feature:calibration"))
+    implementation(project(":feature:siggen"))
+    implementation(project(":feature:rta"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

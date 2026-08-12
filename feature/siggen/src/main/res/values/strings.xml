@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="siggen_title">シグナルジェネレータ</string>
+
+    <string name="siggen_waveform">波形</string>
+    <string name="siggen_sine">サイン</string>
+    <string name="siggen_pink">ピンクノイズ</string>
+    <string name="siggen_white">ホワイトノイズ</string>
+    <string name="siggen_square">矩形波</string>
+    <string name="siggen_log_sweep">対数スイープ</string>
+    <string name="siggen_lin_sweep">リニアスイープ</string>
+    <string name="siggen_dual_tone">デュアルトーン</string>
+
+    <string name="siggen_frequency">周波数</string>
+    <string name="siggen_level">出力レベル</string>
+    <string name="siggen_burst">断続（バースト）</string>
+    <string name="siggen_sweep_range">スイープ範囲 20Hz〜20kHz / %1$s秒</string>
+
+    <string name="siggen_play">出力</string>
+    <string name="siggen_stop">停止</string>
+    <string name="siggen_preset_1k">1kHz 基準</string>
+    <string name="siggen_preset_pink">ピンク -20dB</string>
+
+    <string name="siggen_warning">スピーカーに繋いだまま操作します。レベルを上げる前に卓のフェーダーを確認してください。開始と停止にはフェードが掛かります。</string>
+</resources>
