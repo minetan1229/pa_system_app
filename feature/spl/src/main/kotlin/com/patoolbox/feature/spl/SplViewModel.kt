@@ -4,12 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patoolbox.core.audio.AudioCaptureEngine
 import com.patoolbox.core.audio.AudioInputDevice
+import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
+import com.patoolbox.core.data.MeasurementRepository
 import com.patoolbox.core.dsp.FrequencyWeighting
 import com.patoolbox.core.dsp.SoundLevelMeter
 import com.patoolbox.core.dsp.TimeWeighting
 import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
+import com.patoolbox.core.model.Measurement
+import com.patoolbox.core.model.MeasurementSample
+import com.patoolbox.core.model.ProStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,8 +44,15 @@ data class SplUiState(
     ),
     val inputSourceLabel: String = "",
     val inputSourceIsMeasurementGrade: Boolean = true,
+    val proStatus: ProStatus = ProStatus.Free,
+    val isLogging: Boolean = false,
+    val loggedSamples: Int = 0,
+    val savedMessage: String? = null,
     val error: String? = null,
-)
+) {
+    /** 記録は Pro 専用。測定そのものは無料で使える */
+    val canLog: Boolean get() = proStatus.isPro && isMeasuring
+}
 
 /**
  * SPLメーターの状態管理。
@@ -53,6 +65,8 @@ data class SplUiState(
 class SplViewModel @Inject constructor(
     private val captureEngine: AudioCaptureEngine,
     private val calibrationRepository: CalibrationRepository,
+    private val measurementRepository: MeasurementRepository,
+    proGate: ProGate,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SplUiState())
@@ -60,6 +74,19 @@ class SplViewModel @Inject constructor(
 
     private var meter: SoundLevelMeter? = null
     private var blockCounter = 0
+
+    // 記録はオーディオスレッドからのみ触る。UI へは件数だけを流す
+    private val loggedSamples = mutableListOf<MeasurementSample>()
+    private var logStartedAtEpochMs = 0L
+    private var nextSampleAtMs = 0L
+
+    init {
+        viewModelScope.launch {
+            proGate.proStatus.collect { status ->
+                _uiState.update { it.copy(proStatus = status) }
+            }
+        }
+    }
 
     fun start() {
         if (_uiState.value.isMeasuring) return
@@ -149,7 +176,65 @@ class SplViewModel @Inject constructor(
         super.onCleared()
     }
 
+    /** 記録開始。測定中でないと呼べない。 */
+    fun startLogging() {
+        if (!uiState.value.canLog || uiState.value.isLogging) return
+        loggedSamples.clear()
+        logStartedAtEpochMs = System.currentTimeMillis()
+        nextSampleAtMs = 0L
+        _uiState.update { it.copy(isLogging = true, loggedSamples = 0, savedMessage = null) }
+    }
+
+    /** 記録を止めて保存する。1件も無ければ何もしない。 */
+    fun stopLoggingAndSave(title: String) {
+        if (!uiState.value.isLogging) return
+        val state = uiState.value
+        val samples = loggedSamples.toList()
+        _uiState.update { it.copy(isLogging = false) }
+        if (samples.isEmpty()) return
+
+        viewModelScope.launch {
+            measurementRepository.save(
+                measurement = Measurement(
+                    title = title.ifBlank { DEFAULT_TITLE },
+                    startedAtEpochMs = logStartedAtEpochMs,
+                    endedAtEpochMs = System.currentTimeMillis(),
+                    frequencyWeighting = state.frequencyWeighting.displayName,
+                    timeWeighting = state.timeWeighting.label,
+                    calibrationOffsetDb = state.calibration.offsetDb,
+                    calibrationMethod = state.calibration.method,
+                    leqDb = state.leqDb,
+                    maxDb = state.maxDb,
+                    minDb = state.minDb,
+                    peakDb = state.peakDb,
+                    l10Db = state.l10Db,
+                    l50Db = state.l50Db,
+                    l90Db = state.l90Db,
+                    clipped = state.clipped,
+                ),
+                samples = samples,
+            )
+            _uiState.update { it.copy(savedMessage = MESSAGE_SAVED) }
+        }
+    }
+
+    fun clearSavedMessage() {
+        _uiState.update { it.copy(savedMessage = null) }
+    }
+
     private fun publish(meter: SoundLevelMeter, reading: SoundLevelMeter.Reading) {
+        if (_uiState.value.isLogging) {
+            val elapsedMs = (reading.elapsedSeconds * 1000).toLong()
+            if (elapsedMs >= nextSampleAtMs) {
+                loggedSamples += MeasurementSample(
+                    offsetMs = elapsedMs,
+                    instantDb = reading.instantDb,
+                    leqDb = reading.leqDb,
+                )
+                nextSampleAtMs = elapsedMs + SAMPLE_INTERVAL_MS
+            }
+        }
+
         _uiState.update { state ->
             state.copy(
                 hasReading = true,
@@ -163,6 +248,7 @@ class SplViewModel @Inject constructor(
                 l90Db = meter.percentileDb(PERCENTILE_90),
                 elapsedSeconds = reading.elapsedSeconds,
                 clipped = reading.clipped,
+                loggedSamples = loggedSamples.size,
             )
         }
     }
@@ -177,6 +263,12 @@ class SplViewModel @Inject constructor(
     }
 
     private companion object {
+        const val DEFAULT_TITLE = "無題の測定"
+        const val MESSAGE_SAVED = "saved"
+
+        /** 記録の間隔。1秒ごとなら3時間で約1万行に収まる */
+        const val SAMPLE_INTERVAL_MS = 1_000L
+
         const val UI_UPDATE_EVERY_BLOCKS = 2
         const val PERCENTILE_10 = 10.0
         const val PERCENTILE_50 = 50.0

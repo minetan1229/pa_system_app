@@ -21,4 +21,20 @@
     <string name="spl_calibrate">校正する</string>
     <string name="spl_source">入力: %1$s</string>
     <string name="spl_no_value">--.-</string>
+
+    <!-- 記録（Pro） -->
+    <string name="spl_log_title">測定記録</string>
+    <string name="spl_log_empty">保存された測定はありません。SPLメーターで記録すると溜まります</string>
+    <string name="spl_log_summary">Leq %1$s / Lmax %2$s / Lmin %3$s dB</string>
+    <string name="spl_log_uncalibrated">未校正で記録（参考値）</string>
+    <string name="spl_log_export">CSVで書き出す</string>
+    <string name="spl_log_delete">削除</string>
+    <string name="spl_record_start">記録開始</string>
+    <string name="spl_record_stop">記録を保存</string>
+    <string name="spl_record_count">記録中 %1$d 秒</string>
+    <string name="spl_record_pro">記録は Pro で使えます</string>
+    <string name="spl_record_title">測定名</string>
+    <string name="spl_record_saved">保存しました</string>
+    <string name="spl_record_save">保存</string>
+    <string name="spl_record_cancel">キャンセル</string>
 </resources>

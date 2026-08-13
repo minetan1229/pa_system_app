@@ -26,7 +26,7 @@ enum class ToolId(
 ) {
     // --- A. 計測 ---
     SPL_METER(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "SPL", phase = 1, implemented = true),
-    SPL_LOGGER(ToolCategory.MEASURE, ToolAccess.PRO, "LOG", phase = 4),
+    SPL_LOGGER(ToolCategory.MEASURE, ToolAccess.PRO, "LOG", phase = 4, implemented = true),
     RTA(ToolCategory.MEASURE, ToolAccess.FREE_LIMITED, "RTA", phase = 1, implemented = true),
     FFT(ToolCategory.MEASURE, ToolAccess.PRO, "FFT", phase = 4),
     SPECTROGRAM(ToolCategory.MEASURE, ToolAccess.PRO, "SPEC", phase = 4),

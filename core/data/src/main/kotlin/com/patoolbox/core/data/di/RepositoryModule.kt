@@ -5,6 +5,8 @@ import com.patoolbox.core.data.JobRepository
 import com.patoolbox.core.data.PatchSheetRepository
 import com.patoolbox.core.data.RoomJobRepository
 import com.patoolbox.core.data.RoomPatchSheetRepository
+import com.patoolbox.core.data.MeasurementRepository
+import com.patoolbox.core.data.RoomMeasurementRepository
 import com.patoolbox.core.data.RoomScheduleRepository
 import com.patoolbox.core.data.ScheduleRepository
 import com.patoolbox.core.data.DataStoreUserPreferencesRepository
@@ -45,4 +47,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindScheduleRepository(impl: RoomScheduleRepository): ScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMeasurementRepository(
+        impl: RoomMeasurementRepository,
+    ): MeasurementRepository
 }

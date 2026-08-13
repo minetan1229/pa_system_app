@@ -5,10 +5,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.patoolbox.core.database.dao.CalibrationProfileDao
 import com.patoolbox.core.database.dao.JobDao
+import com.patoolbox.core.database.dao.MeasurementDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
 import com.patoolbox.core.database.entity.CalibrationProfileEntity
 import com.patoolbox.core.database.entity.JobEntity
+import com.patoolbox.core.database.entity.MeasurementEntity
+import com.patoolbox.core.database.entity.MeasurementSampleEntity
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
 import com.patoolbox.core.database.entity.ScheduleItemEntity
@@ -29,14 +32,18 @@ import com.patoolbox.core.database.entity.ScheduleItemEntity
         PatchSheetEntity::class,
         PatchRowEntity::class,
         ScheduleItemEntity::class,
+        MeasurementEntity::class,
+        MeasurementSampleEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
         AutoMigration(from = 1, to = 2),
         // v3: patch_sheets / patch_rows / schedule_items を追加
         AutoMigration(from = 2, to = 3),
+        // v4: measurements / measurement_samples を追加
+        AutoMigration(from = 3, to = 4),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {
@@ -44,6 +51,7 @@ abstract class PaDatabase : RoomDatabase() {
     abstract fun calibrationProfileDao(): CalibrationProfileDao
     abstract fun patchSheetDao(): PatchSheetDao
     abstract fun scheduleItemDao(): ScheduleItemDao
+    abstract fun measurementDao(): MeasurementDao
 
     companion object {
         const val NAME = "pa_toolbox.db"

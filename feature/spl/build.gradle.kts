@@ -8,4 +8,6 @@ android {
 
 dependencies {
     implementation(project(":core:audio"))
+    implementation(project(":core:export"))
+    implementation(libs.androidx.activity.compose)
 }
