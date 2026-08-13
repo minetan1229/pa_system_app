@@ -42,6 +42,7 @@ include(":core:designsystem")
 include(":core:ui")
 include(":core:data")
 include(":core:database")
+include(":core:export")
 include(":core:billing")
 include(":core:testing")
 

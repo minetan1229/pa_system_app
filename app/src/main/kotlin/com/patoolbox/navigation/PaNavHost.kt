@@ -147,7 +147,8 @@ private fun ToolDestination(
 
         ToolId.METRONOME -> MetronomeScreen(onBack = onBack)
 
-        ToolId.PATCH_SHEET -> PatchListScreen(
+        // PDF出力はパッチ表・進行表の画面から行うので、一覧へ送る
+        ToolId.PATCH_SHEET, ToolId.PDF_EXPORT -> PatchListScreen(
             onOpenSheet = onOpenPatchSheet,
             onBack = onBack,
         )

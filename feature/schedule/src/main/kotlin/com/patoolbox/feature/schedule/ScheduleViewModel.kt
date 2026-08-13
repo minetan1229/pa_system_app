@@ -3,18 +3,26 @@ package com.patoolbox.feature.schedule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.JobRepository
 import com.patoolbox.core.data.ScheduleRepository
+import com.patoolbox.core.data.di.IoDispatcher
+import com.patoolbox.core.export.DocumentTables
+import com.patoolbox.core.export.PdfTableWriter
 import com.patoolbox.core.model.Job
 import com.patoolbox.core.model.ScheduleItem
 import com.patoolbox.core.model.ScheduleTimeline
+import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.TimelineEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.OutputStream
 import javax.inject.Inject
 
 data class ScheduleUiState(
@@ -24,8 +32,12 @@ data class ScheduleUiState(
     val overrunning: List<TimelineEntry> = emptyList(),
     val anchorEpochMs: Long = 0,
     val hasAnchor: Boolean = false,
+    val proStatus: ProStatus = ProStatus.Free,
 ) {
     val totalMinutes: Int get() = ScheduleTimeline.totalMinutes(items)
+
+    /** PDF出力は Pro 専用。 */
+    val canExport: Boolean get() = proStatus.isPro && job != null && entries.isNotEmpty()
 }
 
 /**
@@ -38,7 +50,10 @@ data class ScheduleUiState(
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val scheduleRepository: ScheduleRepository,
+    private val pdfWriter: PdfTableWriter,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     jobRepository: JobRepository,
+    proGate: ProGate,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -47,7 +62,8 @@ class ScheduleViewModel @Inject constructor(
     val uiState: StateFlow<ScheduleUiState> = combine(
         jobRepository.observeById(jobId),
         scheduleRepository.observeForJob(jobId),
-    ) { job, items ->
+        proGate.proStatus,
+    ) { job, items, proStatus ->
         val anchor = job?.loadInAtEpochMs
         val entries = ScheduleTimeline.build(
             anchorEpochMs = anchor ?: 0L,
@@ -60,12 +76,44 @@ class ScheduleViewModel @Inject constructor(
             overrunning = ScheduleTimeline.overrunningAnchors(entries),
             anchorEpochMs = anchor ?: 0L,
             hasAnchor = anchor != null,
+            proStatus = proStatus,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = ScheduleUiState(),
     )
+
+    /**
+     * PDF を書き出す。時刻は画面と同じ [ScheduleTimeline] の計算結果を使うので、
+     * 印刷物と画面がずれることがない。
+     */
+    fun exportPdf(output: OutputStream, formatTime: (Long) -> String) {
+        val state = uiState.value
+        val job = state.job ?: return
+        if (!state.canExport) return
+
+        viewModelScope.launch {
+            withContext(ioDispatcher) {
+                output.use { stream ->
+                    pdfWriter.write(
+                        table = DocumentTables.schedule(
+                            job = job,
+                            entries = state.entries,
+                            formatTime = formatTime,
+                            totalMinutes = state.totalMinutes,
+                        ),
+                        output = stream,
+                    )
+                }
+            }
+        }
+    }
+
+    fun suggestedFileName(): String {
+        val name = uiState.value.job?.name?.ifBlank { "schedule" } ?: "schedule"
+        return "$name-進行表.pdf"
+    }
 
     fun add(title: String, durationMinutes: Int, owner: String, fixedStartEpochMs: Long?) {
         viewModelScope.launch {

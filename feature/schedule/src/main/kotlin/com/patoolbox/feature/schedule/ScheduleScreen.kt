@@ -1,5 +1,7 @@
 package com.patoolbox.feature.schedule
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -46,7 +49,18 @@ fun ScheduleScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dimens = LocalPaDimens.current
+    val context = LocalContext.current
     var showAdd by rememberSaveable { mutableStateOf(false) }
+
+    val createPdfLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(PDF_MIME_TYPE),
+    ) { uri ->
+        if (uri != null) {
+            context.contentResolver.openOutputStream(uri)?.let { stream ->
+                viewModel.exportPdf(stream, DateTimeText::formatTime)
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -58,6 +72,15 @@ fun ScheduleScreen(
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Text(stringResource(CoreUiR.string.back))
+                    }
+                },
+                actions = {
+                    // PDF は Pro 専用。押せない理由が分かるよう、隠さず無効で出す
+                    TextButton(
+                        onClick = { createPdfLauncher.launch(viewModel.suggestedFileName()) },
+                        enabled = uiState.canExport,
+                    ) {
+                        Text(stringResource(R.string.schedule_export_pdf))
                     }
                 },
             )
@@ -281,3 +304,5 @@ private fun AddItemDialog(
         },
     )
 }
+
+private const val PDF_MIME_TYPE = "application/pdf"

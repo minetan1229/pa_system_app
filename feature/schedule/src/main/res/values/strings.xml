@@ -18,4 +18,5 @@
     <string name="schedule_overrun">固定時刻に間に合いません: %1$s</string>
     <string name="schedule_anchor_start">搬入 %1$s から積み上げ</string>
     <string name="schedule_no_anchor">案件に搬入時刻が入っていないので、今日の0時から積み上げています</string>
+    <string name="schedule_export_pdf">PDF</string>
 </resources>
