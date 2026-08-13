@@ -70,4 +70,44 @@
     <string name="calc_imp_high_z_remaining">残り %1$s W（定格の80%%まで）</string>
     <string name="calc_imp_high_z_over">容量オーバーです</string>
     <string name="calc_imp_high_z_load">タップ合計から見た負荷 %1$s Ω</string>
+
+    <!-- タブ（Pro） -->
+    <string name="calc_tab_power">電源</string>
+    <string name="calc_tab_coverage">カバレッジ</string>
+    <string name="calc_pro_required">この計算は Pro で使えます</string>
+
+    <!-- 電源 -->
+    <string name="calc_power_load">負荷</string>
+    <string name="calc_power_watts">消費電力 (W)</string>
+    <string name="calc_power_volts">電圧 (V)</string>
+    <string name="calc_power_pf">力率（0.6〜1.0）</string>
+    <string name="calc_power_current">%1$s A</string>
+    <string name="calc_power_breaker">ブレーカー</string>
+    <string name="calc_power_breaker_amps">定格 (A)</string>
+    <string name="calc_power_ok">この回路で使えます（連続 %1$s A まで）</string>
+    <string name="calc_power_over">容量オーバーです（連続 %1$s A まで）</string>
+    <string name="calc_power_usable">この回路で使える電力の目安 %1$s W</string>
+    <string name="calc_power_drop">電圧降下</string>
+    <string name="calc_power_length">ケーブル長 (m)</string>
+    <string name="calc_power_section">断面積 (mm²)</string>
+    <string name="calc_power_drop_result">%1$s V 降下（%2$s %%）</string>
+    <string name="calc_power_drop_ok">許容範囲（2%% 以内）です</string>
+    <string name="calc_power_drop_over">降下しすぎです。太い線にするか距離を詰めてください</string>
+    <string name="calc_power_note">連続負荷はブレーカー定格の80%%までが基本。電圧降下は内線規程の簡易式です</string>
+
+    <!-- カバレッジ -->
+    <string name="calc_coverage_level">距離とレベル</string>
+    <string name="calc_coverage_spl1m">1m での音圧 (dB)</string>
+    <string name="calc_coverage_distance">最後列までの距離 (m)</string>
+    <string name="calc_coverage_spl_result">最後列で %1$s dB</string>
+    <string name="calc_coverage_near">最前列までの距離 (m)</string>
+    <string name="calc_coverage_difference">前後の音圧差 %1$s dB</string>
+    <string name="calc_coverage_delay_hint">10dB を超えています。ディレイタワーかフィルの検討対象です</string>
+    <string name="calc_coverage_width">カバー範囲</string>
+    <string name="calc_coverage_dispersion">水平開き角 (度)</string>
+    <string name="calc_coverage_width_result">最後列で幅 %1$s m をカバー</string>
+    <string name="calc_coverage_multiple">複数台</string>
+    <string name="calc_coverage_count">台数</string>
+    <string name="calc_coverage_gain">+%1$s dB（無相関の加算）</string>
+    <string name="calc_coverage_note">同相で重なる場合は倍で +6dB。実際は位置と位相で変わります</string>
 </resources>

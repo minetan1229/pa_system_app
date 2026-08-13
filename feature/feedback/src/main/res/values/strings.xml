@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_title">ハウリング検出</string>
+    <string name="feedback_none">発振している成分はありません</string>
+    <string name="feedback_waiting">測定開始を押してください</string>
+    <string name="feedback_detected">%1$d 箇所で発振しています</string>
+    <string name="feedback_band">%1$s Hz 帯</string>
+    <string name="feedback_detail">%1$s Hz / %2$s / 周囲より %3$s dB</string>
+    <string name="feedback_action">その帯域を Q 狭めで数dB切る</string>
+    <string name="feedback_note">切りすぎると音が痩せます。3〜4箇所までにとどめ、まず配置とゲインを見直してください</string>
+    <string name="feedback_pro">この機能は Pro で使えます</string>
+</resources>

@@ -68,6 +68,7 @@ dependencies {
     implementation(project(":feature:metronome"))
     implementation(project(":feature:calc"))
     implementation(project(":feature:reference"))
+    implementation(project(":feature:feedback"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
     implementation(project(":feature:job"))

@@ -12,6 +12,7 @@ import com.patoolbox.core.ui.component.PlaceholderScreen
 import com.patoolbox.feature.calc.CalcScreen
 import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
+import com.patoolbox.feature.feedback.FeedbackScreen
 import com.patoolbox.feature.home.HomeScreen
 import com.patoolbox.feature.job.JobDetailScreen
 import com.patoolbox.feature.job.JobListScreen
@@ -144,6 +145,8 @@ private fun ToolDestination(
         ToolId.RTA -> RtaScreen(onBack = onBack)
 
         ToolId.SIGNAL_GENERATOR -> SigGenScreen(onBack = onBack)
+
+        ToolId.FEEDBACK_FINDER -> FeedbackScreen(onBack = onBack)
 
         ToolId.TUNER -> TunerScreen(onBack = onBack)
 
