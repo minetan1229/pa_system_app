@@ -46,10 +46,10 @@ enum class ToolId(
     IMPEDANCE_CALC(ToolCategory.CALC, ToolAccess.FREE, "Ω", phase = 2, implemented = true),
     POWER_CALC(ToolCategory.CALC, ToolAccess.PRO, "kW", phase = 4),
     COVERAGE_CALC(ToolCategory.CALC, ToolAccess.PRO, "COV", phase = 4),
-    CONNECTOR_REF(ToolCategory.CALC, ToolAccess.FREE, "PIN", phase = 2),
-    FREQ_CHART(ToolCategory.CALC, ToolAccess.FREE, "EQ", phase = 2),
-    TROUBLESHOOT(ToolCategory.CALC, ToolAccess.FREE_LIMITED, "FIX", phase = 2),
-    GLOSSARY(ToolCategory.CALC, ToolAccess.FREE, "用語", phase = 2),
+    CONNECTOR_REF(ToolCategory.CALC, ToolAccess.FREE, "PIN", phase = 2, implemented = true),
+    FREQ_CHART(ToolCategory.CALC, ToolAccess.FREE, "EQ", phase = 2, implemented = true),
+    TROUBLESHOOT(ToolCategory.CALC, ToolAccess.FREE_LIMITED, "FIX", phase = 2, implemented = true),
+    GLOSSARY(ToolCategory.CALC, ToolAccess.FREE, "用語", phase = 2, implemented = true),
     WIRELESS_COORD(ToolCategory.CALC, ToolAccess.PRO, "MHz", phase = 4),
 
     // --- C. 現場ドキュメント ---

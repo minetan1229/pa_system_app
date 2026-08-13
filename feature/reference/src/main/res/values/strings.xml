@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reference_title">リファレンス</string>
+
+    <string name="reference_tab_connector">結線</string>
+    <string name="reference_tab_frequency">帯域</string>
+    <string name="reference_tab_troubleshoot">切り分け</string>
+    <string name="reference_tab_glossary">用語</string>
+
+    <string name="reference_caution">注意</string>
+    <string name="reference_fundamental">基音 %1$s 〜 %2$s Hz</string>
+    <string name="reference_band_range">%1$s 〜 %2$s Hz</string>
+
+    <string name="reference_yes">はい</string>
+    <string name="reference_no">いいえ</string>
+    <string name="reference_restart">最初から</string>
+    <string name="reference_undo">1つ戻る</string>
+    <string name="reference_cause">考えられる原因</string>
+    <string name="reference_actions">やること</string>
+    <string name="reference_select_flow">症状を選んでください</string>
+
+    <string name="reference_search">用語を検索</string>
+    <string name="reference_no_result">一致する用語がありません</string>
+    <string name="reference_term_count">%1$d 語</string>
+</resources>

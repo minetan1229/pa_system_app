@@ -17,6 +17,8 @@ import com.patoolbox.feature.job.JobDetailScreen
 import com.patoolbox.feature.job.JobListScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
 import com.patoolbox.feature.patch.PatchListScreen
+import com.patoolbox.feature.reference.ReferenceScreen
+import com.patoolbox.feature.reference.toReferenceTabOrNull
 import com.patoolbox.feature.patch.PatchSheetScreen
 import com.patoolbox.feature.rta.RtaScreen
 import com.patoolbox.feature.siggen.SigGenScreen
@@ -162,12 +164,14 @@ private fun ToolDestination(
         )
 
         else -> {
-            // 計算機系は1画面のタブ集合なので、該当タブを開いた状態で入る
+            // 計算機とリファレンスはそれぞれ1画面のタブ集合。該当タブを開いた状態で入る
             val calcTab = tool.toCalcTabOrNull()
-            if (calcTab != null) {
-                CalcScreen(initialTab = calcTab, onBack = onBack)
-            } else {
-                PlaceholderScreen(tool = tool, onBack = onBack)
+            val referenceTab = tool.toReferenceTabOrNull()
+            when {
+                calcTab != null -> CalcScreen(initialTab = calcTab, onBack = onBack)
+                referenceTab != null ->
+                    ReferenceScreen(initialTab = referenceTab, onBack = onBack)
+                else -> PlaceholderScreen(tool = tool, onBack = onBack)
             }
         }
     }
