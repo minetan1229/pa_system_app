@@ -16,6 +16,9 @@ import com.patoolbox.feature.feedback.FeedbackScreen
 import com.patoolbox.feature.home.HomeScreen
 import com.patoolbox.feature.job.JobDetailScreen
 import com.patoolbox.feature.job.JobListScreen
+import com.patoolbox.feature.measure.DelayFinderScreen
+import com.patoolbox.feature.measure.PolarityScreen
+import com.patoolbox.feature.measure.RoomMeasureScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
 import com.patoolbox.feature.patch.PatchListScreen
 import com.patoolbox.feature.reference.ReferenceScreen
@@ -150,6 +153,13 @@ private fun ToolDestination(
         ToolId.SIGNAL_GENERATOR -> SigGenScreen(onBack = onBack)
 
         ToolId.FEEDBACK_FINDER -> FeedbackScreen(onBack = onBack)
+
+        // 3つとも「スイープを鳴らして録る」1回の測定。画面だけ問いに合わせて分けている
+        ToolId.DELAY_FINDER -> DelayFinderScreen(onBack = onBack)
+
+        ToolId.POLARITY_CHECK -> PolarityScreen(onBack = onBack)
+
+        ToolId.ROOM_MEASURE -> RoomMeasureScreen(onBack = onBack)
 
         ToolId.TUNER -> TunerScreen(onBack = onBack)
 

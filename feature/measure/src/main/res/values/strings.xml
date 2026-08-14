@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 共通 -->
+    <string name="measure_pro">Pro が必要です</string>
+    <string name="measure_pro_note">スイープ測定（ディレイ実測・極性チェック・残響測定）は Pro 版の機能です。</string>
+    <string name="measure_start">測定する（スイープを鳴らします）</string>
+    <string name="measure_running">測定中…</string>
+    <string name="measure_level_note">スピーカーからスイープ音が出ます。客入り前に行ってください。レベルは小さい方から試すこと。</string>
+    <string name="measure_clipped">過大入力です。マイクを離すか出力を下げてください</string>
+    <string name="measure_low_confidence">信号が埋もれています。暗騒音を下げるか、スイープを長く／大きくしてください</string>
+    <string name="measure_fallback_correlation">暗騒音が大きいため相互相関で算出しました。残響の多い部屋では数ms遅れ側に出ます</string>
+
+    <!-- ディレイ実測 -->
+    <string name="delay_finder_title">ディレイ実測</string>
+    <string name="delay_difference">基準との差</string>
+    <string name="delay_distance">距離に換算して %1$s m</string>
+    <string name="delay_raw">測定値（端末レイテンシ込み）</string>
+    <string name="delay_raw_note">この値には端末の入出力遅延が含まれます。そのままディレイ値に入れないでください</string>
+    <string name="delay_set_reference">この測定を基準にする</string>
+    <string name="delay_clear_reference">基準を消す</string>
+    <string name="delay_workflow_title">使い方</string>
+    <string name="delay_workflow">1. メインスピーカーの近くで測る → 「基準にする」\n2. ディレイスピーカーの位置へ移動して測る\n3. 出た差をディレイタイムに入れる\n\n端末の遅延は引き算で消えるので、この手順なら校正なしで正しい値が出ます。</string>
+    <string name="delay_impulse_title">インパルス応答</string>
+    <string name="delay_confidence">ピークの立ち: %1$s dB</string>
+
+    <!-- 極性チェック -->
+    <string name="polarity_title">極性チェック</string>
+    <string name="polarity_normal">正相</string>
+    <string name="polarity_inverted">逆相</string>
+    <string name="polarity_uncertain">判定不能</string>
+    <string name="polarity_margin">差 %1$s dB</string>
+    <string name="polarity_caption">スピーカーの正面 1〜2m にマイクを向けて測ってください</string>
+    <string name="polarity_uncertain_advice">正負の差が小さく、断定できません。マイクをスピーカーの正面・近距離に置き直して測り直してください。反射が多い位置では判定が鈍ります。</string>
+
+    <!-- 残響測定 -->
+    <string name="room_title">残響測定</string>
+    <string name="room_waiting">スイープを鳴らして測定します</string>
+    <string name="room_nonlinear">減衰が直線から外れています。参考値として扱ってください</string>
+    <string name="room_range">減衰の読み取り幅 %1$s dB</string>
+    <string name="room_bands_title">オクターブバンド別</string>
+    <string name="room_column_band">帯域</string>
+    <string name="room_column_rt">残響時間</string>
+    <string name="room_column_quality">根拠</string>
+    <string name="room_unmeasurable">測定不能</string>
+    <string name="room_quality_poor">要注意</string>
+    <string name="room_decay_title">減衰カーブ</string>
+    <string name="room_decay_note">直線に近いほど素直な減衰です。途中で折れる部屋は、その帯域に強い反射面があります</string>
+    <string name="room_clarity">C50 %1$s dB / C80 %2$s dB / D50 %3$s%%</string>
+    <string name="room_clarity_note">C50 は話し声の聞き取りやすさ、C80 は音楽の粒立ちの目安。C50 が 0dB を下回る部屋は、音量を上げても言葉が潰れます。効くのはスピーカーの指向を客席だけに当てることです。</string>
+</resources>

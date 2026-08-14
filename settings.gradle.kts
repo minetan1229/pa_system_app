@@ -59,6 +59,8 @@ include(":feature:metronome")
 include(":feature:calc")
 include(":feature:reference")
 include(":feature:feedback")
+// スイープ測定（ディレイ実測・極性・残響）。3ツールで測定行為が同じなので1モジュール
+include(":feature:measure")
 include(":feature:patch")
 include(":feature:showtimer")
 include(":feature:job")

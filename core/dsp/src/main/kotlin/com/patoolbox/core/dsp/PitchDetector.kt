@@ -108,26 +108,9 @@ class PitchDetector(
         )
     }
 
-    /** ピーク周辺を放物線で補間して、サンプル間の遅れを推定する。 */
-    private fun parabolicPeak(values: DoubleArray, peak: Int): Double {
-        if (peak <= 0 || peak >= values.size - 1) return peak.toDouble()
-        val a = values[peak - 1]
-        val b = values[peak]
-        val c = values[peak + 1]
-        val denominator = 2.0 * (2.0 * b - a - c)
-        if (denominator == 0.0) return peak.toDouble()
-        return peak + (c - a) / denominator
-    }
-
     private companion object {
         const val SILENCE_POWER = 1e-9
         const val MIN_CLARITY = 0.3
         const val PEAK_ACCEPT_RATIO = 0.9
-
-        fun nextPowerOfTwo(value: Int): Int {
-            var result = 1
-            while (result < value) result = result shl 1
-            return result
-        }
     }
 }
