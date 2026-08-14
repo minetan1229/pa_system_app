@@ -11,6 +11,13 @@ import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
 import com.patoolbox.feature.analyzer.FftScreen
 import com.patoolbox.feature.analyzer.SpectrogramScreen
+import com.patoolbox.feature.business.BackupScreen
+import com.patoolbox.feature.business.GearScreen
+import com.patoolbox.feature.business.InvoiceDetailScreen
+import com.patoolbox.feature.business.InvoiceListScreen
+import com.patoolbox.feature.business.SnapshotDetailScreen
+import com.patoolbox.feature.business.SnapshotListScreen
+import com.patoolbox.feature.business.WorkLogScreen
 import com.patoolbox.feature.calc.CalcScreen
 import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
@@ -78,6 +85,14 @@ data class ScheduleRoute(val jobId: Long)
 @Serializable
 data class StagePlotRoute(val plotId: Long)
 
+/** スナップショットの中身。property 名は SnapshotDetailViewModel.KEY_SNAPSHOT_ID と一致させる。 */
+@Serializable
+data class SnapshotRoute(val snapshotId: Long)
+
+/** 請求書・見積書の編集。property 名は InvoiceDetailViewModel.KEY_INVOICE_ID と一致させる。 */
+@Serializable
+data class InvoiceRoute(val invoiceId: Long)
+
 @Composable
 fun PaNavHost(
     navController: NavHostController = rememberNavController(),
@@ -112,6 +127,8 @@ fun PaNavHost(
                     onOpenStagePlot = { plotId ->
                         navController.navigate(StagePlotRoute(plotId))
                     },
+                    onOpenSnapshot = { id -> navController.navigate(SnapshotRoute(id)) },
+                    onOpenInvoice = { id -> navController.navigate(InvoiceRoute(id)) },
                 )
             }
         }
@@ -142,6 +159,14 @@ fun PaNavHost(
         composable<StagePlotRoute> {
             StagePlotEditorScreen(onBack = { navController.popBackStack() })
         }
+
+        composable<SnapshotRoute> {
+            SnapshotDetailScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable<InvoiceRoute> {
+            InvoiceDetailScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
@@ -157,6 +182,8 @@ private fun ToolDestination(
     onOpenPatchSheet: (Long) -> Unit,
     onOpenJob: (Long) -> Unit,
     onOpenStagePlot: (Long) -> Unit,
+    onOpenSnapshot: (Long) -> Unit,
+    onOpenInvoice: (Long) -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -202,6 +229,18 @@ private fun ToolDestination(
         )
 
         ToolId.WIRELESS_COORD -> WirelessScreen(onBack = onBack)
+
+        ToolId.GEAR_INVENTORY -> GearScreen(onBack = onBack)
+
+        ToolId.SNAPSHOT -> SnapshotListScreen(onOpen = onOpenSnapshot, onBack = onBack)
+
+        // 見積書と請求書は同じ画面。作るときに種別を選ぶ
+        ToolId.INVOICE -> InvoiceListScreen(onOpen = onOpenInvoice, onBack = onBack)
+
+        ToolId.WORK_LOG -> WorkLogScreen(onBack = onBack)
+
+        // 自動のクラウド同期ではなく、ファイルの書き出しと復元
+        ToolId.CLOUD_BACKUP -> BackupScreen(onBack = onBack)
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
 

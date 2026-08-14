@@ -7,7 +7,17 @@ import com.patoolbox.core.data.RoomJobRepository
 import com.patoolbox.core.data.RoomPatchSheetRepository
 import com.patoolbox.core.data.MeasurementRepository
 import com.patoolbox.core.data.RoomMeasurementRepository
+import com.patoolbox.core.data.BackupRepository
+import com.patoolbox.core.data.GearRepository
+import com.patoolbox.core.data.InvoiceRepository
 import com.patoolbox.core.data.LocalRecordingRepository
+import com.patoolbox.core.data.RoomGearRepository
+import com.patoolbox.core.data.RoomInvoiceRepository
+import com.patoolbox.core.data.RoomSnapshotRepository
+import com.patoolbox.core.data.RoomWorkLogRepository
+import com.patoolbox.core.data.SnapshotRepository
+import com.patoolbox.core.data.SqliteBackupRepository
+import com.patoolbox.core.data.WorkLogRepository
 import com.patoolbox.core.data.RecordingRepository
 import com.patoolbox.core.data.RoomStagePlotRepository
 import com.patoolbox.core.data.StagePlotRepository
@@ -69,4 +79,24 @@ abstract class RepositoryModule {
     abstract fun bindRecordingRepository(
         impl: LocalRecordingRepository,
     ): RecordingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGearRepository(impl: RoomGearRepository): GearRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSnapshotRepository(impl: RoomSnapshotRepository): SnapshotRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInvoiceRepository(impl: RoomInvoiceRepository): InvoiceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWorkLogRepository(impl: RoomWorkLogRepository): WorkLogRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBackupRepository(impl: SqliteBackupRepository): BackupRepository
 }

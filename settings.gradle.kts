@@ -69,6 +69,9 @@ include(":feature:stageplot")
 include(":feature:wireless")
 // 録音。WAV の読み書きは core:export、再生は既存の AudioPlaybackEngine を使う
 include(":feature:recorder")
+// Phase 6 の運営ツール群（機材台帳・スナップショット・見積/請求・稼働記録・バックアップ）。
+// どれも「一覧して足して消す」形で独自性が薄いため、1モジュールにまとめている
+include(":feature:business")
 include(":feature:patch")
 include(":feature:showtimer")
 include(":feature:job")

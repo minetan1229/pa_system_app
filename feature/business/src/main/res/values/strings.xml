@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="business_pro">Pro が必要です</string>
+    <string name="business_save">保存</string>
+    <string name="business_cancel">キャンセル</string>
+    <string name="business_delete">削除</string>
+    <string name="business_create">作成</string>
+
+    <string name="gear_title">機材台帳</string>
+    <string name="gear_add">機材を追加</string>
+    <string name="gear_all">すべて</string>
+    <string name="gear_empty">機材がありません。右下の追加から登録してください</string>
+    <string name="gear_summary">現場に出せる %1$d 点 ／ 登録 %2$d 件</string>
+    <string name="gear_name">名称</string>
+    <string name="gear_maker">メーカー</string>
+    <string name="gear_model">型番</string>
+    <string name="gear_serial">シリアル</string>
+    <string name="gear_quantity">数量</string>
+    <string name="gear_note">備考</string>
+
+    <string name="snapshot_title">スナップショット</string>
+    <string name="snapshot_add">スナップショットを追加</string>
+    <string name="snapshot_empty">記録がありません。右下の追加から作成してください</string>
+    <string name="snapshot_note">卓の内部データは機種ごとに形式が違うため、人が読める記録として残します。別の卓でも追い込みの出発点として使えます</string>
+    <string name="snapshot_name">名前</string>
+    <string name="snapshot_console">卓（例: QL1）</string>
+    <string name="snapshot_channels">チャンネル数</string>
+    <string name="snapshot_header">卓 %1$s ／ %2$s</string>
+    <string name="snapshot_overall">全体メモ（PAD・出力・エフェクトなど）</string>
+    <string name="snapshot_ch_name">名前</string>
+    <string name="snapshot_ch_gain">GAIN</string>
+    <string name="snapshot_ch_hpf">HPF</string>
+    <string name="snapshot_ch_eq">EQ</string>
+    <string name="snapshot_ch_send">送り（AUX / FX）</string>
+    <string name="snapshot_ch_note">備考</string>
+
+    <string name="invoice_title">見積・請求</string>
+    <string name="invoice_add">書類を追加</string>
+    <string name="invoice_empty">書類がありません。右下の追加から作成してください</string>
+    <string name="invoice_kind_invoice">請求書</string>
+    <string name="invoice_kind_estimate">見積書</string>
+    <string name="invoice_client">請求先</string>
+    <string name="invoice_header">書類の設定</string>
+    <string name="invoice_pdf">PDF</string>
+    <string name="invoice_add_line">明細を追加</string>
+    <string name="invoice_untitled_line">（品目未入力）</string>
+    <string name="invoice_line_name">品目</string>
+    <string name="invoice_line_qty">数量</string>
+    <string name="invoice_line_unit">単位</string>
+    <string name="invoice_line_price">単価（円）</string>
+    <string name="invoice_number">請求書番号</string>
+    <string name="invoice_subject">件名</string>
+    <string name="invoice_issuer">発行者名</string>
+    <string name="invoice_registration">登録番号（T+13桁）</string>
+    <string name="invoice_registration_warning">登録番号の形式が「T」＋13桁の数字になっていません</string>
+    <string name="invoice_tax_mode">単価の扱い</string>
+    <string name="invoice_rounding">消費税の端数処理</string>
+    <string name="invoice_rounding_note">端数処理の方法は事業者が選べます。1枚の書類につき税率ごとに1回だけ処理します（インボイス制度の規定）</string>
+    <string name="invoice_note">備考</string>
+    <string name="invoice_rate_net">%1$s 対象（税抜）</string>
+    <string name="invoice_rate_tax">消費税（%1$s）</string>
+    <string name="invoice_total">合計（税込）</string>
+    <string name="invoice_tax_note">単価は%1$s ／ 端数は%2$s</string>
+
+    <string name="worklog_title">稼働記録</string>
+    <string name="worklog_add">稼働を追加</string>
+    <string name="worklog_empty">記録がありません。右下の追加から登録してください</string>
+    <string name="worklog_total">%1$d 件 ／ 合計 %2$s ／ %3$s</string>
+    <string name="worklog_row">%1$s〜%2$s ／ 実働 %3$s ／ %4$s</string>
+    <string name="worklog_name">現場名</string>
+    <string name="worklog_start">開始</string>
+    <string name="worklog_end">終了</string>
+    <string name="worklog_overnight">終了が開始より早い場合は翌日として計算します（撤収が翌日になる現場向け）</string>
+    <string name="worklog_break">休憩（分）</string>
+    <string name="worklog_multiplier">割増率</string>
+    <string name="worklog_rate">単価（円）</string>
+    <string name="worklog_transport">交通費（円）</string>
+    <string name="worklog_transport_note">交通費は実費なので割増の対象外です</string>
+
+    <string name="backup_title">バックアップ</string>
+    <string name="backup_description">端末内のデータをファイルに書き出します。書き出したファイルはご自身のクラウド（Drive や Dropbox）に置いてください。アプリが直接クラウドに繋がないのは、「データを端末外に送らない」という性質を保つためです。</string>
+    <string name="backup_excluded_title">書き出しに含まれないもの</string>
+    <string name="backup_export">バックアップを書き出す</string>
+    <string name="backup_restore">バックアップから復元する</string>
+    <string name="backup_restore_note">復元すると現在のデータはすべて置き換わります。元には戻せません</string>
+    <string name="backup_confirm_title">復元しますか</string>
+    <string name="backup_confirm_body">現在のデータはすべて置き換わり、元には戻せません。復元後はアプリを一度終了して開き直してください。</string>
+    <string name="backup_confirm_ok">復元する</string>
+</resources>

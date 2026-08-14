@@ -59,13 +59,13 @@ enum class ToolId(
     RUN_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "進行", phase = 3, implemented = true),
     SHOW_TIMER(ToolCategory.DOCUMENT, ToolAccess.FREE, "TMR", phase = 3, implemented = true),
     JOB_MANAGER(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "案件", phase = 3, implemented = true),
-    SNAPSHOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "再現", phase = 6),
-    GEAR_INVENTORY(ToolCategory.DOCUMENT, ToolAccess.PRO, "台帳", phase = 6),
+    SNAPSHOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "再現", phase = 6, implemented = true),
+    GEAR_INVENTORY(ToolCategory.DOCUMENT, ToolAccess.PRO, "台帳", phase = 6, implemented = true),
 
     // --- D. ビジネス ---
-    INVOICE(ToolCategory.BUSINESS, ToolAccess.PRO, "見積", phase = 6),
-    WORK_LOG(ToolCategory.BUSINESS, ToolAccess.PRO, "稼働", phase = 6),
-    CLOUD_BACKUP(ToolCategory.BUSINESS, ToolAccess.PRO, "同期", phase = 6),
+    INVOICE(ToolCategory.BUSINESS, ToolAccess.PRO, "見積", phase = 6, implemented = true),
+    WORK_LOG(ToolCategory.BUSINESS, ToolAccess.PRO, "稼働", phase = 6, implemented = true),
+    CLOUD_BACKUP(ToolCategory.BUSINESS, ToolAccess.PRO, "同期", phase = 6, implemented = true),
     ;
 
     /** Pro が無いと一切開けないツールか。FREE_LIMITED は開けるが機能に制限がある。 */

@@ -119,6 +119,7 @@ dependencies {
     implementation(project(":feature:stageplot"))
     implementation(project(":feature:wireless"))
     implementation(project(":feature:recorder"))
+    implementation(project(":feature:business"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
     implementation(project(":feature:job"))

@@ -6,7 +6,11 @@ import androidx.room.RoomDatabase
 import com.patoolbox.core.database.dao.CalibrationProfileDao
 import com.patoolbox.core.database.dao.JobDao
 import com.patoolbox.core.database.dao.MeasurementDao
+import com.patoolbox.core.database.dao.GearDao
+import com.patoolbox.core.database.dao.InvoiceDao
 import com.patoolbox.core.database.dao.RecordingDao
+import com.patoolbox.core.database.dao.SnapshotDao
+import com.patoolbox.core.database.dao.WorkLogDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
 import com.patoolbox.core.database.dao.StagePlotDao
@@ -14,7 +18,13 @@ import com.patoolbox.core.database.entity.CalibrationProfileEntity
 import com.patoolbox.core.database.entity.JobEntity
 import com.patoolbox.core.database.entity.MeasurementEntity
 import com.patoolbox.core.database.entity.MeasurementSampleEntity
+import com.patoolbox.core.database.entity.GearItemEntity
+import com.patoolbox.core.database.entity.InvoiceEntity
+import com.patoolbox.core.database.entity.InvoiceLineEntity
 import com.patoolbox.core.database.entity.RecordingEntity
+import com.patoolbox.core.database.entity.SnapshotChannelEntity
+import com.patoolbox.core.database.entity.SnapshotEntity
+import com.patoolbox.core.database.entity.WorkLogEntity
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
 import com.patoolbox.core.database.entity.ScheduleItemEntity
@@ -42,8 +52,14 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         StagePlotEntity::class,
         StageItemEntity::class,
         RecordingEntity::class,
+        GearItemEntity::class,
+        SnapshotEntity::class,
+        SnapshotChannelEntity::class,
+        InvoiceEntity::class,
+        InvoiceLineEntity::class,
+        WorkLogEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
@@ -56,6 +72,8 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         AutoMigration(from = 4, to = 5),
         // v6: recordings を追加
         AutoMigration(from = 5, to = 6),
+        // v7: gear_items / snapshots / invoices / work_logs を追加
+        AutoMigration(from = 6, to = 7),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {
@@ -66,8 +84,15 @@ abstract class PaDatabase : RoomDatabase() {
     abstract fun measurementDao(): MeasurementDao
     abstract fun stagePlotDao(): StagePlotDao
     abstract fun recordingDao(): RecordingDao
+    abstract fun gearDao(): GearDao
+    abstract fun snapshotDao(): SnapshotDao
+    abstract fun invoiceDao(): InvoiceDao
+    abstract fun workLogDao(): WorkLogDao
 
     companion object {
         const val NAME = "pa_toolbox.db"
+
+        /** @Database の version と必ず一致させること。バックアップの版数照合で使う */
+        const val VERSION = 7
     }
 }
