@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wireless_title">ワイヤレス周波数調整</string>
+    <string name="wireless_pro">Pro が必要です</string>
+
+    <string name="wireless_legal_title">使用可能な周波数は判定しません</string>
+    <string name="wireless_legal_body">本機能は入力された組み合わせで混変調が起きるかを計算するだけです。どの周波数を使ってよいかは電波法と免許の条件で決まり、TVホワイトスペースは運用地点ごとに異なります。必ず機材の取扱説明書と免許の条件で確認してください。</string>
+
+    <string name="wireless_add_label">周波数（MHz）</string>
+    <string name="wireless_add">追加</string>
+    <string name="wireless_remove">削除</string>
+    <string name="wireless_clear">全消去</string>
+    <string name="wireless_empty">使用する周波数を追加するか、下の自動生成を使ってください</string>
+    <string name="wireless_count">使用周波数 %1$d 本</string>
+    <string name="wireless_hit">干渉あり</string>
+
+    <string name="wireless_guard">許容ずれ（受信機の帯域に合わせる）</string>
+    <string name="wireless_spacing">最小間隔 ／ 5次まで見る</string>
+    <string name="wireless_fifth">5次も見る</string>
+
+    <string name="wireless_clean">この組み合わせなら混変調は出ません</string>
+    <string name="wireless_problems">%1$d 件の干渉があります</string>
+    <string name="wireless_offender">%1$s MHz が %2$d 件に関与（ここを動かすと効きます）</string>
+    <string name="wireless_conflict">%1$s: %2$s → %3$s MHz に落ちる</string>
+    <string name="wireless_more">ほか %1$d 件</string>
+    <string name="wireless_spacing_violation">%1$s と %2$s が近すぎます</string>
+
+    <string name="wireless_plan_title">干渉しない組み合わせを生成</string>
+    <string name="wireless_plan_note">機材が対応する範囲と刻みを入れてください。結果は毎回同じになります（現場で昨日と違う周波数が出ないように）。</string>
+    <string name="wireless_plan_from">下限 MHz</string>
+    <string name="wireless_plan_to">上限 MHz</string>
+    <string name="wireless_plan_step">刻み kHz</string>
+    <string name="wireless_plan_count">本数</string>
+    <string name="wireless_plan_new">新規に生成</string>
+    <string name="wireless_plan_add">今の分を残して追加</string>
+    <string name="wireless_plan_shortfall">この条件では %1$d 本足りません。範囲を広げるか、許容ずれ・最小間隔を見直してください</string>
+</resources>

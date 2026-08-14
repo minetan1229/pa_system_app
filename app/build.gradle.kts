@@ -117,6 +117,7 @@ dependencies {
     implementation(project(":feature:measure"))
     implementation(project(":feature:analyzer"))
     implementation(project(":feature:stageplot"))
+    implementation(project(":feature:wireless"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
     implementation(project(":feature:job"))

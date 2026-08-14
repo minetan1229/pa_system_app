@@ -36,6 +36,7 @@ import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplLogScreen
 import com.patoolbox.feature.spl.SplScreen
 import com.patoolbox.feature.tuner.TunerScreen
+import com.patoolbox.feature.wireless.WirelessScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -196,6 +197,8 @@ private fun ToolDestination(
             onOpenPlot = onOpenStagePlot,
             onBack = onBack,
         )
+
+        ToolId.WIRELESS_COORD -> WirelessScreen(onBack = onBack)
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
 

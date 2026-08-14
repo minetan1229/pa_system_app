@@ -50,7 +50,7 @@ enum class ToolId(
     FREQ_CHART(ToolCategory.CALC, ToolAccess.FREE, "EQ", phase = 2, implemented = true),
     TROUBLESHOOT(ToolCategory.CALC, ToolAccess.FREE_LIMITED, "FIX", phase = 2, implemented = true),
     GLOSSARY(ToolCategory.CALC, ToolAccess.FREE, "用語", phase = 2, implemented = true),
-    WIRELESS_COORD(ToolCategory.CALC, ToolAccess.PRO, "MHz", phase = 4),
+    WIRELESS_COORD(ToolCategory.CALC, ToolAccess.PRO, "MHz", phase = 4, implemented = true),
 
     // --- C. 現場ドキュメント ---
     PATCH_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "CH", phase = 3, implemented = true),

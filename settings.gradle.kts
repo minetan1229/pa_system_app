@@ -65,6 +65,8 @@ include(":feature:measure")
 include(":feature:analyzer")
 // ステージプロット。描画コードは core:export に置いて PDF と共有している
 include(":feature:stageplot")
+// ワイヤレスの混変調計算。法令上の可否は扱わない（一次資料を確認できないため）
+include(":feature:wireless")
 include(":feature:patch")
 include(":feature:showtimer")
 include(":feature:job")
