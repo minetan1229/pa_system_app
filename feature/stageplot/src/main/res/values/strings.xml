@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stageplot_title">ステージプロット</string>
+    <string name="stageplot_empty">配置図がありません。右下の追加から作成してください</string>
+    <string name="stageplot_add">配置図を追加</string>
+    <string name="stageplot_name">名前</string>
+    <string name="stageplot_create">作成</string>
+    <string name="stageplot_cancel">キャンセル</string>
+    <string name="stageplot_save">保存</string>
+    <string name="stageplot_delete">削除</string>
+    <string name="stageplot_delete_confirm">「%1$s」を削除します。元に戻せません</string>
+    <string name="stageplot_summary">%1$s × %2$s m ／ 更新 %3$s</string>
+    <string name="stageplot_limit_reached">無料版で保存できる配置図は %1$d 件までです。Pro で無制限になります</string>
+
+    <string name="stageplot_details">図の設定</string>
+    <string name="stageplot_export">PDF</string>
+    <string name="stageplot_width">間口(m)</string>
+    <string name="stageplot_depth">奥行(m)</string>
+    <string name="stageplot_notes">備考</string>
+    <string name="stageplot_label">名前</string>
+    <string name="stageplot_delete_item">この記号を削除</string>
+    <string name="stageplot_hint">下から記号を追加し、図の上でドラッグして配置してください。タップで選ぶと名前を変えられます</string>
+    <string name="stageplot_palette">記号を追加</string>
+</resources>

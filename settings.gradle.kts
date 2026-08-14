@@ -63,6 +63,8 @@ include(":feature:feedback")
 include(":feature:measure")
 // FFT アナライザとスペクトログラム。同じ解析結果の別の見せ方なので1モジュール
 include(":feature:analyzer")
+// ステージプロット。描画コードは core:export に置いて PDF と共有している
+include(":feature:stageplot")
 include(":feature:patch")
 include(":feature:showtimer")
 include(":feature:job")

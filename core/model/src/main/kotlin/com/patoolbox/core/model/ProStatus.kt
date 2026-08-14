@@ -31,4 +31,7 @@ enum class ProSource {
 
     /** 開発用の強制 ON（デバッグビルドのみ） */
     DEBUG_OVERRIDE,
+
+    /** 課金の実装前なので全機能を開放している状態。Phase 5 で無くなる */
+    PRE_RELEASE,
 }

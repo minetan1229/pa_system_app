@@ -54,7 +54,7 @@ enum class ToolId(
 
     // --- C. 現場ドキュメント ---
     PATCH_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "CH", phase = 3, implemented = true),
-    STAGE_PLOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "図", phase = 4),
+    STAGE_PLOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "図", phase = 4, implemented = true),
     PDF_EXPORT(ToolCategory.DOCUMENT, ToolAccess.PRO, "PDF", phase = 3, implemented = true),
     RUN_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "進行", phase = 3, implemented = true),
     SHOW_TIMER(ToolCategory.DOCUMENT, ToolAccess.FREE, "TMR", phase = 3, implemented = true),

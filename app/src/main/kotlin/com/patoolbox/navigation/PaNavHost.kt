@@ -30,6 +30,8 @@ import com.patoolbox.feature.rta.RtaScreen
 import com.patoolbox.feature.siggen.SigGenScreen
 import com.patoolbox.feature.schedule.ScheduleScreen
 import com.patoolbox.feature.settings.SettingsScreen
+import com.patoolbox.feature.stageplot.StagePlotEditorScreen
+import com.patoolbox.feature.stageplot.StagePlotListScreen
 import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplLogScreen
 import com.patoolbox.feature.spl.SplScreen
@@ -70,6 +72,10 @@ data class JobDetailRoute(val jobId: Long)
 @Serializable
 data class ScheduleRoute(val jobId: Long)
 
+/** ステージプロットの編集。property 名は StagePlotViewModel.KEY_PLOT_ID と一致させる。 */
+@Serializable
+data class StagePlotRoute(val plotId: Long)
+
 @Composable
 fun PaNavHost(
     navController: NavHostController = rememberNavController(),
@@ -101,6 +107,9 @@ fun PaNavHost(
                         navController.navigate(PatchSheetRoute(sheetId))
                     },
                     onOpenJob = { jobId -> navController.navigate(JobDetailRoute(jobId)) },
+                    onOpenStagePlot = { plotId ->
+                        navController.navigate(StagePlotRoute(plotId))
+                    },
                 )
             }
         }
@@ -127,6 +136,10 @@ fun PaNavHost(
         composable<ScheduleRoute> {
             ScheduleScreen(onBack = { navController.popBackStack() })
         }
+
+        composable<StagePlotRoute> {
+            StagePlotEditorScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
 
@@ -141,6 +154,7 @@ private fun ToolDestination(
     onOpenCalibration: () -> Unit,
     onOpenPatchSheet: (Long) -> Unit,
     onOpenJob: (Long) -> Unit,
+    onOpenStagePlot: (Long) -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -175,6 +189,11 @@ private fun ToolDestination(
         // PDF出力はパッチ表・進行表の画面から行うので、一覧へ送る
         ToolId.PATCH_SHEET, ToolId.PDF_EXPORT -> PatchListScreen(
             onOpenSheet = onOpenPatchSheet,
+            onBack = onBack,
+        )
+
+        ToolId.STAGE_PLOT -> StagePlotListScreen(
+            onOpenPlot = onOpenStagePlot,
             onBack = onBack,
         )
 

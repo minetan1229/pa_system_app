@@ -11,7 +11,11 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ---
 
-## 現在の状態: Phase 0〜3 完了、Phase 4 ほぼ完了（35ツール中27が実装済み）
+## 現在の状態: Phase 4 まで完了（35ツール中28が実装済み・全機能開放の先行版）
+
+**いま APK を入れれば全機能が使える。** 課金が未実装なので、
+Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
+配布する前にここを閉じる必要がある — 手順は [docs/PHASE5.md](docs/PHASE5.md)。
 
 | Phase | 内容 | 状態 |
 |---|---|---|
@@ -23,10 +27,10 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 | 4 | SPLロガー / ハウリング検出 / 電源計算 / カバレッジ | 実装済み |
 | 4 | ディレイ実測 / 極性チェック / 残響測定（IR・RT60） | 実装済み（実機未検証） |
 | 4 | FFT アナライザ / スペクトログラム | 実装済み |
-| 4 | ステージプロット | 未着手 |
+| 4 | ステージプロット | 実装済み |
 | 4 | ワイヤレス周波数調整 | 保留（総務省の一次資料での確認が先） |
-| 5 | 課金（Play Billing 9）・法務・Play 公開 | 未着手 |
-| 6 | 録音、機材台帳、見積、稼働記録、クラウドバックアップ | 未着手 |
+| 5 | 課金（Play Billing）・法務・Play 公開 | 未着手 → [docs/PHASE5.md](docs/PHASE5.md) |
+| 6 | 録音、機材台帳、見積、稼働記録、クラウドバックアップ | 未着手 → [docs/PHASE5.md](docs/PHASE5.md) |
 
 35ツールの一覧は [ToolId.kt](core/model/src/main/kotlin/com/patoolbox/core/model/ToolId.kt) が唯一の定義。
 ホーム画面には未実装ツールも「準備中」として並ぶ（何がいつ来るか分かる方が実用的なので、非表示にしていない）。
@@ -50,6 +54,28 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 ```bash
 JAVA_HOME="/c/Program Files/Android/Android Studio/jbr" ./gradlew assembleDebug
 ```
+
+### APK を作って端末に入れる
+
+```bash
+JAVA_HOME="/c/Program Files/Android/Android Studio/jbr" ./gradlew assembleRelease
+```
+
+`app/build/outputs/apk/release/app-release.apk` ができる（約2MB）。
+これを端末に転送し、「提供元不明のアプリ」を許可してインストールする。
+
+署名は **`keystore.properties` があればその鍵、無ければデバッグ鍵** を使う。
+未署名の APK はインストールできないので、鍵を用意していない段階でも
+動かせることを優先した。Play へ出すときは本番鍵に差し替えること。
+
+USB 接続した端末に直接入れる場合:
+
+```bash
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+デバッグ版（`assembleDebug`）は別アプリ（`.debug` 付き）として並んで入るので、
+実機で両方を比べられる。
 
 ### よく使うタスク
 
@@ -97,6 +123,7 @@ feature/
   feedback              ハウリング検出（Pro）
   measure               ディレイ実測 / 極性チェック / 残響測定（Pro）
                         3ツールとも測定行為は「スイープ1回」なので1モジュールにまとめている
+  stageplot             ステージプロット（Pro）。描画は core:export に置いて PDF と共有
   analyzer              FFT アナライザ / スペクトログラム（Pro）
                         同じ解析結果の別の見せ方なので取り込みと解析を共有
   job                   案件管理（一覧・詳細）
@@ -174,10 +201,12 @@ UI に校正状態を常時出す。
 
 ## 公開前にやること
 
+手順と理由は [docs/PHASE5.md](docs/PHASE5.md) にまとめてある。要点だけ:
+
+- [ ] **`PRE_RELEASE_UNLOCK` を false にする**（現在 true。全機能が無料で開いている）
 - [ ] `applicationId` を自分のドメインに変更（`com.patoolbox` → 実際のもの。後から変更できない）
-- [ ] targetSdk 36 の維持（2026/8/31 以降 Google Play で必須）
-- [ ] Play Billing 8 以上（同日以降必須。現在の最新は 9）
-- [ ] プライバシーポリシー、Data safety フォーム（マイク・録音の扱い）
-- [ ] 特定商取引法に基づく表記（有料販売のため）
-- [ ] EULA（商用利用の許諾 ＋ 計量法上の証明用途への不使用と免責）
+- [ ] 本番の署名鍵を用意して `keystore.properties` を置く（今はデバッグ鍵で署名している）
+- [ ] Play Billing の実装（オフライン猶予を必ず入れる。現場は圏外が多い）
+- [ ] EULA・プライバシーポリシー・特商法表記
 - [ ] アプリ内 OSS ライセンス一覧（`:app:licensee` の出力を利用）
+- [ ] Data safety フォーム（マイク・録音の扱い）

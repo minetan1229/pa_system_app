@@ -10,6 +10,8 @@ import androidx.room.Upsert
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
 import com.patoolbox.core.database.entity.ScheduleItemEntity
+import com.patoolbox.core.database.entity.StageItemEntity
+import com.patoolbox.core.database.entity.StagePlotEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -66,6 +68,62 @@ interface PatchSheetDao {
         }
         return sheetId
     }
+}
+
+@Dao
+interface StagePlotDao {
+
+    @Query("SELECT * FROM stage_plots ORDER BY updatedAtEpochMs DESC")
+    fun observeAll(): Flow<List<StagePlotEntity>>
+
+    @Query("SELECT * FROM stage_plots WHERE jobId = :jobId ORDER BY updatedAtEpochMs DESC")
+    fun observeForJob(jobId: Long): Flow<List<StagePlotEntity>>
+
+    @Query("SELECT * FROM stage_plots WHERE id = :id")
+    fun observeById(id: Long): Flow<StagePlotEntity?>
+
+    @Query("SELECT * FROM stage_items WHERE stagePlotId = :plotId ORDER BY id")
+    fun observeItems(plotId: Long): Flow<List<StageItemEntity>>
+
+    /** 無料版の保存件数制限の判定に使う。 */
+    @Query("SELECT COUNT(*) FROM stage_plots")
+    suspend fun count(): Int
+
+    @Insert
+    suspend fun insertPlot(plot: StagePlotEntity): Long
+
+    @Query(
+        "UPDATE stage_plots SET name = :name, stageWidthMeters = :width, " +
+            "stageDepthMeters = :depth, notes = :notes, updatedAtEpochMs = :now WHERE id = :id",
+    )
+    suspend fun updatePlot(
+        id: Long,
+        name: String,
+        width: Double,
+        depth: Double,
+        notes: String,
+        now: Long,
+    )
+
+    /** 記号を動かしたときに一覧の並び（更新順）を保つため親の更新時刻を進める。 */
+    @Query("UPDATE stage_plots SET updatedAtEpochMs = :now WHERE id = :id")
+    suspend fun touchPlot(id: Long, now: Long)
+
+    @Query("DELETE FROM stage_plots WHERE id = :id")
+    suspend fun deletePlotById(id: Long)
+
+    @Upsert
+    suspend fun upsertItem(item: StageItemEntity): Long
+
+    @Query("DELETE FROM stage_items WHERE id = :id")
+    suspend fun deleteItemById(id: Long)
+
+    /**
+     * ドラッグ中は座標だけを毎回書く。
+     * エンティティ全体を書き戻すと、編集中のラベルを古い値で踏み潰す。
+     */
+    @Query("UPDATE stage_items SET x = :x, y = :y WHERE id = :id")
+    suspend fun moveItem(id: Long, x: Float, y: Float)
 }
 
 @Dao

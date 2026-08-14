@@ -8,6 +8,7 @@ import com.patoolbox.core.database.dao.JobDao
 import com.patoolbox.core.database.dao.MeasurementDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
+import com.patoolbox.core.database.dao.StagePlotDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,4 +46,7 @@ object DatabaseModule {
 
     @Provides
     fun provideMeasurementDao(database: PaDatabase): MeasurementDao = database.measurementDao()
+
+    @Provides
+    fun provideStagePlotDao(database: PaDatabase): StagePlotDao = database.stagePlotDao()
 }

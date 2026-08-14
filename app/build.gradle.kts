@@ -1,9 +1,24 @@
+// スクリプト内の `java` は Gradle の拡張を指すので、完全修飾では書けない
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.pa.android.application)
     alias(libs.plugins.pa.android.compose)
     alias(libs.plugins.pa.android.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.licensee)
+}
+
+/**
+ * 署名鍵の読み込み。
+ *
+ * keystore.properties があればそれを使い、無ければデバッグ鍵で署名する。
+ * 未署名の APK は端末にインストールできないので、鍵を用意していない段階でも
+ * とりあえず動かせることを優先した。Play へ出す前には必ず本番鍵に差し替える
+ * （手順は docs/PHASE5.md）。
+ */
+val keystoreProperties = rootProject.file("keystore.properties").takeIf { it.exists() }?.let {
+    Properties().apply { it.inputStream().use(::load) }
 }
 
 android {
@@ -15,6 +30,21 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    signingConfigs {
+        if (keystoreProperties != null) {
+            create("upload") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -29,8 +59,23 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // 署名は Play App Signing 前提。ローカルでは未署名APKが出る。
+            signingConfig = if (keystoreProperties != null) {
+                signingConfigs.getByName("upload")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
+    }
+
+    /**
+     * 課金が入るまでの暫定的な全機能開放。
+     *
+     * Play Billing はまだ入っていないので、この値が false だと Pro のツールが
+     * どのビルドでも一切開けない。**Phase 5 で課金を実装したら false にすること。**
+     * 消し忘れると有料機能が無料で出続ける。
+     */
+    buildTypes.configureEach {
+        buildConfigField("boolean", "PRE_RELEASE_UNLOCK", "true")
     }
 }
 
@@ -71,6 +116,7 @@ dependencies {
     implementation(project(":feature:feedback"))
     implementation(project(":feature:measure"))
     implementation(project(":feature:analyzer"))
+    implementation(project(":feature:stageplot"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
     implementation(project(":feature:job"))

@@ -8,6 +8,7 @@ import com.patoolbox.core.database.dao.JobDao
 import com.patoolbox.core.database.dao.MeasurementDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
+import com.patoolbox.core.database.dao.StagePlotDao
 import com.patoolbox.core.database.entity.CalibrationProfileEntity
 import com.patoolbox.core.database.entity.JobEntity
 import com.patoolbox.core.database.entity.MeasurementEntity
@@ -15,6 +16,8 @@ import com.patoolbox.core.database.entity.MeasurementSampleEntity
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
 import com.patoolbox.core.database.entity.ScheduleItemEntity
+import com.patoolbox.core.database.entity.StageItemEntity
+import com.patoolbox.core.database.entity.StagePlotEntity
 
 /**
  * 端末内の唯一のDB。
@@ -34,8 +37,10 @@ import com.patoolbox.core.database.entity.ScheduleItemEntity
         ScheduleItemEntity::class,
         MeasurementEntity::class,
         MeasurementSampleEntity::class,
+        StagePlotEntity::class,
+        StageItemEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
@@ -44,6 +49,8 @@ import com.patoolbox.core.database.entity.ScheduleItemEntity
         AutoMigration(from = 2, to = 3),
         // v4: measurements / measurement_samples を追加
         AutoMigration(from = 3, to = 4),
+        // v5: stage_plots / stage_items を追加
+        AutoMigration(from = 4, to = 5),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {
@@ -52,6 +59,7 @@ abstract class PaDatabase : RoomDatabase() {
     abstract fun patchSheetDao(): PatchSheetDao
     abstract fun scheduleItemDao(): ScheduleItemDao
     abstract fun measurementDao(): MeasurementDao
+    abstract fun stagePlotDao(): StagePlotDao
 
     companion object {
         const val NAME = "pa_toolbox.db"

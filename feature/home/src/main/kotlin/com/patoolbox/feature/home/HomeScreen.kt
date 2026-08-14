@@ -233,4 +233,5 @@ private fun ProSource.label(): String = when (this) {
     ProSource.LIFETIME -> "買い切り"
     ProSource.OFFLINE_GRACE -> "オフライン猶予中"
     ProSource.DEBUG_OVERRIDE -> "デバッグ強制ON"
+    ProSource.PRE_RELEASE -> "先行版（全機能開放中）"
 }
