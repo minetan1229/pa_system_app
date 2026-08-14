@@ -70,6 +70,7 @@ dependencies {
     implementation(project(":feature:reference"))
     implementation(project(":feature:feedback"))
     implementation(project(":feature:measure"))
+    implementation(project(":feature:analyzer"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
     implementation(project(":feature:job"))

@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
+import com.patoolbox.feature.analyzer.FftScreen
+import com.patoolbox.feature.analyzer.SpectrogramScreen
 import com.patoolbox.feature.calc.CalcScreen
 import com.patoolbox.feature.calc.toCalcTabOrNull
 import com.patoolbox.feature.calibration.CalibrationScreen
@@ -149,6 +151,11 @@ private fun ToolDestination(
         ToolId.SPL_LOGGER -> SplLogScreen(onBack = onBack)
 
         ToolId.RTA -> RtaScreen(onBack = onBack)
+
+        // FFT とスペクトログラムは同じ解析結果の別の見せ方
+        ToolId.FFT -> FftScreen(onBack = onBack)
+
+        ToolId.SPECTROGRAM -> SpectrogramScreen(onBack = onBack)
 
         ToolId.SIGNAL_GENERATOR -> SigGenScreen(onBack = onBack)
 
