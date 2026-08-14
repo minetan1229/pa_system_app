@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recorder_title">録音</string>
+    <string name="recorder_pro">Pro が必要です</string>
+    <string name="recorder_idle">録音ボタンで開始します（WAV 16bit / 48kHz）</string>
+    <string name="recorder_recording">録音中</string>
+    <string name="recorder_start">録音開始</string>
+    <string name="recorder_stop">停止して保存</string>
+    <string name="recorder_clipped">過大入力です。マイクを離すか入力を下げてください</string>
+    <string name="recorder_list">保存した録音 %1$d 件</string>
+    <string name="recorder_summary">%1$s ／ %2$s MB ／ %3$s</string>
+    <string name="recorder_play">再生</string>
+    <string name="recorder_pause">停止</string>
+    <string name="recorder_export">書き出し</string>
+    <string name="recorder_delete">削除</string>
+</resources>

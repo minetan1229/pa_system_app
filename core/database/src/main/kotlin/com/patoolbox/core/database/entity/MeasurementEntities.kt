@@ -74,3 +74,34 @@ data class MeasurementSampleEntity(
     /** 曲名などの目印。無ければ空 */
     val marker: String = "",
 )
+
+/**
+ * 録音。音声そのものはアプリ内部のファイルで、ここには所在と要約だけを持つ。
+ * 案件が消えたら録音の行も消えるが、**ファイルは自動では消えない**ので、
+ * リポジトリ側で孤児ファイルを掃除する。
+ */
+@Entity(
+    tableName = "recordings",
+    foreignKeys = [
+        ForeignKey(
+            entity = JobEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["jobId"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
+    ],
+    indices = [Index("jobId")],
+)
+data class RecordingEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val jobId: Long? = null,
+    val title: String,
+    val fileName: String,
+    val startedAtEpochMs: Long,
+    val durationSeconds: Double,
+    val sampleRate: Int,
+    val sizeBytes: Long,
+    val peakAmplitude: Float,
+    val note: String = "",
+)

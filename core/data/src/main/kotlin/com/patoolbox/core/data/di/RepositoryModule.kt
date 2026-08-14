@@ -7,6 +7,8 @@ import com.patoolbox.core.data.RoomJobRepository
 import com.patoolbox.core.data.RoomPatchSheetRepository
 import com.patoolbox.core.data.MeasurementRepository
 import com.patoolbox.core.data.RoomMeasurementRepository
+import com.patoolbox.core.data.LocalRecordingRepository
+import com.patoolbox.core.data.RecordingRepository
 import com.patoolbox.core.data.RoomStagePlotRepository
 import com.patoolbox.core.data.StagePlotRepository
 import com.patoolbox.core.data.RoomScheduleRepository
@@ -61,4 +63,10 @@ abstract class RepositoryModule {
     abstract fun bindStagePlotRepository(
         impl: RoomStagePlotRepository,
     ): StagePlotRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecordingRepository(
+        impl: LocalRecordingRepository,
+    ): RecordingRepository
 }

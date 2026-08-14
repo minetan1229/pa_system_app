@@ -11,7 +11,7 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ---
 
-## 現在の状態: Phase 4 完了（35ツール中29が実装済み・全機能開放の先行版）
+## 現在の状態: Phase 4 完了・Phase 6 着手（35ツール中30が実装済み・全機能開放の先行版）
 
 **いま APK を入れれば全機能が使える。** 課金が未実装なので、
 Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
@@ -30,7 +30,8 @@ Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
 | 4 | ステージプロット | 実装済み |
 | 4 | ワイヤレス周波数調整 | 混変調計算のみ実装（法令上の可否は判定しない。後述） |
 | 5 | 課金（Play Billing）・法務・Play 公開 | 未着手 → [docs/PHASE5.md](docs/PHASE5.md) |
-| 6 | 録音、機材台帳、見積、稼働記録、クラウドバックアップ | 未着手 → [docs/PHASE5.md](docs/PHASE5.md) |
+| 6 | 録音（WAV / 再生 / 書き出し） | 実装済み |
+| 6 | 機材台帳、見積、稼働記録、スナップショット、クラウドバックアップ | 未着手 → [docs/PHASE5.md](docs/PHASE5.md) |
 
 35ツールの一覧は [ToolId.kt](core/model/src/main/kotlin/com/patoolbox/core/model/ToolId.kt) が唯一の定義。
 ホーム画面には未実装ツールも「準備中」として並ぶ（何がいつ来るか分かる方が実用的なので、非表示にしていない）。
@@ -111,7 +112,7 @@ core/
   ui                    ToolCard、チップ、権限ゲート、校正バッジ
   data                  設定（DataStore）、校正値（Room）、BuildInfo
   database              Room（案件 / 校正値 / パッチ表 / 進行表）
-  export                PDF出力（Android標準の PdfDocument。iText は AGPL なので不採用）
+  export                PDF・CSV・WAV の書き出し（PdfDocument。iText は AGPL なので不採用）
   billing               ProGate（Phase 5 で Play Billing に差し替え）
   testing               Fake / MainDispatcherRule
 feature/
@@ -125,6 +126,7 @@ feature/
                         3ツールとも測定行為は「スイープ1回」なので1モジュールにまとめている
   stageplot             ステージプロット（Pro）。描画は core:export に置いて PDF と共有
   wireless              ワイヤレスの混変調計算（Pro）。法令上の可否は判定しない
+  recorder              録音（Pro）。WAV書き出しは core:export、再生は AudioPlaybackEngine
   analyzer              FFT アナライザ / スペクトログラム（Pro）
                         同じ解析結果の別の見せ方なので取り込みと解析を共有
   job                   案件管理（一覧・詳細）
@@ -138,7 +140,7 @@ feature/
   calibration           マイク校正（騒音計合わせ / 音響校正器）
 ```
 
-**数値の正しさは `core:dsp` と `core:calc` の JVM テストで担保している**（全体で344テスト）。
+**数値の正しさは `core:dsp` と `core:calc` の JVM テストで担保している**（全体で361テスト）。
 Android を挟まないので、A特性の減衰量やピンクノイズのフラット性を
 理論値と直接突き合わせられる。DSP を変更したらまずここを回すこと。
 

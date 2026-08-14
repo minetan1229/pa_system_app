@@ -41,3 +41,36 @@ data class MeasurementSample(
     val leqDb: Double,
     val marker: String = "",
 )
+
+/**
+ * 現場で撮った録音。
+ *
+ * 音声そのものはアプリ内部のファイルに置き、DB には所在と要約だけを持つ。
+ * 数分の録音でも数十MBになるので、BLOB で DB に入れるとバックアップも
+ * 一覧の読み込みも重くなる。
+ */
+data class Recording(
+    val id: Long = 0,
+    val jobId: Long? = null,
+    val title: String,
+    /** アプリ内部の録音フォルダからの相対名 */
+    val fileName: String,
+    val startedAtEpochMs: Long,
+    val durationSeconds: Double,
+    val sampleRate: Int,
+    val sizeBytes: Long,
+    val peakAmplitude: Float,
+    val note: String = "",
+) {
+    val clipped: Boolean get() = peakAmplitude >= CLIP_THRESHOLD
+
+    val durationLabel: String
+        get() {
+            val total = durationSeconds.toInt()
+            return "%d:%02d".format(total / 60, total % 60)
+        }
+
+    private companion object {
+        const val CLIP_THRESHOLD = 0.99f
+    }
+}

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import com.patoolbox.core.database.entity.MeasurementEntity
+import com.patoolbox.core.database.entity.RecordingEntity
 import com.patoolbox.core.database.entity.MeasurementSampleEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -45,4 +46,27 @@ interface MeasurementDao {
         insertSamples(samples.map { it.copy(measurementId = id) })
         return id
     }
+}
+
+@Dao
+interface RecordingDao {
+
+    @Query("SELECT * FROM recordings ORDER BY startedAtEpochMs DESC")
+    fun observeAll(): Flow<List<RecordingEntity>>
+
+    @Query("SELECT * FROM recordings ORDER BY startedAtEpochMs DESC")
+    suspend fun all(): List<RecordingEntity>
+
+    /** 無料版の保存件数制限の判定に使う。 */
+    @Query("SELECT COUNT(*) FROM recordings")
+    suspend fun count(): Int
+
+    @Insert
+    suspend fun insert(recording: RecordingEntity): Long
+
+    @Query("UPDATE recordings SET title = :title, note = :note WHERE id = :id")
+    suspend fun updateDetails(id: Long, title: String, note: String)
+
+    @Query("DELETE FROM recordings WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

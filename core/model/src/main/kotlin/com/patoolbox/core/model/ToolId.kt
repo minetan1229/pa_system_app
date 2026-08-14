@@ -37,7 +37,7 @@ enum class ToolId(
     ROOM_MEASURE(ToolCategory.MEASURE, ToolAccess.PRO, "IR", phase = 4, implemented = true),
     TUNER(ToolCategory.MEASURE, ToolAccess.FREE, "TUN", phase = 1, implemented = true),
     METRONOME(ToolCategory.MEASURE, ToolAccess.FREE, "CLK", phase = 1, implemented = true),
-    RECORDER(ToolCategory.MEASURE, ToolAccess.PRO, "REC", phase = 6),
+    RECORDER(ToolCategory.MEASURE, ToolAccess.PRO, "REC", phase = 6, implemented = true),
 
     // --- B. 計算・リファレンス ---
     DELAY_CALC(ToolCategory.CALC, ToolAccess.FREE, "ms", phase = 2, implemented = true),

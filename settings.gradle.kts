@@ -67,6 +67,8 @@ include(":feature:analyzer")
 include(":feature:stageplot")
 // ワイヤレスの混変調計算。法令上の可否は扱わない（一次資料を確認できないため）
 include(":feature:wireless")
+// 録音。WAV の読み書きは core:export、再生は既存の AudioPlaybackEngine を使う
+include(":feature:recorder")
 include(":feature:patch")
 include(":feature:showtimer")
 include(":feature:job")

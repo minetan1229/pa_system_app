@@ -23,6 +23,7 @@ import com.patoolbox.feature.measure.PolarityScreen
 import com.patoolbox.feature.measure.RoomMeasureScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
 import com.patoolbox.feature.patch.PatchListScreen
+import com.patoolbox.feature.recorder.RecorderScreen
 import com.patoolbox.feature.reference.ReferenceScreen
 import com.patoolbox.feature.reference.toReferenceTabOrNull
 import com.patoolbox.feature.patch.PatchSheetScreen
@@ -182,6 +183,8 @@ private fun ToolDestination(
         ToolId.POLARITY_CHECK -> PolarityScreen(onBack = onBack)
 
         ToolId.ROOM_MEASURE -> RoomMeasureScreen(onBack = onBack)
+
+        ToolId.RECORDER -> RecorderScreen(onBack = onBack)
 
         ToolId.TUNER -> TunerScreen(onBack = onBack)
 

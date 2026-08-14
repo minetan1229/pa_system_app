@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import com.patoolbox.core.database.dao.CalibrationProfileDao
 import com.patoolbox.core.database.dao.JobDao
 import com.patoolbox.core.database.dao.MeasurementDao
+import com.patoolbox.core.database.dao.RecordingDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
 import com.patoolbox.core.database.dao.StagePlotDao
@@ -13,6 +14,7 @@ import com.patoolbox.core.database.entity.CalibrationProfileEntity
 import com.patoolbox.core.database.entity.JobEntity
 import com.patoolbox.core.database.entity.MeasurementEntity
 import com.patoolbox.core.database.entity.MeasurementSampleEntity
+import com.patoolbox.core.database.entity.RecordingEntity
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
 import com.patoolbox.core.database.entity.ScheduleItemEntity
@@ -39,8 +41,9 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         MeasurementSampleEntity::class,
         StagePlotEntity::class,
         StageItemEntity::class,
+        RecordingEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
@@ -51,6 +54,8 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         AutoMigration(from = 3, to = 4),
         // v5: stage_plots / stage_items を追加
         AutoMigration(from = 4, to = 5),
+        // v6: recordings を追加
+        AutoMigration(from = 5, to = 6),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {
@@ -60,6 +65,7 @@ abstract class PaDatabase : RoomDatabase() {
     abstract fun scheduleItemDao(): ScheduleItemDao
     abstract fun measurementDao(): MeasurementDao
     abstract fun stagePlotDao(): StagePlotDao
+    abstract fun recordingDao(): RecordingDao
 
     companion object {
         const val NAME = "pa_toolbox.db"
