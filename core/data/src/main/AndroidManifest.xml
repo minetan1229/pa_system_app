@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      権限を必要とするモジュール自身が宣言する（app のマニフェストにマージされる）。
+
+      ACCESS_NOTIFICATION_POLICY は本番モードでおやすみモードを切り替えるために使う。
+      これは実行時ダイアログで取れる種類の権限ではなく、利用者が
+      設定 > 通知 > 通知ポリシーへのアクセス で手で有効にする必要がある。
+      宣言していないとその一覧にアプリ自体が出てこない。
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
+</manifest>

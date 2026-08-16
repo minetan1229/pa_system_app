@@ -40,6 +40,7 @@ import com.patoolbox.feature.schedule.ScheduleScreen
 import com.patoolbox.feature.settings.SettingsScreen
 import com.patoolbox.feature.stageplot.StagePlotEditorScreen
 import com.patoolbox.feature.stageplot.StagePlotListScreen
+import com.patoolbox.feature.sfx.SfxScreen
 import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplLogScreen
 import com.patoolbox.feature.spl.SplScreen
@@ -243,6 +244,8 @@ private fun ToolDestination(
         ToolId.CLOUD_BACKUP -> BackupScreen(onBack = onBack)
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
+
+        ToolId.SFX_PADS -> SfxScreen(onBack = onBack)
 
         ToolId.JOB_MANAGER, ToolId.RUN_SHEET -> JobListScreen(
             // 進行表は案件に紐づくので、どちらから来ても案件一覧を経由する

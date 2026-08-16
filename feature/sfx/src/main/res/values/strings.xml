@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sfx_title">SE パッド</string>
+    <string name="sfx_stop_all">全部止める</string>
+    <string name="sfx_playing">再生中</string>
+
+    <string name="sfx_add">SE を追加</string>
+    <string name="sfx_importing">取り込み中…</string>
+    <string name="sfx_add_note">選んだ音はアプリ内にコピーされます。以後は圏外でも鳴ります。長押しで名前・音量・ループ・色を変えられます。</string>
+    <string name="sfx_free_limit">無料版で持てるパッドは %1$d 枚までです。Pro にすると制限がなくなります。</string>
+
+    <string name="sfx_empty_title">まだ SE がありません</string>
+    <string name="sfx_empty_body">下の「SE を追加」から端末内の音声を選んでください。取り込んだ時点でアプリ内にコピーするので、元のファイルを消しても、圏外でも鳴ります。</string>
+
+    <string name="sfx_dismiss">閉じる</string>
+
+    <string name="sfx_edit_title">パッドの設定</string>
+    <string name="sfx_edit_name">名前</string>
+    <string name="sfx_edit_gain">音量 %1$d%%</string>
+    <string name="sfx_edit_gain_note">素材ごとの録音レベル差をここで揃えておくと、本番で卓のフェーダーを触らずに済みます。</string>
+    <string name="sfx_edit_loop">繰り返し再生</string>
+    <string name="sfx_edit_color">色</string>
+    <string name="sfx_edit_save">保存</string>
+
+    <string name="sfx_delete">このパッドを削除</string>
+    <string name="sfx_delete_confirm">「%1$s」を削除します。取り込んだ音声ファイルも一緒に消えます。元に戻せません。</string>
+    <string name="sfx_delete_cancel">やめる</string>
+    <string name="sfx_delete_do">削除する</string>
+</resources>

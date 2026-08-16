@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.model.UserPreferences
@@ -27,7 +28,26 @@ class DataStoreUserPreferencesRepository @Inject constructor(
             favoriteToolIds = prefs[Keys.FAVORITE_TOOLS].orEmpty(),
             keepScreenOnWhileMeasuring = prefs[Keys.KEEP_SCREEN_ON] ?: true,
             debugProOverride = prefs[Keys.DEBUG_PRO_OVERRIDE] ?: false,
+            showMode = ShowModeSettings(
+                silenceNotifications = prefs[Keys.SHOW_MODE_SILENCE]
+                    ?: ShowModeSettings.Default.silenceNotifications,
+                allowAlarms = prefs[Keys.SHOW_MODE_ALARMS]
+                    ?: ShowModeSettings.Default.allowAlarms,
+                keepScreenOn = prefs[Keys.SHOW_MODE_SCREEN_ON]
+                    ?: ShowModeSettings.Default.keepScreenOn,
+                allowOtherAppAudio = prefs[Keys.SHOW_MODE_OTHER_AUDIO]
+                    ?: ShowModeSettings.Default.allowOtherAppAudio,
+            ),
         )
+    }
+
+    override suspend fun setShowMode(settings: ShowModeSettings) {
+        dataStore.edit { prefs ->
+            prefs[Keys.SHOW_MODE_SILENCE] = settings.silenceNotifications
+            prefs[Keys.SHOW_MODE_ALARMS] = settings.allowAlarms
+            prefs[Keys.SHOW_MODE_SCREEN_ON] = settings.keepScreenOn
+            prefs[Keys.SHOW_MODE_OTHER_AUDIO] = settings.allowOtherAppAudio
+        }
     }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
@@ -58,5 +78,9 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val FAVORITE_TOOLS = stringSetPreferencesKey("favorite_tools")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val DEBUG_PRO_OVERRIDE = booleanPreferencesKey("debug_pro_override")
+        val SHOW_MODE_SILENCE = booleanPreferencesKey("show_mode_silence_notifications")
+        val SHOW_MODE_ALARMS = booleanPreferencesKey("show_mode_allow_alarms")
+        val SHOW_MODE_SCREEN_ON = booleanPreferencesKey("show_mode_keep_screen_on")
+        val SHOW_MODE_OTHER_AUDIO = booleanPreferencesKey("show_mode_allow_other_audio")
     }
 }

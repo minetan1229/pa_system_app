@@ -122,6 +122,7 @@ dependencies {
     implementation(project(":feature:business"))
     implementation(project(":feature:patch"))
     implementation(project(":feature:showtimer"))
+    implementation(project(":feature:sfx"))
     implementation(project(":feature:job"))
     implementation(project(":feature:schedule"))
 

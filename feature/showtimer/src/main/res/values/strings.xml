@@ -16,4 +16,26 @@
     <string name="timer_elapsed_label">経過</string>
     <string name="timer_preset">%1$d 分</string>
     <string name="timer_note">画面は自動で消えません。ステージから見えるように置いて使えます</string>
+
+    <string name="timer_monitor_title">音のモニター</string>
+    <string name="timer_monitor_start">開始</string>
+    <string name="timer_monitor_stop">停止</string>
+    <string name="timer_monitor_hint">本番中の音を時間と一緒に見られます（マイクを使います）</string>
+    <string name="timer_monitor_waiting">測定中…</string>
+    <string name="timer_monitor_level">%1$s / 最大 %2$s %3$s</string>
+    <string name="timer_monitor_reset_max">最大値を消去</string>
+
+    <string name="show_mode_title">本番モード</string>
+    <string name="show_mode_on">入っています。抜けると元の状態に戻します</string>
+    <string name="show_mode_off">何を止めるかは下で選べます</string>
+    <string name="show_mode_silence">通知を止める</string>
+    <string name="show_mode_silence_desc">おやすみモードを入れて、本番中の通知音とバイブを止めます</string>
+    <string name="show_mode_alarms">アラームは通す</string>
+    <string name="show_mode_alarms_desc">転換をアラームで管理している場合はこちら</string>
+    <string name="show_mode_screen">画面を消さない</string>
+    <string name="show_mode_screen_desc">本番中は画面を点けたままにします</string>
+    <string name="show_mode_other_audio">他アプリの音を止めない</string>
+    <string name="show_mode_other_audio_desc">BGM を別アプリで出しているときに、その再生を止めません</string>
+    <string name="show_mode_permission_note">通知を止めるには「通知ポリシーへのアクセス」の許可が要ります。アプリからは要求できないので、設定アプリで一度だけ許可してください。</string>
+    <string name="show_mode_open_settings">設定を開いて許可する</string>
 </resources>

@@ -11,6 +11,7 @@ import com.patoolbox.core.database.dao.ScheduleItemDao
 import com.patoolbox.core.database.dao.GearDao
 import com.patoolbox.core.database.dao.InvoiceDao
 import com.patoolbox.core.database.dao.RecordingDao
+import com.patoolbox.core.database.dao.SoundCueDao
 import com.patoolbox.core.database.dao.SnapshotDao
 import com.patoolbox.core.database.dao.WorkLogDao
 import com.patoolbox.core.database.dao.StagePlotDao
@@ -69,4 +70,7 @@ object DatabaseModule {
 
     @Provides
     fun provideWorkLogDao(database: PaDatabase): WorkLogDao = database.workLogDao()
+
+    @Provides
+    fun provideSoundCueDao(database: PaDatabase): SoundCueDao = database.soundCueDao()
 }

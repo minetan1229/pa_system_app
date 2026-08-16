@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.R
@@ -41,6 +41,9 @@ import com.patoolbox.core.ui.titleRes
  * アイコンではなく文字バッジ（SPL / RTA / Ω など）で識別する。
  * 暗いFOHでも屋外でも読めることを優先した結果で、material-icons-extended（約30MB）を
  * 抱え込まずに済むという副作用もある。★も同じ理由でグリフを直接使っている。
+ *
+ * バッジは色面で塗る。36枚が並ぶ画面では、文字を読む前に色と位置で当たりを
+ * 付けられることの方が速さに効く。
  */
 @Composable
 fun ToolCard(
@@ -53,56 +56,49 @@ fun ToolCard(
     val dimens = LocalPaDimens.current
     val accent = tool.category.accentColor()
 
-    Card(
+    PaCard(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = dimens.toolCardMinHeight)
-            .clip(RoundedCornerShape(dimens.cardCorner))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(dimens.cardCorner),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
+            .defaultMinSize(minHeight = dimens.toolCardMinHeight),
+        onClick = onClick,
+        corner = dimens.cornerLarge,
+        contentPadding = dimens.spaceMd,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                ToolBadge(text = tool.badge, accent = accent, size = dimens.badgeSize)
-                FavoriteStar(
-                    isFavorite = isFavorite,
-                    onClick = onToggleFavorite,
-                    minTouch = dimens.minTouch,
-                )
-            }
-
-            Text(
-                text = stringResource(tool.titleRes),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+            ToolBadge(text = tool.badge, accent = accent, size = dimens.badgeSize)
+            FavoriteStar(
+                isFavorite = isFavorite,
+                onClick = onToggleFavorite,
+                minTouch = dimens.minTouch,
             )
+        }
 
-            Text(
-                text = stringResource(tool.descriptionRes),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
-            )
+        Text(
+            text = stringResource(tool.titleRes),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                AccessChip(access = tool.access)
-                if (!tool.implemented) {
-                    ComingSoonChip()
-                }
+        Text(
+            text = stringResource(tool.descriptionRes),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
+            AccessChip(access = tool.access)
+            if (!tool.implemented) {
+                ComingSoonChip()
             }
         }
     }
@@ -118,14 +114,16 @@ private fun ToolBadge(
     Box(
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(10.dp))
-            .background(accent.copy(alpha = 0.18f)),
+            .clip(RoundedCornerShape(12.dp))
+            .background(accent),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            color = accent,
+            // 白か黒かは面の明るさで決める。固定にすると、
+            // カテゴリ色のうち明るいもの（現場ドキュメントの橙）で読めなくなる
+            color = if (accent.luminance() > 0.5f) Color.Black else Color.White,
             maxLines = 1,
             textAlign = TextAlign.Center,
         )
@@ -156,7 +154,7 @@ private fun FavoriteStar(
             color = if (isFavorite) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.outline
+                MaterialTheme.colorScheme.outlineVariant
             },
         )
     }

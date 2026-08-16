@@ -1,5 +1,6 @@
 package com.patoolbox.core.data
 
+import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.model.UserPreferences
@@ -22,4 +23,7 @@ interface UserPreferencesRepository {
     suspend fun setDebugProOverride(enabled: Boolean)
 
     suspend fun toggleFavorite(tool: ToolId)
+
+    /** 本番モードで何を止めるか。 */
+    suspend fun setShowMode(settings: ShowModeSettings)
 }

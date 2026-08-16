@@ -11,6 +11,7 @@ import com.patoolbox.core.data.BackupRepository
 import com.patoolbox.core.data.GearRepository
 import com.patoolbox.core.data.InvoiceRepository
 import com.patoolbox.core.data.LocalRecordingRepository
+import com.patoolbox.core.data.LocalSoundCueRepository
 import com.patoolbox.core.data.RoomGearRepository
 import com.patoolbox.core.data.RoomInvoiceRepository
 import com.patoolbox.core.data.RoomSnapshotRepository
@@ -19,6 +20,7 @@ import com.patoolbox.core.data.SnapshotRepository
 import com.patoolbox.core.data.SqliteBackupRepository
 import com.patoolbox.core.data.WorkLogRepository
 import com.patoolbox.core.data.RecordingRepository
+import com.patoolbox.core.data.SoundCueRepository
 import com.patoolbox.core.data.RoomStagePlotRepository
 import com.patoolbox.core.data.StagePlotRepository
 import com.patoolbox.core.data.RoomScheduleRepository
@@ -79,6 +81,12 @@ abstract class RepositoryModule {
     abstract fun bindRecordingRepository(
         impl: LocalRecordingRepository,
     ): RecordingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSoundCueRepository(
+        impl: LocalSoundCueRepository,
+    ): SoundCueRepository
 
     @Binds
     @Singleton

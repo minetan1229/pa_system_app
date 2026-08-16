@@ -6,69 +6,77 @@ import androidx.compose.ui.graphics.Color
 
 // surfaceContainer 系まで明示的に指定している。指定を省くと Material のベースライン
 // （紫がかったグレー）が残り、特に NIGHT_RED でカードだけ灰色に浮くため。
+//
+// 面の分け方は「影」ではなく「明度の段差 + 髪の毛一本の枠線」に統一している。
+// 暗所モードでは影が一切見えず、屋外モードでは影が飛ぶ。4つのテーマすべてで
+// 同じ作りが成立するのは、影に頼らない方だけ。
 
 internal val PaLightColors = lightColorScheme(
-    primary = Color(0xFF00658F),
+    primary = Color(0xFF0B5FD0),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFC7E7FF),
-    onPrimaryContainer = Color(0xFF001E2F),
-    secondary = Color(0xFF4F616E),
+    primaryContainer = Color(0xFFDCE8FF),
+    onPrimaryContainer = Color(0xFF001A44),
+    secondary = Color(0xFF44566B),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFD2E5F5),
-    onSecondaryContainer = Color(0xFF0B1D29),
-    tertiary = Color(0xFF63597C),
+    secondaryContainer = Color(0xFFDCE6F2),
+    onSecondaryContainer = Color(0xFF0A1722),
+    tertiary = Color(0xFF00808C),
     onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFE9DDFF),
-    onTertiaryContainer = Color(0xFF1F1635),
-    error = Color(0xFFBA1A1A),
+    tertiaryContainer = Color(0xFFC6F1F5),
+    onTertiaryContainer = Color(0xFF00272C),
+    error = Color(0xFFC0182B),
     onError = Color(0xFFFFFFFF),
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002),
-    background = Color(0xFFF7F9FF),
-    onBackground = Color(0xFF191C1E),
-    surface = Color(0xFFF7F9FF),
-    onSurface = Color(0xFF191C1E),
-    surfaceVariant = Color(0xFFDDE3EA),
-    onSurfaceVariant = Color(0xFF41484D),
+    errorContainer = Color(0xFFFFDDDF),
+    onErrorContainer = Color(0xFF41000A),
+    background = Color(0xFFF7F9FC),
+    onBackground = Color(0xFF0E1116),
+    surface = Color(0xFFF7F9FC),
+    onSurface = Color(0xFF0E1116),
+    surfaceVariant = Color(0xFFE4E9F1),
+    onSurfaceVariant = Color(0xFF4A5462),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF1F4F9),
-    surfaceContainer = Color(0xFFEBEEF3),
-    surfaceContainerHigh = Color(0xFFE5E8EE),
-    surfaceContainerHighest = Color(0xFFDFE3E8),
-    outline = Color(0xFF71787E),
-    outlineVariant = Color(0xFFC1C7CE),
+    surfaceContainerLow = Color(0xFFFCFDFE),
+    surfaceContainer = Color(0xFFFFFFFF),
+    surfaceContainerHigh = Color(0xFFF1F4F9),
+    surfaceContainerHighest = Color(0xFFE8EDF4),
+    outline = Color(0xFF6B7684),
+    outlineVariant = Color(0xFFDDE3EC),
 )
 
+/**
+ * 暗色。FOH の卓まわりで一番長く見る画面なので、ここを基準に作ってある。
+ * 背景をほぼ黒に落とし、面は明度をわずかに上げるだけで分ける。
+ */
 internal val PaDarkColors = darkColorScheme(
-    primary = Color(0xFF87CEFF),
-    onPrimary = Color(0xFF00344D),
-    primaryContainer = Color(0xFF004C6D),
-    onPrimaryContainer = Color(0xFFC7E7FF),
-    secondary = Color(0xFFB6C9D8),
-    onSecondary = Color(0xFF21323E),
-    secondaryContainer = Color(0xFF374955),
-    onSecondaryContainer = Color(0xFFD2E5F5),
-    tertiary = Color(0xFFCDC1E9),
-    onTertiary = Color(0xFF342B4B),
-    tertiaryContainer = Color(0xFF4B4163),
-    onTertiaryContainer = Color(0xFFE9DDFF),
-    error = Color(0xFFFFB4AB),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    background = Color(0xFF101416),
-    onBackground = Color(0xFFE1E2E5),
-    surface = Color(0xFF101416),
-    onSurface = Color(0xFFE1E2E5),
-    surfaceVariant = Color(0xFF41484D),
-    onSurfaceVariant = Color(0xFFC1C7CE),
-    surfaceContainerLowest = Color(0xFF0A0E10),
-    surfaceContainerLow = Color(0xFF171B1D),
-    surfaceContainer = Color(0xFF1B1F21),
-    surfaceContainerHigh = Color(0xFF262A2C),
-    surfaceContainerHighest = Color(0xFF313537),
-    outline = Color(0xFF8B9198),
-    outlineVariant = Color(0xFF41484D),
+    primary = Color(0xFF7FB0FF),
+    onPrimary = Color(0xFF00274F),
+    primaryContainer = Color(0xFF0B3D85),
+    onPrimaryContainer = Color(0xFFDCE8FF),
+    secondary = Color(0xFFAFC2D6),
+    onSecondary = Color(0xFF1B2836),
+    secondaryContainer = Color(0xFF2C3B4B),
+    onSecondaryContainer = Color(0xFFDCE6F2),
+    tertiary = Color(0xFF5AD8E4),
+    onTertiary = Color(0xFF00363C),
+    tertiaryContainer = Color(0xFF004F58),
+    onTertiaryContainer = Color(0xFFC6F1F5),
+    error = Color(0xFFFF9A9F),
+    onError = Color(0xFF5C0011),
+    errorContainer = Color(0xFF8C0018),
+    onErrorContainer = Color(0xFFFFDDDF),
+    background = Color(0xFF0A0C10),
+    onBackground = Color(0xFFE7EBF1),
+    surface = Color(0xFF0A0C10),
+    onSurface = Color(0xFFE7EBF1),
+    surfaceVariant = Color(0xFF2A313C),
+    onSurfaceVariant = Color(0xFFA9B3C1),
+    surfaceContainerLowest = Color(0xFF05070A),
+    surfaceContainerLow = Color(0xFF0F1319),
+    surfaceContainer = Color(0xFF141920),
+    surfaceContainerHigh = Color(0xFF1C222B),
+    surfaceContainerHighest = Color(0xFF252C37),
+    outline = Color(0xFF7D8797),
+    outlineVariant = Color(0xFF262D38),
 )
 
 /**
@@ -145,8 +153,8 @@ internal val PaOutdoorColors = lightColorScheme(
  * アイコンを使わない方針なので、色 + 文字バッジでツールを見分ける。
  */
 object PaCategoryColors {
-    val measure = Color(0xFF00A0B0)
-    val calc = Color(0xFF7B8FA1)
-    val document = Color(0xFFE0A32E)
-    val business = Color(0xFF8E7CC3)
+    val measure = Color(0xFF00B3C4)
+    val calc = Color(0xFF5B8DEF)
+    val document = Color(0xFFE8A33D)
+    val business = Color(0xFF9B7BEA)
 }

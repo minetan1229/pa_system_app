@@ -1,6 +1,7 @@
 package com.patoolbox.core.testing
 
 import com.patoolbox.core.data.UserPreferencesRepository
+import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.model.UserPreferences
@@ -39,5 +40,9 @@ class FakeUserPreferencesRepository(
                 favorites + tool.name
             },
         )
+    }
+
+    override suspend fun setShowMode(settings: ShowModeSettings) {
+        state.value = state.value.copy(showMode = settings)
     }
 }

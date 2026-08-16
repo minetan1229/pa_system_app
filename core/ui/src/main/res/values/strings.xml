@@ -51,7 +51,7 @@
     <string name="tool_spl_logger_desc">時系列で記録してCSV/PDF出力。規制値アラートと曲マーカー</string>
     <string name="tool_rta_title">RTA</string>
     <string name="tool_rta_desc">1/1・1/3オクターブ（Proで1/6・1/12）、ピークホールド</string>
-    <string name="tool_fft_title">FFTアナライザ</string>
+    <string name="tool_fft_title">スペクトラムアナライザ</string>
     <string name="tool_fft_desc">高分解能スペクトラム、窓関数選択、ハーモニクスカーソル</string>
     <string name="tool_spectrogram_title">スペクトログラム</string>
     <string name="tool_spectrogram_desc">ウォーターフォール表示で時間変化を追う</string>
@@ -107,6 +107,8 @@
     <string name="tool_run_sheet_desc">リハ・本番の時間割、押し巻きの自動再計算</string>
     <string name="tool_show_timer_title">本番タイマー</string>
     <string name="tool_show_timer_desc">カウントダウン・経過・押し表示を巨大表示</string>
+    <string name="tool_sfx_pads_title">SE パッド</string>
+    <string name="tool_sfx_pads_desc">SEを取り込んでオフライン再生。パッドを押して即発音</string>
     <string name="tool_job_manager_title">案件管理</string>
     <string name="tool_job_manager_desc">会場・日時・搬入時間・連絡先・写真を案件単位で管理</string>
     <string name="tool_snapshot_title">セッティング再現</string>

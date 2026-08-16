@@ -10,6 +10,7 @@ import com.patoolbox.core.database.dao.GearDao
 import com.patoolbox.core.database.dao.InvoiceDao
 import com.patoolbox.core.database.dao.RecordingDao
 import com.patoolbox.core.database.dao.SnapshotDao
+import com.patoolbox.core.database.dao.SoundCueDao
 import com.patoolbox.core.database.dao.WorkLogDao
 import com.patoolbox.core.database.dao.PatchSheetDao
 import com.patoolbox.core.database.dao.ScheduleItemDao
@@ -24,6 +25,7 @@ import com.patoolbox.core.database.entity.InvoiceLineEntity
 import com.patoolbox.core.database.entity.RecordingEntity
 import com.patoolbox.core.database.entity.SnapshotChannelEntity
 import com.patoolbox.core.database.entity.SnapshotEntity
+import com.patoolbox.core.database.entity.SoundCueEntity
 import com.patoolbox.core.database.entity.WorkLogEntity
 import com.patoolbox.core.database.entity.PatchRowEntity
 import com.patoolbox.core.database.entity.PatchSheetEntity
@@ -58,8 +60,9 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         InvoiceEntity::class,
         InvoiceLineEntity::class,
         WorkLogEntity::class,
+        SoundCueEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
@@ -74,6 +77,8 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         AutoMigration(from = 5, to = 6),
         // v7: gear_items / snapshots / invoices / work_logs を追加
         AutoMigration(from = 6, to = 7),
+        // v8: sound_cues を追加
+        AutoMigration(from = 7, to = 8),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {
@@ -88,11 +93,12 @@ abstract class PaDatabase : RoomDatabase() {
     abstract fun snapshotDao(): SnapshotDao
     abstract fun invoiceDao(): InvoiceDao
     abstract fun workLogDao(): WorkLogDao
+    abstract fun soundCueDao(): SoundCueDao
 
     companion object {
         const val NAME = "pa_toolbox.db"
 
         /** @Database の version と必ず一致させること。バックアップの版数照合で使う */
-        const val VERSION = 7
+        const val VERSION = 8
     }
 }

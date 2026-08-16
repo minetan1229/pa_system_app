@@ -10,16 +10,16 @@ import org.junit.Test
 class ToolIdTest {
 
     @Test
-    fun `カタログは35ツールある`() {
-        assertThat(ToolId.entries).hasSize(35)
+    fun `カタログは36ツールある`() {
+        assertThat(ToolId.entries).hasSize(36)
     }
 
     @Test
-    fun `無料17 Pro18 の線引きを保つ`() {
+    fun `無料18 Pro18 の線引きを保つ`() {
         val free = ToolId.entries.count { it.access != ToolAccess.PRO }
         val pro = ToolId.entries.count { it.access == ToolAccess.PRO }
 
-        assertThat(free).isEqualTo(17)
+        assertThat(free).isEqualTo(18)
         assertThat(pro).isEqualTo(18)
     }
 

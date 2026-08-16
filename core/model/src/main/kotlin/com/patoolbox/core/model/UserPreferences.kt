@@ -9,6 +9,8 @@ data class UserPreferences(
     val keepScreenOnWhileMeasuring: Boolean = true,
     /** 開発用の Pro 強制 ON。デバッグビルドでしか効かせない */
     val debugProOverride: Boolean = false,
+    /** 本番モードで何を止めるか */
+    val showMode: ShowModeSettings = ShowModeSettings.Default,
 ) {
     companion object {
         val Default = UserPreferences()
