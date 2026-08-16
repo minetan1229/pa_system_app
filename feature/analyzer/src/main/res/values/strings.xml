@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="analyzer_pro">Pro が必要です</string>
-    <string name="analyzer_pro_note">FFT アナライザとスペクトログラムは Pro 版の機能です。</string>
+    <string name="analyzer_pro_note">スペクトラムアナライザとスペクトログラムは Pro 版の機能です。</string>
     <string name="analyzer_peak_hold">ピーク保持</string>
-    <string name="analyzer_clear_peaks">消去</string>
+    <string name="analyzer_clear_peaks">保持を消去</string>
 
-    <string name="fft_title">FFT アナライザ</string>
+    <string name="analyzer_smoothing">ならし</string>
+    <string name="analyzer_resolution">分解能（FFT 点数）</string>
+    <string name="analyzer_averaging">平均の速さ</string>
+    <string name="analyzer_window">窓関数</string>
+    <string name="analyzer_span">縦軸の幅</string>
+    <string name="analyzer_harmonics">倍音</string>
+
+    <string name="analyzer_cursor">カーソル</string>
+    <string name="analyzer_cursor_hint">図を触るとその周波数のレベルを読めます。指を横に滑らせると追従します。</string>
+    <string name="analyzer_cursor_clear">外す</string>
+    <string name="analyzer_no_signal">信号なし</string>
+    <string name="analyzer_peaks">目立っている山</string>
+    <string name="analyzer_peaks_empty">まだ山が立っていません。測定を開始してください。</string>
+
+    <string name="fft_title">スペクトラムアナライザ</string>
     <string name="fft_peak_caption">いま一番出ている成分の周波数</string>
-    <string name="fft_axis">横軸 20Hz〜20kHz（対数）／ 縦軸 0〜-90 %2$s ／ 分解能 %1$s</string>
-    <string name="fft_note">RTA が「帯域ごとの量」を見るのに対し、FFT は「その山が何Hzか」を特定する道具です。ハウリングの芽、電源ハムの次数、共振の中心を当てるのに使います。生の表示は音楽を入れると読めないので、通常は 1/6 でならしてください。</string>
+    <string name="fft_axis">横軸 20Hz〜20kHz（対数）／ 縦軸 %3$s 幅・上端は自動（単位 %2$s）／ 分解能 %1$s</string>
+    <string name="fft_note">RTA が「帯域ごとの量」を見るのに対し、こちらは「その山が何Hzか」を特定する道具です。ハウリングの芽、電源ハムの次数、共振の中心を当てるのに使います。生の表示は音楽を入れると読めないので、通常は 1/6 でならしてください。縦軸の上端は入っている音に追従するので、絶対値ではなく「どこが飛び出しているか」を見てください。</string>
 
     <string name="spectrogram_title">スペクトログラム</string>
-    <string name="spectrogram_axis">縦軸 時間（上が最新・約25秒ぶん）／ 横軸 20Hz〜20kHz（対数）／ 色 強さ</string>
-    <string name="spectrogram_note">一瞬しか出ない音を探すための表示です。FFT の瞬間表示では見逃すもの（ハウリングが立ち上がる直前の帯域、断続的なノイズ、無線の飛び込み）が線として残ります。</string>
+    <string name="spectrogram_axis">縦軸 時間（上が最新・約%1$s秒ぶん）／ 横軸 20Hz〜20kHz（対数）／ 色 強さ（単位 %2$s）</string>
+    <string name="spectrogram_note">一瞬しか出ない音を探すための表示です。瞬間表示では見逃すもの（ハウリングが立ち上がる直前の帯域、断続的なノイズ、無線の飛び込み）が線として残ります。</string>
 </resources>

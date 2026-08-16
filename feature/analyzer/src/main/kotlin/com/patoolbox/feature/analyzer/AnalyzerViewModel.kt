@@ -6,12 +6,13 @@ import com.patoolbox.core.audio.AudioCaptureEngine
 import com.patoolbox.core.audio.AudioInputDevice
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
-import com.patoolbox.core.dsp.FrameAccumulator
 import com.patoolbox.core.dsp.LogSpectrumMapper
+import com.patoolbox.core.dsp.NoteNames
 import com.patoolbox.core.dsp.OctaveSmoothing
 import com.patoolbox.core.dsp.SpectrogramBuffer
-import com.patoolbox.core.dsp.SpectrumAnalyzer
-import com.patoolbox.core.dsp.powerToDb
+import com.patoolbox.core.dsp.SpectrumPeak
+import com.patoolbox.core.dsp.SpectrumPipeline
+import com.patoolbox.core.dsp.WindowFunction
 import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
 import com.patoolbox.core.model.ProStatus
@@ -39,6 +40,36 @@ enum class AnalyzerAveraging(val coefficient: Double, val label: String) {
     SLOW(0.08, "遅い"),
 }
 
+/**
+ * 縦軸の幅。上端はレベルに追従させるので、利用者が決めるのは「何dB分を見るか」だけ。
+ *
+ * 50dB は1本の山の形を見るとき、90dB は暗騒音まで含めて全体を見るとき。
+ */
+enum class AnalyzerSpan(val db: Double, val label: String) {
+    NARROW(50.0, "50dB"),
+    NORMAL(70.0, "70dB"),
+    WIDE(90.0, "90dB"),
+}
+
+/**
+ * 選べる窓関数。
+ *
+ * [WindowFunction] のうち計測で使い分ける3つだけを出す。
+ * 矩形と Hamming は、この画面での使いどころが説明できないので出さない。
+ */
+enum class AnalyzerWindow(val function: WindowFunction, val label: String, val detail: String) {
+    HANN(WindowFunction.HANN, "Hann", "汎用。迷ったらこれ"),
+    BLACKMAN_HARRIS(WindowFunction.BLACKMAN_HARRIS, "B-Harris", "近い2本を分けたいとき"),
+    FLAT_TOP(WindowFunction.FLAT_TOP, "Flat-top", "レベルを正確に読みたいとき"),
+}
+
+/** 表に出す山。音名は表示のためだけに付ける（PA では「250Hz あたり」より "B3" が通じる場面がある） */
+data class AnalyzerPeak(
+    val frequencyHz: Double,
+    val levelDb: Double,
+    val noteName: String?,
+)
+
 data class AnalyzerUiState(
     val isMeasuring: Boolean = false,
     /**
@@ -51,10 +82,18 @@ data class AnalyzerUiState(
     val frequencies: DoubleArray = DoubleArray(0),
     val peakFrequencyHz: Double = 0.0,
     val peakLevelDb: Double = 0.0,
+    val topPeaks: List<AnalyzerPeak> = emptyList(),
+    /** 利用者が置いたカーソル。null なら置いていない */
+    val cursorHz: Double? = null,
+    val cursorLevelDb: Double = Double.NEGATIVE_INFINITY,
     val fftSize: AnalyzerFftSize = AnalyzerFftSize.MEDIUM,
+    val window: AnalyzerWindow = AnalyzerWindow.HANN,
     val smoothing: OctaveSmoothing = OctaveSmoothing.SIXTH,
     val averaging: AnalyzerAveraging = AnalyzerAveraging.NORMAL,
+    val span: AnalyzerSpan = AnalyzerSpan.NORMAL,
     val peakHold: Boolean = false,
+    /** カーソルの倍音を重ねるか。ハムや共振の次数を追うときに使う */
+    val showHarmonics: Boolean = false,
     val calibration: CalibrationProfile = CalibrationProfile.uncalibrated(
         AudioInputDevice.BUILTIN_KEY,
         AudioInputType.BUILTIN_MIC,
@@ -64,12 +103,22 @@ data class AnalyzerUiState(
 ) {
     val hasReading: Boolean get() = columnsDb.isNotEmpty()
 
-    /** 校正済みなら dB SPL、未校正なら dBFS。単位を偽らないために出し分ける */
-    val unitLabel: String get() = if (calibration.isCalibrated) "dB SPL" else "dBFS"
+    /**
+     * 単位。
+     *
+     * 表示している数値には常に [CalibrationProfile.offsetDb] が乗っている。
+     * 未校正でもオフセットは 120dB（[CalibrationProfile.DEFAULT_OFFSET_DB]）が入るので、
+     * 「dBFS」と書くと 120dB ずれた数字に嘘の単位を付けることになる。
+     * 未校正であることは [com.patoolbox.core.ui.component.CalibrationBadge] でも出す。
+     */
+    val unitLabel: String get() = if (calibration.isCalibrated) "dB SPL" else "dB(目安)"
+
+    /** カーソルの音名。ハウリングの帯域を人に伝えるときに使う */
+    val cursorNote: String? get() = cursorHz?.let { NoteNames.fromFrequency(it)?.displayName }
 }
 
 /**
- * FFT アナライザとスペクトログラムの共通部分。
+ * スペクトラムアナライザとスペクトログラムの共通部分。
  *
  * 2つの画面は「同じ解析結果を別の見せ方で出している」だけなので、
  * 取り込みと解析はここ1箇所にまとめてある。
@@ -87,14 +136,8 @@ class AnalyzerViewModel @Inject constructor(
 
     private val sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE
 
-    private var analyzer = SpectrumAnalyzer(sampleRate, AnalyzerFftSize.MEDIUM.size)
-    private var mapper = createMapper(analyzer)
-    private var accumulator = createAccumulator(AnalyzerFftSize.MEDIUM.size)
+    private var pipeline = createPipeline(AnalyzerFftSize.MEDIUM, AnalyzerWindow.HANN)
 
-    private var smoothedPowers = DoubleArray(mapper.columns)
-    private var peakPowers = DoubleArray(mapper.columns)
-    private var scratch = DoubleArray(mapper.columns)
-    private var hasFrame = false
     private var frameCounter = 0L
 
     /**
@@ -109,12 +152,21 @@ class AnalyzerViewModel @Inject constructor(
         historySize = SPECTROGRAM_HISTORY,
     )
 
+    /** スペクトログラム1行あたりの時間。時間軸の目盛りに使う */
+    val hopSeconds: Double get() = pipeline.hopSeconds
+
+    /** 履歴として遡れる長さ（秒）。FFT の点数を変えると変わるので計算で出す */
+    val historySeconds: Double get() = spectrogram.historySize * pipeline.hopSeconds
+
     init {
         viewModelScope.launch {
             proGate.proStatus.collect { status ->
                 _uiState.update { it.copy(proStatus = status) }
             }
         }
+        // 未計測でも軸だけは描けるようにしておく。
+        // 真っさらな画面より「20Hz〜20kHz の図が待っている」方が何をする画面か分かる
+        _uiState.update { it.copy(frequencies = pipeline.frequencies) }
     }
 
     fun start() {
@@ -127,9 +179,9 @@ class AnalyzerViewModel @Inject constructor(
         }
 
         runCatching {
-            rebuild(current.fftSize)
+            rebuild(current.fftSize, current.window)
             captureEngine.start { buffer, length ->
-                accumulator.add(buffer, length) { frame -> onFrame(frame) }
+                pipeline.accumulator.add(buffer, length) { frame -> onFrame(frame) }
             }
         }.onSuccess { session ->
             _uiState.update { it.copy(isMeasuring = true, error = null) }
@@ -150,10 +202,24 @@ class AnalyzerViewModel @Inject constructor(
 
     fun setFftSize(fftSize: AnalyzerFftSize) {
         if (_uiState.value.fftSize == fftSize) return
+        restartWith { it.copy(fftSize = fftSize) }
+    }
+
+    fun setWindow(window: AnalyzerWindow) {
+        if (_uiState.value.window == window) return
+        restartWith { it.copy(window = window) }
+    }
+
+    /**
+     * 解析器を作り直す設定の変更。
+     * 窓も点数も [SpectrumPipeline] の生成時に決まるので、測定中なら一度止めて開き直す。
+     */
+    private fun restartWith(change: (AnalyzerUiState) -> AnalyzerUiState) {
         val wasMeasuring = _uiState.value.isMeasuring
         stop()
-        _uiState.update { it.copy(fftSize = fftSize) }
-        if (wasMeasuring) start() else rebuild(fftSize)
+        _uiState.update(change)
+        val state = _uiState.value
+        if (wasMeasuring) start() else rebuild(state.fftSize, state.window)
     }
 
     fun setSmoothing(smoothing: OctaveSmoothing) {
@@ -164,14 +230,36 @@ class AnalyzerViewModel @Inject constructor(
         _uiState.update { it.copy(averaging = averaging) }
     }
 
+    fun setSpan(span: AnalyzerSpan) {
+        _uiState.update { it.copy(span = span) }
+    }
+
+    /** 図を触ったときの周波数。カーソルのレベルは次のフレームで埋まる */
+    fun setCursor(frequencyHz: Double) {
+        _uiState.update { state ->
+            state.copy(
+                cursorHz = frequencyHz,
+                cursorLevelDb = levelAt(frequencyHz, state.columnsDb),
+            )
+        }
+    }
+
+    fun clearCursor() {
+        _uiState.update { it.copy(cursorHz = null, cursorLevelDb = Double.NEGATIVE_INFINITY) }
+    }
+
     fun togglePeakHold() {
         val enabled = !_uiState.value.peakHold
-        if (!enabled) peakPowers.fill(0.0)
+        if (!enabled) pipeline.clearPeakHold()
         _uiState.update { it.copy(peakHold = enabled) }
     }
 
+    fun toggleHarmonics() {
+        _uiState.update { it.copy(showHarmonics = !it.showHarmonics) }
+    }
+
     fun clearPeaks() {
-        peakPowers.fill(0.0)
+        pipeline.clearPeakHold()
     }
 
     override fun onCleared() {
@@ -180,72 +268,56 @@ class AnalyzerViewModel @Inject constructor(
 
     private fun onFrame(frame: FloatArray) {
         val state = _uiState.value
-        val spectrum = analyzer.powerSpectrum(frame)
+        val snapshot = pipeline.analyze(
+            frame = frame,
+            smoothing = state.smoothing,
+            averagingCoefficient = state.averaging.coefficient,
+            offsetDb = state.calibration.offsetDb,
+            peakHold = state.peakHold,
+        )
 
-        // ピーク周波数は表示カラムではなく生のビンから読む。
-        // カラムに畳んだ後だと分解能がカラム幅（1オクターブの1/25程度）まで落ちる
-        val peakBin = analyzer.peakBin(spectrum)
-        val peakHz = analyzer.interpolatedPeakHz(spectrum, peakBin)
-        val peakPower = analyzer.toneMeanSquareAround(spectrum, peakBin)
-
-        mapper.map(spectrum, state.smoothing, scratch)
-
-        val alpha = state.averaging.coefficient
-        for (i in scratch.indices) {
-            smoothedPowers[i] = if (hasFrame) {
-                smoothedPowers[i] + alpha * (scratch[i] - smoothedPowers[i])
-            } else {
-                scratch[i]
-            }
-            if (smoothedPowers[i] > peakPowers[i]) peakPowers[i] = smoothedPowers[i]
-        }
-        hasFrame = true
-
-        val offset = state.calibration.offsetDb
-        val columnsDb = FloatArray(smoothedPowers.size) {
-            (powerToDb(smoothedPowers[it]) + offset).toFloat()
-        }
-        val peaksDb = if (state.peakHold) {
-            FloatArray(peakPowers.size) { (powerToDb(peakPowers[it]) + offset).toFloat() }
-        } else {
-            FloatArray(0)
-        }
-
-        spectrogram.push(columnsDb)
+        spectrogram.push(snapshot.columnsDb)
 
         frameCounter++
         _uiState.update {
             it.copy(
                 frame = frameCounter,
-                columnsDb = columnsDb,
-                peakHoldDb = peaksDb,
-                frequencies = mapper.frequencies,
-                peakFrequencyHz = peakHz,
-                peakLevelDb = powerToDb(peakPower) + offset,
+                columnsDb = snapshot.columnsDb,
+                peakHoldDb = snapshot.peakHoldDb,
+                frequencies = pipeline.frequencies,
+                peakFrequencyHz = snapshot.peakFrequencyHz,
+                peakLevelDb = snapshot.peakLevelDb,
+                topPeaks = snapshot.topPeaks.map(::toAnalyzerPeak),
+                cursorLevelDb = it.cursorHz?.let { hz -> levelAt(hz, snapshot.columnsDb) }
+                    ?: Double.NEGATIVE_INFINITY,
             )
         }
     }
 
-    private fun rebuild(fftSize: AnalyzerFftSize) {
-        analyzer = SpectrumAnalyzer(sampleRate, fftSize.size)
-        mapper = createMapper(analyzer)
-        accumulator = createAccumulator(fftSize.size)
-        smoothedPowers = DoubleArray(mapper.columns)
-        peakPowers = DoubleArray(mapper.columns)
-        scratch = DoubleArray(mapper.columns)
-        hasFrame = false
-        spectrogram.clear()
-    }
-
-    private fun createMapper(analyzer: SpectrumAnalyzer) = LogSpectrumMapper(
-        binCount = analyzer.binCount,
-        binWidthHz = analyzer.binWidthHz,
-        columns = LogSpectrumMapper.DEFAULT_COLUMNS,
+    private fun toAnalyzerPeak(peak: SpectrumPeak) = AnalyzerPeak(
+        frequencyHz = peak.frequencyHz,
+        levelDb = peak.levelDb,
+        noteName = NoteNames.fromFrequency(peak.frequencyHz)?.displayName,
     )
 
-    /** 50% オーバーラップ。点数を上げても更新が飛び飛びに見えないようにする */
-    private fun createAccumulator(fftSize: Int) =
-        FrameAccumulator(fftSize, hopSize = fftSize / 2)
+    private fun levelAt(frequencyHz: Double, columnsDb: FloatArray): Double {
+        if (columnsDb.isEmpty()) return Double.NEGATIVE_INFINITY
+        val column = pipeline.columnOf(frequencyHz).coerceIn(0, columnsDb.size - 1)
+        return columnsDb[column].toDouble()
+    }
+
+    private fun rebuild(fftSize: AnalyzerFftSize, window: AnalyzerWindow) {
+        pipeline = createPipeline(fftSize, window)
+        spectrogram.clear()
+        _uiState.update { it.copy(frequencies = pipeline.frequencies) }
+    }
+
+    private fun createPipeline(fftSize: AnalyzerFftSize, window: AnalyzerWindow) = SpectrumPipeline(
+        sampleRate = sampleRate,
+        fftSize = fftSize.size,
+        columns = LogSpectrumMapper.DEFAULT_COLUMNS,
+        windowFunction = window.function,
+    )
 
     private fun observeCalibration(deviceKey: String, inputType: AudioInputType) {
         viewModelScope.launch {

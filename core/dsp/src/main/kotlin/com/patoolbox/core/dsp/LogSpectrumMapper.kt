@@ -38,6 +38,13 @@ class LogSpectrumMapper(
     /** 各カラムの中心周波数。目盛りの描画にも使う */
     val frequencies: DoubleArray
 
+    /**
+     * 1オクターブぶんのカラム数。
+     * 「1/3オクターブ以上離れた山だけ拾う」のように、
+     * 周波数の間隔をカラム数に直すときに使う。
+     */
+    val columnsPerOctave: Double
+
     /** 隣り合うカラムの周波数比。カラムの幅を出すのに使う */
     private val ratio: Double
 
@@ -50,6 +57,7 @@ class LogSpectrumMapper(
 
         ratio = (this.maxHz / minHz).pow(1.0 / (columns - 1))
         frequencies = DoubleArray(columns) { minHz * ratio.pow(it) }
+        columnsPerOctave = kotlin.math.ln(2.0) / kotlin.math.ln(ratio)
     }
 
     /**

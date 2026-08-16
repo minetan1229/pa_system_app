@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -52,40 +53,44 @@ fun MicPermissionGate(
         denied = !result
     }
 
-    if (granted) {
-        content()
-        return
-    }
+    // 許可済みの経路にも modifier を通す。呼び出し側は Scaffold の innerPadding を
+    // ここに渡しているので、素の content() を呼ぶと本体だけが TopAppBar の下に潜る
+    Box(modifier = modifier.fillMaxSize()) {
+        if (granted) {
+            content()
+            return@Box
+        }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = stringResource(R.string.mic_permission_title),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(R.string.mic_permission_rationale),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        if (denied) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
-                text = stringResource(R.string.mic_permission_denied),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
+                text = stringResource(R.string.mic_permission_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
-        }
-        Button(onClick = { launcher.launch(Manifest.permission.RECORD_AUDIO) }) {
-            Text(stringResource(R.string.mic_permission_grant))
+            Text(
+                text = stringResource(R.string.mic_permission_rationale),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            if (denied) {
+                Text(
+                    text = stringResource(R.string.mic_permission_denied),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Button(onClick = { launcher.launch(Manifest.permission.RECORD_AUDIO) }) {
+                Text(stringResource(R.string.mic_permission_grant))
+            }
         }
     }
 }
