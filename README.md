@@ -11,7 +11,7 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ## ダウンロード
 
-### ⬇ [**PA Toolbox v0.1.0 をダウンロード（APK・2.2MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.1.0.apk)
+### ⬇ [**PA Toolbox v0.2.0 をダウンロード（APK・2.3MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.2.0.apk)
 
 Android 8.0（API 26）以降。**36ツールすべてが使えます。**
 
