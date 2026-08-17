@@ -33,6 +33,7 @@ import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.GearCategory
 import com.patoolbox.core.model.GearItem
 import com.patoolbox.core.model.GearStatus
+import com.patoolbox.core.model.ToolId
 
 /**
  * 機材台帳。
@@ -51,6 +52,7 @@ fun GearScreen(
     var editing by remember { mutableStateOf<GearItem?>(null) }
 
     BusinessScaffold(
+        tool = ToolId.GEAR_INVENTORY,
         title = stringResource(R.string.gear_title),
         onBack = onBack,
         proStatus = uiState.proStatus,

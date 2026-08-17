@@ -42,6 +42,7 @@ import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ProSource
 import com.patoolbox.core.model.ToolCategory
 import com.patoolbox.core.model.ToolId
+import com.patoolbox.core.reference.HelpTopics
 import com.patoolbox.core.ui.accentColor
 import com.patoolbox.core.ui.component.ToolCard
 import com.patoolbox.core.ui.descriptionRes
@@ -82,6 +83,9 @@ internal fun HomeScreen(
     // 検索用インデックスは1回だけ作る。
     // LocalContext ではなく LocalResources を使うのは、設定（ロケールなど）が変わったときに
     // 再計算されるようにするため。LocalContext.getString() は無効化されず古い値が残る。
+    //
+    // 解説の本文も索引に混ぜている。現場で打つのは「Dante」「ハウリング」「70V」のような
+    // 症状や単語で、ツール名や短い説明文には出てこないことが多い。
     val searchIndex = remember(resources) {
         ToolId.entries.associateWith { tool ->
             buildString {
@@ -92,6 +96,8 @@ internal fun HomeScreen(
                 append(tool.badge)
                 append(' ')
                 append(tool.name)
+                append(' ')
+                append(HelpTopics.forTool(tool)?.searchText.orEmpty())
             }.lowercase()
         }
     }

@@ -18,10 +18,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,10 +34,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.Recording
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * 現場の録音。
@@ -71,18 +70,11 @@ fun RecorderScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.recorder_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.RECORDER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.recorder_title),
     ) { innerPadding ->
         if (!uiState.proStatus.isPro) {
             Column(
@@ -94,7 +86,7 @@ fun RecorderScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {

@@ -41,26 +41,97 @@ import com.patoolbox.core.reference.TroubleshootQuestion
 import com.patoolbox.core.reference.TroubleshootResolution
 import com.patoolbox.core.reference.Troubleshooting
 
+/**
+ * コネクタ図鑑。
+ *
+ * 検索していないときはカテゴリで畳んで出す。中身が増えたので、
+ * 全部を縦に並べると目的のものに辿り着けない。
+ * 検索したときはカテゴリを跨いで重要度順のまま出す
+ * （「ハウリング」のように、どのカテゴリにあるか分からない引き方が多いため）。
+ */
 @Composable
 internal fun ConnectorTab(gutter: Dp) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(gutter),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ConnectorCategory.entries.forEach { category ->
-            item(key = "cat_${category.name}") {
-                SectionHeader(category.label)
+    var query by rememberSaveable { mutableStateOf("") }
+    val results = remember(query) { Connectors.search(query) }
+    val searching = query.isNotBlank()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            label = { Text(stringResource(R.string.reference_connector_search)) },
+            placeholder = { Text(stringResource(R.string.reference_connector_search_hint)) },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = gutter, vertical = 8.dp),
+        )
+
+        if (searching) {
+            Text(
+                text = stringResource(R.string.reference_connector_count, results.size),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = gutter),
+            )
+        }
+
+        if (searching && results.isEmpty()) {
+            Text(
+                text = stringResource(R.string.reference_no_result),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(gutter),
+            )
+            return@Column
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = gutter,
+                end = gutter,
+                bottom = gutter,
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (searching) {
+                items(results, key = { it.name }) { connector ->
+                    ConnectorCard(connector, showCategory = true)
+                }
+                return@LazyColumn
             }
-            items(Connectors.byCategory(category), key = { it.name }) { connector ->
-                ConnectorCard(connector)
+
+            ConnectorCategory.entries.forEach { category ->
+                item(key = "cat_${category.name}") {
+                    Column {
+                        SectionHeader(category.label)
+                        Text(
+                            text = category.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                items(Connectors.byCategory(category), key = { it.name }) { connector ->
+                    ConnectorCard(connector, showCategory = false)
+                }
             }
         }
     }
 }
 
+/**
+ * コネクタ1枚。
+ *
+ * 上級者向けの補足は畳んでおく。全部開いていると
+ * 「XLR のピン番号を確かめたいだけ」のときに邪魔になるが、
+ * 無いと Dante のような込み入ったものに手が届かない。
+ */
 @Composable
-private fun ConnectorCard(connector: Connector) {
+private fun ConnectorCard(connector: Connector, showCategory: Boolean) {
+    var expanded by rememberSaveable(connector.name) { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -71,6 +142,13 @@ private fun ConnectorCard(connector: Connector) {
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            if (showCategory) {
+                Text(
+                    text = connector.category.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             Text(
                 text = connector.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -88,7 +166,7 @@ private fun ConnectorCard(connector: Connector) {
                         text = pin.pin,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.width(72.dp),
+                        modifier = Modifier.width(96.dp),
                     )
                     Text(
                         text = pin.signal,
@@ -110,6 +188,29 @@ private fun ConnectorCard(connector: Connector) {
                         text = "・$caution",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            if (connector.advanced.isEmpty()) return@Column
+
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(
+                    stringResource(
+                        if (expanded) {
+                            R.string.reference_advanced_hide
+                        } else {
+                            R.string.reference_advanced_show
+                        },
+                    ),
+                )
+            }
+            if (expanded) {
+                connector.advanced.forEach { note ->
+                    Text(
+                        text = "・$note",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

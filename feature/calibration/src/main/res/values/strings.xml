@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="calibration_title">マイク校正</string>
+    <string name="calibration_role">端末のマイクの癖を測って引く。ここを合わせないと dB の絶対値は出せない</string>
 
     <string name="calibration_intro">内蔵マイクは機種ごとに感度が違うため、無校正の測定値は数dB〜十数dBずれます。基準となる騒音計か音響校正器で一度合わせておくと、以降の測定が実用になります。</string>
 

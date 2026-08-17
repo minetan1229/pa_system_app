@@ -15,15 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,13 +37,14 @@ import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.component.PaSectionHeader
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ShowModeSettings
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.CalibrationBadge
 import com.patoolbox.core.ui.component.KeepScreenOn
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.component.SpectrumChart
 import com.patoolbox.core.ui.component.SpectrumRange
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.formatHz
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowTimerScreen(
     onBack: () -> Unit,
@@ -73,18 +71,11 @@ fun ShowTimerScreen(
         if (granted) viewModel.startMonitor()
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.timer_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.SHOW_TIMER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.timer_title),
     ) { innerPadding ->
         // ステージから見えるように置いて使うので、既定では走っていなくても画面を消さない。
         // 本番モードに入っている間は、その設定に従う
@@ -145,6 +136,7 @@ fun ShowTimerScreen(
                     }
                 },
                 onResetMax = viewModel::resetMaxLevel,
+                onClearLastFeedback = viewModel::clearLastFeedback,
             )
 
             Text(
@@ -371,6 +363,7 @@ private fun MonitorSection(
     uiState: ShowTimerUiState,
     onToggleMonitor: () -> Unit,
     onResetMax: () -> Unit,
+    onClearLastFeedback: () -> Unit,
 ) {
     val dimens = LocalPaDimens.current
 
@@ -436,6 +429,12 @@ private fun MonitorSection(
 
         CalibrationBadge(profile = uiState.calibration)
 
+        FeedbackPanel(
+            current = uiState.feedback,
+            last = uiState.lastFeedback,
+            onClearLast = onClearLastFeedback,
+        )
+
         SpectrumChart(
             columnsDb = uiState.columnsDb,
             frequencies = uiState.frequencies,
@@ -443,6 +442,99 @@ private fun MonitorSection(
             height = 160.dp,
         )
     }
+}
+
+/**
+ * ハウリングの表示。
+ *
+ * 鳴っている間は面ごと赤くする。本番中は数字を読む余裕が無いので、
+ * まず色の変化で気づけること、次に周波数が読めること、の順で作ってある。
+ *
+ * 収まった後も「直前に出た」を残すのは、対処が済んだかどうかを
+ * 曲間に確かめたいため。消すのは手動。
+ */
+@Composable
+private fun FeedbackPanel(
+    current: FeedbackAlert?,
+    last: FeedbackAlert?,
+    onClearLast: () -> Unit,
+) {
+    val dimens = LocalPaDimens.current
+
+    if (current != null) {
+        PaCard(
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            borderColor = MaterialTheme.colorScheme.error,
+            contentPadding = dimens.spaceMd,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.timer_feedback_now),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Text(
+                    text = stringResource(
+                        R.string.timer_feedback_value,
+                        formatHz(current.frequencyHz),
+                    ),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            }
+            Text(
+                text = stringResource(
+                    R.string.timer_feedback_detail,
+                    current.noteName,
+                    current.bandLabel,
+                    "%.0f".format(current.prominenceDb),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Text(
+                text = stringResource(R.string.timer_feedback_action),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+        }
+        return
+    }
+
+    if (last != null) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(
+                    R.string.timer_feedback_last,
+                    formatHz(last.frequencyHz),
+                    last.noteName,
+                    last.bandLabel,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onClearLast) {
+                Text(stringResource(R.string.timer_feedback_clear))
+            }
+        }
+        return
+    }
+
+    Text(
+        text = stringResource(R.string.timer_feedback_idle),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable

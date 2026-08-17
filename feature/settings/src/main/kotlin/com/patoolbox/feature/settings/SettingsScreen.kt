@@ -30,6 +30,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ThemeMode
+import com.patoolbox.core.reference.HelpTopics
+import com.patoolbox.core.ui.component.HelpAction
 import com.patoolbox.core.ui.R as CoreUiR
 
 @Composable
@@ -83,6 +85,27 @@ internal fun SettingsScreen(
                 .padding(horizontal = dimens.gutter),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            // 解説は各画面の右上にもあるが、「そもそも解説があること」に気づかない人がいる。
+            // 設定からも全部を検索して読めるようにしておく
+            SectionTitle(stringResource(R.string.settings_section_help))
+            HelpTopics.byId("index")?.let { index ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_help_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    HelpAction(topic = index)
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             SectionTitle(stringResource(R.string.settings_section_display))
             ThemeMode.entries.forEach { mode ->
                 ThemeModeRow(

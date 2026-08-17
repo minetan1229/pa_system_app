@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.calc.RateType
 import com.patoolbox.core.calc.WorkLogCalculator
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.model.WorkLogEntry
 import com.patoolbox.core.ui.DateTimeText
 
@@ -51,6 +52,7 @@ fun WorkLogScreen(
     var editing by remember { mutableStateOf<WorkLogEntry?>(null) }
 
     BusinessScaffold(
+        tool = ToolId.WORK_LOG,
         title = stringResource(R.string.worklog_title),
         onBack = onBack,
         proStatus = uiState.proStatus,

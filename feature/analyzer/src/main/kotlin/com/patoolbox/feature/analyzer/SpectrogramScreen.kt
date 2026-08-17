@@ -11,13 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,8 +24,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.dsp.OctaveSmoothing
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.component.SpectrumRange
 import com.patoolbox.core.ui.R as CoreUiR
 
@@ -40,7 +38,6 @@ import com.patoolbox.core.ui.R as CoreUiR
  * 一瞬しか出ない音を探すための道具で、スペクトラムの瞬間表示では見逃すものが残る。
  * ハウリングが立ち上がる直前の帯域、断続的なノイズ、ワイヤレスの飛び込みなど。
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpectrogramScreen(
     onBack: () -> Unit,
@@ -51,22 +48,15 @@ fun SpectrogramScreen(
     val dimens = LocalPaDimens.current
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.spectrogram_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.SPECTROGRAM,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.spectrogram_title),
     ) { innerPadding ->
         if (!uiState.proStatus.isPro) {
             AnalyzerProNotice(modifier = Modifier.padding(innerPadding))
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {

@@ -13,14 +13,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,11 +34,13 @@ import com.patoolbox.core.designsystem.component.BigReadout
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.dsp.FrequencyWeighting
 import com.patoolbox.core.dsp.TimeWeighting
+import com.patoolbox.core.model.CalibrationConfidence
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.CalibrationBadge
 import com.patoolbox.core.ui.component.InputSourceBadge
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
-import com.patoolbox.core.model.CalibrationConfidence
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.R as CoreUiR
 
 @Composable
@@ -62,6 +61,7 @@ fun SplScreen(
         onReset = viewModel::reset,
         onFrequencyWeighting = viewModel::setFrequencyWeighting,
         onTimeWeighting = viewModel::setTimeWeighting,
+        onReadoutAveraging = viewModel::setReadoutAveraging,
         onToggleLogging = {
             if (uiState.isLogging) showSaveDialog = true else viewModel.startLogging()
         },
@@ -100,7 +100,6 @@ fun SplScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SplScreen(
     uiState: SplUiState,
@@ -109,6 +108,7 @@ internal fun SplScreen(
     onReset: () -> Unit,
     onFrequencyWeighting: (FrequencyWeighting) -> Unit,
     onTimeWeighting: (TimeWeighting) -> Unit,
+    onReadoutAveraging: (ReadoutAveraging) -> Unit,
     onToggleLogging: () -> Unit,
     onBack: () -> Unit,
     onOpenCalibration: () -> Unit,
@@ -116,18 +116,11 @@ internal fun SplScreen(
 ) {
     val dimens = LocalPaDimens.current
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.spl_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.SPL_METER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.spl_title),
     ) { innerPadding ->
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {
             KeepScreenOn(enabled = uiState.isMeasuring)
@@ -153,19 +146,27 @@ internal fun SplScreen(
                     }
                 }
 
+                // 大表示は既定で 0.5 秒平均。Fast のままだと数字が毎秒何度も跳ねて、
+                // 卓から目を上げた一瞬では読めない。記録側（Leq/Lmax）は規格どおりのまま
                 BigReadout(
                     value = if (uiState.hasReading) {
-                        formatDb(uiState.instantDb)
+                        formatDb(uiState.readoutDb)
                     } else {
                         stringResource(R.string.spl_no_value)
                     },
                     unit = uiState.frequencyWeighting.displayName,
                     label = "${uiState.timeWeighting.label} / ${uiState.frequencyWeighting.displayName}",
                     caption = if (uiState.hasReading) {
-                        stringResource(
-                            CoreUiR.string.measure_elapsed,
-                            formatElapsed(uiState.elapsedSeconds),
-                        )
+                        val elapsed = formatElapsed(uiState.elapsedSeconds)
+                        if (uiState.readoutAveraging == ReadoutAveraging.INSTANT) {
+                            stringResource(R.string.spl_readout_caption_instant, elapsed)
+                        } else {
+                            stringResource(
+                                R.string.spl_readout_caption,
+                                uiState.readoutAveraging.label,
+                                elapsed,
+                            )
+                        }
                     } else {
                         stringResource(R.string.spl_waiting)
                     },
@@ -209,6 +210,19 @@ internal fun SplScreen(
                     selected = uiState.timeWeighting,
                     onSelect = onTimeWeighting,
                     minTouch = dimens.minTouch,
+                )
+
+                SelectorRow(
+                    label = stringResource(R.string.spl_readout_averaging),
+                    options = ReadoutAveraging.entries.map { it to it.label },
+                    selected = uiState.readoutAveraging,
+                    onSelect = onReadoutAveraging,
+                    minTouch = dimens.minTouch,
+                )
+                Text(
+                    text = stringResource(R.string.spl_readout_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Row(

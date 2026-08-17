@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_title">PA Toolbox</string>
-    <string name="home_search_hint">ツールを検索（例: SPL、ディレイ、パッチ）</string>
+    <string name="home_search_hint">ツール・症状で検索（例: SPL、ハウリング、Dante）</string>
     <string name="home_section_favorites">よく使う</string>
     <string name="home_no_results">「%1$s」に一致するツールはありません</string>
     <string name="home_settings">設定</string>

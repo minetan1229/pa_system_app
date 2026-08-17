@@ -32,6 +32,7 @@ import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.Snapshot
 import com.patoolbox.core.model.SnapshotChannel
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
 
 /**
@@ -54,6 +55,7 @@ fun SnapshotListScreen(
     var showCreate by rememberSaveable { mutableStateOf(false) }
 
     BusinessScaffold(
+        tool = ToolId.SNAPSHOT,
         title = stringResource(R.string.snapshot_title),
         onBack = onBack,
         proStatus = uiState.proStatus,
@@ -201,6 +203,7 @@ fun SnapshotDetailScreen(
     var expanded by remember { mutableStateOf<Long?>(null) }
 
     BusinessScaffold(
+        tool = ToolId.SNAPSHOT,
         title = snapshot?.title ?: stringResource(R.string.snapshot_title),
         onBack = onBack,
         // 一覧で Pro を確認済み。ここで再度弾くと編集途中に閉じてしまう

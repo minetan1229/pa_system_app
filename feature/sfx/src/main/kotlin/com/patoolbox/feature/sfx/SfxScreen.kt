@@ -1,7 +1,6 @@
 package com.patoolbox.feature.sfx
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -33,12 +32,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,8 +56,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.SoundCue
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.KeepScreenOn
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * SE パッド。
@@ -79,34 +77,29 @@ fun SfxScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dimens = LocalPaDimens.current
 
+    // 音声ファイルだけを出す。標準の OpenDocument は type を */* にしてしまい、
+    // 端末によっては全ファイルが並ぶ（PickAudioDocument のコメント参照）
     val pickLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
+        PickAudioDocument(),
     ) { uri -> uri?.let(viewModel::import) }
 
     // 鳴っている間は画面を消さない。消えた画面を起こしてから止めるのでは間に合わない
     KeepScreenOn(enabled = uiState.isAnyPlaying)
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.sfx_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-                actions = {
-                    if (uiState.isAnyPlaying) {
-                        TextButton(onClick = viewModel::stopAll) {
-                            Text(
-                                text = stringResource(R.string.sfx_stop_all),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
-                    }
-                },
-            )
+    PaToolScaffold(
+        tool = ToolId.SFX_PADS,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.sfx_title),
+        actions = {
+            if (uiState.isAnyPlaying) {
+                TextButton(onClick = viewModel::stopAll) {
+                    Text(
+                        text = stringResource(R.string.sfx_stop_all),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
         },
     ) { innerPadding ->
         LazyVerticalGrid(
@@ -150,7 +143,7 @@ fun SfxScreen(
                     verticalArrangement = Arrangement.spacedBy(dimens.spaceXs),
                 ) {
                     Button(
-                        onClick = { pickLauncher.launch(arrayOf(AUDIO_MIME)) },
+                        onClick = { pickLauncher.launch(Unit) },
                         enabled = uiState.canAddMore && !uiState.importing,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -477,5 +470,3 @@ private fun PadEditorSheet(
     }
 }
 
-/** 取り込める形式は端末のデコーダ次第。mp3 / m4a / wav はどの端末でも通る */
-private const val AUDIO_MIME = "audio/*"

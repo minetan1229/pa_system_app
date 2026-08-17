@@ -14,10 +14,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +29,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.Measurement
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,18 +58,11 @@ fun SplLogScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.spl_log_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.SPL_LOGGER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.spl_log_title),
     ) { innerPadding ->
         Column(
             modifier = Modifier

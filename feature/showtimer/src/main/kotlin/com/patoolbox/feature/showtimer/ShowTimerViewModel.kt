@@ -7,6 +7,7 @@ import com.patoolbox.core.audio.AudioInputDevice
 import com.patoolbox.core.data.CalibrationRepository
 import com.patoolbox.core.data.ShowModeController
 import com.patoolbox.core.data.UserPreferencesRepository
+import com.patoolbox.core.dsp.FeedbackDetector
 import com.patoolbox.core.dsp.LogSpectrumMapper
 import com.patoolbox.core.dsp.OctaveSmoothing
 import com.patoolbox.core.dsp.SpectrumPipeline
@@ -16,6 +17,8 @@ import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
 import com.patoolbox.core.model.ShowModeSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.math.abs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +27,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.math.abs
 
 enum class TimerMode { COUNTDOWN, ELAPSED }
+
+/**
+ * 本番中に見つけたハウリング。
+ *
+ * 周波数だけでなく音名と 1/3 オクターブ帯域を持つのは、
+ * 打つ手が「卓のどのつまみを触るか」だから。
+ * 「1.02kHz」より「1k の帯域」の方が、グライコの前では速い。
+ */
+data class FeedbackAlert(
+    val frequencyHz: Double,
+    val noteName: String,
+    val bandLabel: String,
+    /** 周囲より何dB突出しているか。値そのものより「どれだけ危ないか」の目安 */
+    val prominenceDb: Double,
+)
 
 data class ShowTimerUiState(
     val mode: TimerMode = TimerMode.COUNTDOWN,
@@ -44,6 +60,10 @@ data class ShowTimerUiState(
     val maxLevelDb: Double = SILENCE_DB,
     val columnsDb: FloatArray = FloatArray(0),
     val frequencies: DoubleArray = DoubleArray(0),
+    /** いま鳴っていると判断したハウリング。null なら検出なし */
+    val feedback: FeedbackAlert? = null,
+    /** 直近で見つけたもの。いま鳴っていなくても「さっき出た」を残す */
+    val lastFeedback: FeedbackAlert? = null,
     val calibration: CalibrationProfile = CalibrationProfile.uncalibrated(
         AudioInputDevice.BUILTIN_KEY,
         AudioInputType.BUILTIN_MIC,
@@ -121,6 +141,21 @@ class ShowTimerViewModel @Inject constructor(
         sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE,
         columns = LogSpectrumMapper.DEFAULT_COLUMNS,
     )
+
+    /**
+     * ハウリングの検出。
+     *
+     * スペクトラムと同じフレームを食わせている。取り込みを2系統に分けると
+     * 同じ音を2回 FFT することになるうえ、表示とずれた時刻の判定が出る。
+     * [SpectrumPipeline] と点数を揃えてあるのはそのため。
+     */
+    private val feedbackDetector = FeedbackDetector(
+        sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE,
+        fftSize = pipeline.fftSize,
+    )
+
+    /** 検出が途切れてから何フレーム経ったか。1フレームの空振りで表示を消さないための猶予 */
+    private var framesSinceFeedback = Int.MAX_VALUE
 
     /**
      * 直近ブロックのレベルと、フレーム間の最大値。
@@ -209,8 +244,11 @@ class ShowTimerViewModel @Inject constructor(
         }
 
         pipeline.reset()
+        feedbackDetector.reset()
+        framesSinceFeedback = Int.MAX_VALUE
         lastLevelDb = ShowTimerUiState.SILENCE_DB
         runningMaxDb = ShowTimerUiState.SILENCE_DB
+        _uiState.update { it.copy(feedback = null) }
 
         runCatching {
             captureEngine.start { buffer, length ->
@@ -229,7 +267,7 @@ class ShowTimerViewModel @Inject constructor(
 
     fun stopMonitor() {
         captureEngine.stop()
-        _uiState.update { it.copy(monitoring = false) }
+        _uiState.update { it.copy(monitoring = false, feedback = null) }
     }
 
     fun toggleMonitor() {
@@ -239,6 +277,11 @@ class ShowTimerViewModel @Inject constructor(
     /** 最大値だけを捨てる。曲の切れ目で「ここから測り直す」ときに使う */
     fun resetMaxLevel() {
         runningMaxDb = lastLevelDb
+    }
+
+    /** 「さっき出た」の記録を消す。対処が済んだときに押す */
+    fun clearLastFeedback() {
+        _uiState.update { it.copy(lastFeedback = null) }
     }
 
     // --- 本番モード ---
@@ -301,6 +344,8 @@ class ShowTimerViewModel @Inject constructor(
             offsetDb = offset,
         )
 
+        val alert = detectFeedback(frame)
+
         _uiState.update {
             it.copy(
                 frame = it.frame + 1,
@@ -308,8 +353,39 @@ class ShowTimerViewModel @Inject constructor(
                 maxLevelDb = runningMaxDb + offset,
                 columnsDb = snapshot.columnsDb,
                 frequencies = pipeline.frequencies,
+                feedback = alert,
+                lastFeedback = alert ?: it.lastFeedback,
             )
         }
+    }
+
+    /**
+     * ハウリングの判定。
+     *
+     * 一番突出しているものを1つだけ出す。本番中に3本並べても打つ手は変わらないし、
+     * 表示が増えるほど時間表示が押し出される。
+
+     * 見つからなくなってもすぐには消さない。ハウリングは揺れるので、
+     * 1フレーム外しただけで表示が点滅すると読めなくなる。
+     */
+    private fun detectFeedback(frame: FloatArray): FeedbackAlert? {
+        val best = feedbackDetector.process(frame).firstOrNull()
+
+        if (best != null) {
+            framesSinceFeedback = 0
+            return FeedbackAlert(
+                frequencyHz = best.frequencyHz,
+                noteName = best.noteName,
+                bandLabel = best.bandLabel,
+                prominenceDb = best.prominenceDb,
+            )
+        }
+
+        if (framesSinceFeedback < FEEDBACK_HOLD_FRAMES) {
+            framesSinceFeedback++
+            return _uiState.value.feedback
+        }
+        return null
     }
 
     private fun observeCalibration(deviceKey: String, inputType: AudioInputType) {
@@ -332,5 +408,12 @@ class ShowTimerViewModel @Inject constructor(
 
         private const val TICK_MS = 100L
         private const val NANOS_PER_MILLI = 1_000_000L
+
+        /**
+         * 検出が途切れてから表示を消すまでのフレーム数。
+         * 1フレームは約85ms なので、12 で約1秒。
+         * これより短いと表示が点滅し、長いと収まった後も出たままになる
+         */
+        private const val FEEDBACK_HOLD_FRAMES = 12
     }
 }

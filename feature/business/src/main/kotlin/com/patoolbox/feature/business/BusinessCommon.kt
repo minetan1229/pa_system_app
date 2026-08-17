@@ -7,17 +7,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ProStatus
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.model.ToolId
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * Phase 6 の運営ツールに共通する枠。
@@ -25,9 +24,9 @@ import com.patoolbox.core.ui.R as CoreUiR
  * 5画面（機材台帳・スナップショット・見積/請求・稼働記録・バックアップ）は
  * どれも「一覧して足して消す」形なので、外枠と Pro の案内をまとめてある。
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun BusinessScaffold(
+    tool: ToolId,
     title: String,
     onBack: () -> Unit,
     proStatus: ProStatus,
@@ -38,19 +37,12 @@ internal fun BusinessScaffold(
 ) {
     val dimens = LocalPaDimens.current
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-                actions = { actions() },
-            )
-        },
+    PaToolScaffold(
+        tool = tool,
+        onBack = onBack,
+        modifier = modifier,
+        title = title,
+        actions = { actions() },
         floatingActionButton = floatingActionButton,
     ) { innerPadding ->
         if (!proStatus.isPro) {
@@ -63,7 +55,7 @@ internal fun BusinessScaffold(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         content(

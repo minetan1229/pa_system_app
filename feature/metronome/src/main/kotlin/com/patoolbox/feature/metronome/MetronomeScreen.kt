@@ -18,12 +18,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,7 +33,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.KeepScreenOn
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.R as CoreUiR
 
 @Composable
@@ -76,18 +76,11 @@ internal fun MetronomeScreen(
 ) {
     val dimens = LocalPaDimens.current
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.metronome_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.METRONOME,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.metronome_title),
     ) { innerPadding ->
         KeepScreenOn(enabled = uiState.isPlaying)
 

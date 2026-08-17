@@ -46,6 +46,89 @@ class ReferenceContentTest {
         assertThat(xlr.pins[2].signal).contains("コールド")
     }
 
+    @Test
+    fun `コネクタ検索が名前と注意点と別名に効く`() {
+        assertThat(Connectors.search("Dante").map { it.name }).contains("Dante")
+        assertThat(Connectors.search("ダンテ").map { it.name }).contains("Dante")
+        // 症状から引く。「リボン」は注意点の本文にしか出てこない
+        assertThat(Connectors.search("リボン").map { it.name })
+            .contains("ファンタム電源（48V）")
+    }
+
+    @Test
+    fun `コネクタ検索は空なら全件を重要度順で返す`() {
+        assertThat(Connectors.search("")).containsExactlyElementsIn(Connectors.ALL).inOrder()
+        assertThat(Connectors.search("  ")).hasSize(Connectors.ALL.size)
+    }
+
+    @Test
+    fun `一致しないコネクタ検索は空`() {
+        assertThat(Connectors.search("該当しない語句xyz")).isEmpty()
+    }
+
+    @Test
+    fun `デジタルとネットワークのコネクタが載っている`() {
+        // 「浅い図鑑」に戻っていないことの見張り。
+        // AES/EBU と Dante が無い状態は、この app では不足として扱う
+        val names = Connectors.ALL.map { it.name }
+        assertThat(names).contains("AES/EBU（AES3）")
+        assertThat(names).contains("MADI（AES10）")
+        assertThat(names).contains("Dante")
+    }
+
+    @Test
+    fun `カテゴリごとに並びが崩れていない`() {
+        // byCategory は ALL の順（重要度順）を保つこと
+        ConnectorCategory.entries.forEach { category ->
+            val fromAll = Connectors.ALL.filter { it.category == category }
+            assertWithMessage(category.label)
+                .that(Connectors.byCategory(category))
+                .containsExactlyElementsIn(fromAll)
+                .inOrder()
+        }
+    }
+
+    // --- 解説 ---
+
+    @Test
+    fun `実装済みの全ツールに解説がある`() {
+        com.patoolbox.core.model.ToolId.entries
+            .filter { it.implemented }
+            .forEach { tool ->
+                assertWithMessage(tool.name)
+                    .that(HelpTopics.forTool(tool))
+                    .isNotNull()
+            }
+    }
+
+    @Test
+    fun `解説のIDは重複しない`() {
+        assertThat(HelpTopics.ALL.map { it.id }).containsNoDuplicates()
+    }
+
+    @Test
+    fun `解説には要約と節がある`() {
+        HelpTopics.ALL.forEach { topic ->
+            assertWithMessage(topic.id).that(topic.summary).isNotEmpty()
+            assertWithMessage(topic.id).that(topic.sections).isNotEmpty()
+            topic.sections.forEach { section ->
+                assertWithMessage("${topic.id} / ${section.heading}")
+                    .that(section.body)
+                    .isNotEmpty()
+            }
+        }
+    }
+
+    @Test
+    fun `解説の検索が本文にも効く`() {
+        assertThat(HelpTopics.search("スイープ").map { it.id })
+            .contains("delay_finder")
+        assertThat(HelpTopics.search("デシベル").map { it.id })
+            .contains("concept_db")
+        assertThat(HelpTopics.search("")).hasSize(HelpTopics.ALL.size)
+        assertThat(HelpTopics.search("該当しない語句xyz")).isEmpty()
+    }
+
     // --- 帯域チャート ---
 
     @Test

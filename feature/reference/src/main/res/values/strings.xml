@@ -20,6 +20,13 @@
     <string name="reference_select_flow">症状を選んでください</string>
 
     <string name="reference_search">用語を検索</string>
-    <string name="reference_no_result">一致する用語がありません</string>
+    <string name="reference_no_result">一致するものがありません</string>
     <string name="reference_term_count">%1$d 語</string>
+
+    <!-- コネクタ図鑑 -->
+    <string name="reference_connector_search">コネクタ・症状で検索</string>
+    <string name="reference_connector_search_hint">Dante、ファンタム、リボン 壊れる など</string>
+    <string name="reference_connector_count">%1$d 件</string>
+    <string name="reference_advanced_show">上級者向けの補足を開く</string>
+    <string name="reference_advanced_hide">補足を閉じる</string>
 </resources>

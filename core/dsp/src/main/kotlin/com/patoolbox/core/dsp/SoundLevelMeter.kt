@@ -46,6 +46,22 @@ class SoundLevelMeter(
     private var histogramSamples = 0L
     private var samplesUntilHistogram = 0
 
+    /**
+     * 表示を落ち着かせるための移動平均。
+     *
+     * [SLIDING_SLOT_SECONDS] ごとの二乗和を輪にためておき、
+     * 欲しい窓の長さぶんだけ後ろから足して平均する。
+     * こうしておくと窓を変えても測り直しにならない
+     * （時間重み付けを変えるとフィルタの積分が飛ぶが、こちらは表示だけの話なので）。
+     */
+    private val slotSamples = (sampleRate * SLIDING_SLOT_SECONDS).toInt().coerceAtLeast(1)
+    private val slotPowerSums = DoubleArray(SLIDING_SLOTS)
+    private val slotCounts = IntArray(SLIDING_SLOTS)
+    private var slotIndex = 0
+    private var filledSlots = 0
+    private var currentSlotSum = 0.0
+    private var currentSlotCount = 0
+
     data class Reading(
         /** 時間重み付けされた現在値 */
         val instantDb: Double,
@@ -78,6 +94,16 @@ class SoundLevelMeter(
             leqSum += power
             leqSamples++
             totalSamples++
+
+            currentSlotSum += power
+            if (++currentSlotCount >= slotSamples) {
+                slotPowerSums[slotIndex] = currentSlotSum
+                slotCounts[slotIndex] = currentSlotCount
+                slotIndex = (slotIndex + 1) % SLIDING_SLOTS
+                if (filledSlots < SLIDING_SLOTS) filledSlots++
+                currentSlotSum = 0.0
+                currentSlotCount = 0
+            }
 
             smoothedPower += alpha * (power - smoothedPower)
 
@@ -119,6 +145,39 @@ class SoundLevelMeter(
     }
 
     /**
+     * 直近 [windowSeconds] の等価レベル（移動平均）。
+     *
+     * 時間重み付け（F/S/I）は規格で決まっていて動かせないが、
+     * F のままだと大表示の数字が毎秒何度も跳ねて読めない。
+     * これは**表示のためだけ**の平均で、Leq や Lmax には影響しない。
+     *
+     * ためた長さが窓に足りないときは、ある分だけで平均する
+     * （測定開始直後に「値なし」を出すより、荒い値でも出した方が使える）。
+     *
+     * @param windowSeconds 0 以下なら [Reading.instantDb] と同じ扱いにはせず、直近1スロットを返す
+     */
+    fun slidingLeqDb(windowSeconds: Double): Double {
+        val wanted = kotlin.math.ceil(windowSeconds / SLIDING_SLOT_SECONDS)
+            .toInt()
+            .coerceIn(1, SLIDING_SLOTS)
+
+        var sum = currentSlotSum
+        var count = currentSlotCount.toLong()
+
+        var taken = 0
+        while (taken < wanted && taken < filledSlots) {
+            // slotIndex は次に書く位置なので、その1つ手前が最新
+            val index = (slotIndex - 1 - taken + SLIDING_SLOTS * 2) % SLIDING_SLOTS
+            sum += slotPowerSums[index]
+            count += slotCounts[index]
+            taken++
+        }
+
+        if (count == 0L) return Double.NEGATIVE_INFINITY
+        return powerToDb(sum / count) + calibrationOffsetDb
+    }
+
+    /**
      * 統計レベル。L10 なら「測定時間の10%を超えていたレベル」。
      * @param percentile 0..100
      */
@@ -147,6 +206,12 @@ class SoundLevelMeter(
         histogram.fill(0)
         histogramSamples = 0L
         samplesUntilHistogram = 0
+        slotPowerSums.fill(0.0)
+        slotCounts.fill(0)
+        slotIndex = 0
+        filledSlots = 0
+        currentSlotSum = 0.0
+        currentSlotCount = 0
     }
 
     private fun addToHistogram(db: Double) {
@@ -178,5 +243,18 @@ class SoundLevelMeter(
         private const val HISTOGRAM_BIN_WIDTH_DB = 0.5
         private const val HISTOGRAM_BINS = 480
         private const val HISTOGRAM_INTERVAL_SECONDS = 0.125
+
+        /**
+         * 移動平均の刻み。これより短い窓は作れない。
+         * 50ms にしてあるのは、0.5秒を10個で割り切れて、
+         * かつ画面の更新間隔（約43ms）とほぼ揃うため
+         */
+        const val SLIDING_SLOT_SECONDS = 0.05
+
+        /** ためておく刻みの数。50ms × 40 で最長 2 秒 */
+        const val SLIDING_SLOTS = 40
+
+        /** [slidingLeqDb] に渡せる最長の窓（秒） */
+        const val MAX_SLIDING_WINDOW_SECONDS = SLIDING_SLOT_SECONDS * SLIDING_SLOTS
     }
 }

@@ -43,6 +43,7 @@ import com.patoolbox.core.model.Invoice
 import com.patoolbox.core.model.InvoiceLineItem
 import com.patoolbox.core.model.ProSource
 import com.patoolbox.core.model.ProStatus
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
 
 @Composable
@@ -57,6 +58,7 @@ fun InvoiceListScreen(
     var showCreate by rememberSaveable { mutableStateOf(false) }
 
     BusinessScaffold(
+        tool = ToolId.INVOICE,
         title = stringResource(R.string.invoice_title),
         onBack = onBack,
         proStatus = uiState.proStatus,
@@ -194,6 +196,7 @@ fun InvoiceDetailScreen(
     }
 
     BusinessScaffold(
+        tool = ToolId.INVOICE,
         title = uiState.invoice?.documentLabel ?: stringResource(R.string.invoice_title),
         onBack = onBack,
         proStatus = ProStatus(isPro = true, source = ProSource.NONE),

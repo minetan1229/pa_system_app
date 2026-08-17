@@ -18,10 +18,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +35,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.TimelineEntry
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,28 +62,19 @@ fun ScheduleScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(uiState.job?.name ?: stringResource(R.string.schedule_title))
-                },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-                actions = {
-                    // PDF は Pro 専用。押せない理由が分かるよう、隠さず無効で出す
-                    TextButton(
-                        onClick = { createPdfLauncher.launch(viewModel.suggestedFileName()) },
-                        enabled = uiState.canExport,
-                    ) {
-                        Text(stringResource(R.string.schedule_export_pdf))
-                    }
-                },
-            )
+    PaToolScaffold(
+        tool = ToolId.RUN_SHEET,
+        onBack = onBack,
+        modifier = modifier,
+        title = uiState.job?.name ?: stringResource(R.string.schedule_title),
+        actions = {
+            // PDF は Pro 専用。押せない理由が分かるよう、隠さず無効で出す
+            TextButton(
+                onClick = { createPdfLauncher.launch(viewModel.suggestedFileName()) },
+                enabled = uiState.canExport,
+            ) {
+                Text(stringResource(R.string.schedule_export_pdf))
+            }
         },
     ) { innerPadding ->
         Column(

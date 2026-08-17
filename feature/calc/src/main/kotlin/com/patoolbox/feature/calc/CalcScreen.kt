@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,20 +22,20 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * 計算機のタブ。
  * ホームの各ツール（ディレイ計算 / BPM / dB換算 / インピーダンス）は
  * すべてこの画面の該当タブを開いた状態で入る。
  */
-enum class CalcTab(@param:StringRes val titleRes: Int) {
-    DELAY(R.string.calc_tab_delay),
-    BPM(R.string.calc_tab_bpm),
-    DB(R.string.calc_tab_db),
-    IMPEDANCE(R.string.calc_tab_impedance),
-    POWER(R.string.calc_tab_power),
-    COVERAGE(R.string.calc_tab_coverage),
+enum class CalcTab(@param:StringRes val titleRes: Int, val tool: ToolId) {
+    DELAY(R.string.calc_tab_delay, ToolId.DELAY_CALC),
+    BPM(R.string.calc_tab_bpm, ToolId.BPM_CALC),
+    DB(R.string.calc_tab_db, ToolId.DB_CALC),
+    IMPEDANCE(R.string.calc_tab_impedance, ToolId.IMPEDANCE_CALC),
+    POWER(R.string.calc_tab_power, ToolId.POWER_CALC),
+    COVERAGE(R.string.calc_tab_coverage, ToolId.COVERAGE_CALC),
     ;
 
     /** 電源とカバレッジは Pro 専用。 */
@@ -67,18 +65,13 @@ fun CalcScreen(
     val proStatus by viewModel.proStatus.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(initialTab) }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(selectedTab.titleRes)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    // タブごとに別のツール扱いにする。解説と識別色がタブに追従するので、
+    // 「いま dB換算 を見ているのか電源計算を見ているのか」が上の帯で分かる
+    PaToolScaffold(
+        tool = selectedTab.tool,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(selectedTab.titleRes),
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             // タブが6つになったので横スクロールにする

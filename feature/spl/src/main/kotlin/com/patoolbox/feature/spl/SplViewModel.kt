@@ -16,17 +16,37 @@ import com.patoolbox.core.model.Measurement
 import com.patoolbox.core.model.MeasurementSample
 import com.patoolbox.core.model.ProStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+
+/**
+ * 大表示をどれだけ落ち着かせるか。
+ *
+ * 時間重み付け（F/S/I）は IEC で決まっていて動かせない。
+ * こちらは**表示だけ**を平均する設定で、Leq や Lmax の記録には影響しない。
+ *
+ * 既定を 0.5 秒にしているのは、Fast のままだと数字が毎秒何度も跳ねて、
+ * 卓から目を上げた一瞬では読み取れないため。
+ * 0.5 秒あれば「いま何dBか」を1回の視線で読める。
+ */
+enum class ReadoutAveraging(val windowSeconds: Double, val label: String) {
+    INSTANT(0.0, "瞬時"),
+    HALF(0.5, "0.5秒"),
+    ONE(1.0, "1秒"),
+    TWO(2.0, "2秒"),
+}
 
 data class SplUiState(
     val isMeasuring: Boolean = false,
     val hasReading: Boolean = false,
     val instantDb: Double = 0.0,
+    /** 大表示に出す値。[readoutAveraging] に従って平均済み */
+    val readoutDb: Double = 0.0,
+    val readoutAveraging: ReadoutAveraging = ReadoutAveraging.HALF,
     val leqDb: Double = 0.0,
     val maxDb: Double = 0.0,
     val minDb: Double = 0.0,
@@ -141,6 +161,7 @@ class SplViewModel @Inject constructor(
             it.copy(
                 hasReading = false,
                 instantDb = 0.0,
+                readoutDb = 0.0,
                 leqDb = 0.0,
                 maxDb = 0.0,
                 minDb = 0.0,
@@ -169,6 +190,27 @@ class SplViewModel @Inject constructor(
         stop()
         _uiState.update { it.copy(timeWeighting = weighting, hasReading = false) }
         if (wasMeasuring) start()
+    }
+
+    /**
+     * 大表示の落ち着き。
+     *
+     * 重み付けと違って測り直しにならない。表示のための平均でしかないので、
+     * 記録中に切り替えても記録の中身は変わらない。
+     */
+    fun setReadoutAveraging(averaging: ReadoutAveraging) {
+        if (_uiState.value.readoutAveraging == averaging) return
+        _uiState.update { state ->
+            val meter = meter
+            state.copy(
+                readoutAveraging = averaging,
+                readoutDb = if (meter != null && state.hasReading) {
+                    readoutValue(meter, state.instantDb, averaging)
+                } else {
+                    state.readoutDb
+                },
+            )
+        }
     }
 
     override fun onCleared() {
@@ -239,6 +281,7 @@ class SplViewModel @Inject constructor(
             state.copy(
                 hasReading = true,
                 instantDb = reading.instantDb,
+                readoutDb = readoutValue(meter, reading.instantDb, state.readoutAveraging),
                 leqDb = reading.leqDb,
                 maxDb = reading.maxDb,
                 minDb = reading.minDb,
@@ -251,6 +294,17 @@ class SplViewModel @Inject constructor(
                 loggedSamples = loggedSamples.size,
             )
         }
+    }
+
+    /** 瞬時なら時間重み付けの値をそのまま、それ以外は窓ぶんの移動平均を返す */
+    private fun readoutValue(
+        meter: SoundLevelMeter,
+        instantDb: Double,
+        averaging: ReadoutAveraging,
+    ): Double = if (averaging == ReadoutAveraging.INSTANT) {
+        instantDb
+    } else {
+        meter.slidingLeqDb(averaging.windowSeconds)
     }
 
     private fun observeCalibration(deviceKey: String, inputType: AudioInputType) {

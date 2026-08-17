@@ -44,6 +44,16 @@
     <string name="measure_clipping">過大入力（クリップ）</string>
     <string name="measure_elapsed">経過 %1$s</string>
 
+    <!-- 解説（各画面の右上「解説」から開く） -->
+    <string name="help_open">解説</string>
+    <string name="help_close">閉じる</string>
+    <string name="help_search_title">ほかの解説を探す</string>
+    <string name="help_search_hint">dB、ハウリング、Dante など</string>
+    <string name="help_no_result">見つかりませんでした</string>
+
+    <!-- ツール識別帯 -->
+    <string name="tool_emits_sound">⚠ この画面はスピーカーから音を出します</string>
+
     <!-- A. 計測 -->
     <string name="tool_spl_meter_title">SPLメーター</string>
     <string name="tool_spl_meter_desc">dBA/dBC/dBZ、Leq、Lmax/Lpeak。校正状態を常時表示</string>

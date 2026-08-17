@@ -19,10 +19,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,8 +36,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.Job
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,18 +53,11 @@ fun JobListScreen(
     var showCreate by rememberSaveable { mutableStateOf(false) }
     var pendingDelete by rememberSaveable { mutableStateOf<Long?>(null) }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.job_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.JOB_MANAGER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.job_title),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showCreate = true },
@@ -244,18 +236,11 @@ fun JobDetailScreen(
         if (uiState.saved) viewModel.clearSaved()
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(job?.name ?: stringResource(R.string.job_detail_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.JOB_MANAGER,
+        onBack = onBack,
+        modifier = modifier,
+        title = job?.name ?: stringResource(R.string.job_detail_title),
     ) { innerPadding ->
         Column(
             modifier = Modifier

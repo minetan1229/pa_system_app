@@ -13,10 +13,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -28,9 +26,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.dsp.ReverbTime
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * 残響測定（IR / RT60）。
@@ -49,22 +48,15 @@ fun RoomMeasureScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dimens = LocalPaDimens.current
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.room_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.ROOM_MEASURE,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.room_title),
     ) { innerPadding ->
         if (!uiState.proStatus.isPro) {
             MeasureProNotice(modifier = Modifier.padding(innerPadding))
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {

@@ -25,6 +25,15 @@
     <string name="timer_monitor_level">%1$s / 最大 %2$s %3$s</string>
     <string name="timer_monitor_reset_max">最大値を消去</string>
 
+    <!-- ハウリング検出 -->
+    <string name="timer_feedback_now">ハウリング</string>
+    <string name="timer_feedback_value">%1$s Hz</string>
+    <string name="timer_feedback_detail">%1$s ／ %2$s 帯域 ／ 周囲より +%3$s dB</string>
+    <string name="timer_feedback_action">まずゲインを下げる。続くならこの帯域を狭く削る</string>
+    <string name="timer_feedback_last">直前に出た: %1$s Hz（%2$s ／ %3$s 帯域）</string>
+    <string name="timer_feedback_clear">消す</string>
+    <string name="timer_feedback_idle">ハウリングは検出されていません</string>
+
     <string name="show_mode_title">本番モード</string>
     <string name="show_mode_on">入っています。抜けると元の状態に戻します</string>
     <string name="show_mode_off">何を止めるかは下で選べます</string>

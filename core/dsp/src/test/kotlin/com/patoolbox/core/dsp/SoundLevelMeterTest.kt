@@ -152,6 +152,73 @@ class SoundLevelMeterTest {
     }
 
     @Test
+    fun `移動平均は定常音では瞬時値に一致する`() {
+        val signal = sineAtLevel(1000.0, levelDbFs = -20.0, lengthSamples = TEST_SAMPLE_RATE * 2)
+
+        val meter = meter()
+        meter.process(signal)
+
+        assertThat(meter.slidingLeqDb(0.5)).isWithin(0.1).of(-20.0)
+    }
+
+    @Test
+    fun `移動平均は窓に入る過去を引きずる`() {
+        // 1秒 -10dB のあと 0.25秒 -40dB。
+        // 0.5秒窓なら半分ずつ入るのでエネルギー平均、0.1秒窓なら静かな方だけになる
+        val loud = sineAtLevel(1000.0, levelDbFs = -10.0, lengthSamples = TEST_SAMPLE_RATE)
+        val quiet = sineAtLevel(1000.0, levelDbFs = -40.0, lengthSamples = TEST_SAMPLE_RATE / 4)
+
+        val meter = meter()
+        meter.process(loud)
+        meter.process(quiet)
+
+        val halfAndHalf = powerToDb((dbToPower(-10.0) + dbToPower(-40.0)) / 2.0)
+        assertThat(meter.slidingLeqDb(0.5)).isWithin(0.3).of(halfAndHalf)
+        assertThat(meter.slidingLeqDb(0.1)).isWithin(0.5).of(-40.0)
+    }
+
+    @Test
+    fun `移動平均に校正オフセットが乗る`() {
+        val signal = sineAtLevel(1000.0, levelDbFs = -20.0, lengthSamples = TEST_SAMPLE_RATE)
+
+        val meter = meter(offsetDb = 120.0)
+        meter.process(signal)
+
+        assertThat(meter.slidingLeqDb(0.5)).isWithin(0.1).of(100.0)
+    }
+
+    @Test
+    fun `移動平均の窓は最長でも上限で頭打ちになる`() {
+        // 上限を超える窓を渡しても、ためてある範囲で計算して落ちないこと
+        val signal = sineAtLevel(1000.0, levelDbFs = -20.0, lengthSamples = TEST_SAMPLE_RATE * 3)
+
+        val meter = meter()
+        meter.process(signal)
+
+        val atLimit = meter.slidingLeqDb(SoundLevelMeter.MAX_SLIDING_WINDOW_SECONDS)
+        val overLimit = meter.slidingLeqDb(SoundLevelMeter.MAX_SLIDING_WINDOW_SECONDS * 10)
+        assertThat(overLimit).isWithin(0.001).of(atLimit)
+    }
+
+    @Test
+    fun `移動平均はresetで捨てられる`() {
+        val loud = sineAtLevel(1000.0, levelDbFs = -6.0, lengthSamples = TEST_SAMPLE_RATE)
+        val quiet = sineAtLevel(1000.0, levelDbFs = -30.0, lengthSamples = TEST_SAMPLE_RATE)
+
+        val meter = meter()
+        meter.process(loud)
+        meter.reset()
+        meter.process(quiet)
+
+        assertThat(meter.slidingLeqDb(2.0)).isWithin(0.3).of(-30.0)
+    }
+
+    @Test
+    fun `測定前の移動平均は値なしを返す`() {
+        assertThat(meter().slidingLeqDb(0.5)).isNegativeInfinity()
+    }
+
+    @Test
     fun `入力バッファを書き換えない`() {
         val signal = sineAtLevel(1000.0, levelDbFs = -20.0, lengthSamples = 1024)
         val copy = signal.copyOf()

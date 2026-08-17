@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
+import com.patoolbox.core.model.ToolId
 
 /**
  * バックアップと復元。
@@ -63,6 +64,7 @@ fun BackupScreen(
     ) { uri -> confirmRestore = uri }
 
     BusinessScaffold(
+        tool = ToolId.CLOUD_BACKUP,
         title = stringResource(R.string.backup_title),
         onBack = onBack,
         proStatus = uiState.proStatus,

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -18,10 +19,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.calc.Intermodulation
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.model.ToolId
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * ワイヤレス周波数調整。
@@ -57,18 +56,11 @@ fun WirelessScreen(
     val dimens = LocalPaDimens.current
     var input by rememberSaveable { mutableStateOf("") }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.wireless_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.WIRELESS_COORD,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.wireless_title),
     ) { innerPadding ->
         if (!uiState.proStatus.isPro) {
             Column(
@@ -80,7 +72,7 @@ fun WirelessScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         Column(

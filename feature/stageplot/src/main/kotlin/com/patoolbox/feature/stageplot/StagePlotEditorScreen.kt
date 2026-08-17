@@ -17,10 +17,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +34,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.StagePlot
 import com.patoolbox.core.model.StageSymbol
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.model.ToolId
+import com.patoolbox.core.ui.component.PaToolScaffold
 
 /**
  * ステージプロットの編集。
@@ -64,36 +63,29 @@ fun StagePlotEditorScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(uiState.plot?.name ?: stringResource(R.string.stageplot_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-                actions = {
-                    TextButton(onClick = { showDetails = true }) {
-                        Text(stringResource(R.string.stageplot_details))
-                    }
-                    if (uiState.proStatus.isPro) {
-                        TextButton(
-                            onClick = { createPdfLauncher.launch(viewModel.suggestedFileName()) },
-                        ) {
-                            Text(stringResource(R.string.stageplot_export))
-                        }
-                    }
-                },
-            )
+    PaToolScaffold(
+        tool = ToolId.STAGE_PLOT,
+        onBack = onBack,
+        modifier = modifier,
+        title = uiState.plot?.name ?: stringResource(R.string.stageplot_title),
+        actions = {
+            TextButton(onClick = { showDetails = true }) {
+                Text(stringResource(R.string.stageplot_details))
+            }
+            if (uiState.proStatus.isPro) {
+                TextButton(
+                    onClick = { createPdfLauncher.launch(viewModel.suggestedFileName()) },
+                ) {
+                    Text(stringResource(R.string.stageplot_export))
+                }
+            }
         },
     ) { innerPadding ->
         val plot = uiState.plot
         if (plot == null) {
             // 削除された図を開いたまま戻ってきた場合
             LaunchedEffect(Unit) { onBack() }
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         Column(

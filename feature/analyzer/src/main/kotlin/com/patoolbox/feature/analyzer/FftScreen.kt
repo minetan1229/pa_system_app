@@ -12,16 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,11 +28,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
+import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.dsp.OctaveSmoothing
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.CalibrationBadge
+import com.patoolbox.core.ui.component.ChartLegend
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
+import com.patoolbox.core.ui.component.PaToolScaffold
 import com.patoolbox.core.ui.component.SpectrumChart
 import com.patoolbox.core.ui.component.SpectrumRange
 import com.patoolbox.core.ui.component.formatHz
@@ -50,10 +49,13 @@ import com.patoolbox.core.ui.R as CoreUiR
  * こちらは「その山が何 Hz なのか」を 1Hz 単位で当てる道具。
  * ハウリングの芽、電源ハムの次数、共振の中心を特定するときに使う。
  *
+ * 大表示はレベル（dB）。現場で最初に判断するのは
+ * 「対処が要るほど出ているのか」で、周波数はその次に要る情報なので、
+ * 数字の大小関係を判断の順番に合わせてある。
+ *
  * 画面は縦にスクロールする。図・操作・読み取りを全部詰めると小さい端末では
  * 縦に収まらず、以前は一番下の開始ボタンが画面外に出て操作できなくなっていた。
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FftScreen(
     onBack: () -> Unit,
@@ -64,22 +66,15 @@ fun FftScreen(
     val dimens = LocalPaDimens.current
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.fft_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.FFT,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.fft_title),
     ) { innerPadding ->
         if (!uiState.proStatus.isPro) {
             AnalyzerProNotice(modifier = Modifier.padding(innerPadding))
-            return@Scaffold
+            return@PaToolScaffold
         }
 
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {
@@ -96,26 +91,53 @@ fun FftScreen(
                     .padding(horizontal = dimens.gutter),
                 verticalArrangement = Arrangement.spacedBy(dimens.gutterSmall),
             ) {
+                // 大きいのはレベル。周波数はその下に添える。
+                // 「何dB出ているか」→「それは何Hzか」の順で読めるようにしてある
                 BigReadout(
                     value = if (uiState.hasReading) {
-                        "%.0f".format(uiState.peakFrequencyHz)
+                        "%.1f".format(uiState.peakLevelDb)
                     } else {
-                        "----"
+                        "--.-"
                     },
-                    unit = if (uiState.hasReading) "Hz" else null,
-                    label = if (uiState.hasReading) {
-                        "%.1f %s".format(uiState.peakLevelDb, uiState.unitLabel)
+                    unit = uiState.unitLabel,
+                    label = stringResource(R.string.fft_level_label),
+                    caption = if (uiState.hasReading) {
+                        stringResource(
+                            R.string.fft_peak_caption,
+                            formatHz(uiState.peakFrequencyHz),
+                            uiState.peakNote?.let { "（$it）" }.orEmpty(),
+                        )
                     } else {
                         null
                     },
-                    caption = stringResource(R.string.fft_peak_caption),
-                    maxFontSize = 64.sp,
+                    maxFontSize = 72.sp,
                     modifier = Modifier.padding(vertical = dimens.gutterSmall),
                 )
 
                 // 表示している dB には常に校正オフセットが乗っている。
                 // どの状態で読んでいるのかを隠さないため、図の手前に必ず出す
                 CalibrationBadge(profile = uiState.calibration)
+
+                ChartLegend(
+                    entries = buildList {
+                        add(
+                            stringResource(R.string.analyzer_legend_live) to
+                                MaterialTheme.colorScheme.primary,
+                        )
+                        if (uiState.peakHold) {
+                            add(
+                                stringResource(R.string.analyzer_legend_peak) to
+                                    MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+                        if (uiState.cursorHz != null) {
+                            add(
+                                stringResource(R.string.analyzer_legend_cursor) to
+                                    MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
+                )
 
                 SpectrumChart(
                     columnsDb = uiState.columnsDb,
@@ -143,14 +165,37 @@ fun FftScreen(
                             ),
                         )
                     }
+                    // 保存は測定中に一番よく押す操作なので、設定の奥ではなく図のすぐ下に置く
+                    OutlinedButton(
+                        onClick = viewModel::savePeaks,
+                        enabled = uiState.topPeaks.isNotEmpty(),
+                        modifier = Modifier.weight(1f).heightIn(min = dimens.minTouch),
+                    ) {
+                        Text(stringResource(R.string.analyzer_save_peaks))
+                    }
+                }
+
+                // ピーク保持は「押しっぱなしで残す」表示なので、
+                // 入り切りと消去を隣り合わせにして状態が分かるようにする
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    FilterChip(
+                        selected = uiState.peakHold,
+                        onClick = viewModel::togglePeakHold,
+                        label = { Text(stringResource(R.string.analyzer_peak_hold)) },
+                    )
                     if (uiState.peakHold) {
-                        OutlinedButton(
-                            onClick = viewModel::clearPeaks,
-                            modifier = Modifier.heightIn(min = dimens.minTouch),
-                        ) {
+                        TextButton(onClick = viewModel::clearPeaks) {
                             Text(stringResource(R.string.analyzer_clear_peaks))
                         }
                     }
+                    FilterChip(
+                        selected = uiState.showHarmonics,
+                        onClick = viewModel::toggleHarmonics,
+                        label = { Text(stringResource(R.string.analyzer_harmonics)) },
+                    )
                 }
 
                 CursorCard(
@@ -162,6 +207,12 @@ fun FftScreen(
                 )
 
                 PeakList(peaks = uiState.topPeaks, unitLabel = uiState.unitLabel)
+
+                SavedPeaks(
+                    saved = uiState.savedPeaks,
+                    unitLabel = uiState.unitLabel,
+                    onClear = viewModel::clearSavedPeaks,
+                )
 
                 uiState.error?.let { error ->
                     Text(
@@ -220,16 +271,6 @@ fun FftScreen(
                             label = { Text(span.label) },
                         )
                     }
-                    FilterChip(
-                        selected = uiState.peakHold,
-                        onClick = viewModel::togglePeakHold,
-                        label = { Text(stringResource(R.string.analyzer_peak_hold)) },
-                    )
-                    FilterChip(
-                        selected = uiState.showHarmonics,
-                        onClick = viewModel::toggleHarmonics,
-                        label = { Text(stringResource(R.string.analyzer_harmonics)) },
-                    )
                 }
 
                 Text(
@@ -268,6 +309,7 @@ private fun CursorCard(
     unitLabel: String,
     onClear: () -> Unit,
 ) {
+    val dimens = LocalPaDimens.current
     if (cursorHz == null) {
         Text(
             text = stringResource(R.string.analyzer_cursor_hint),
@@ -277,14 +319,9 @@ private fun CursorCard(
         return
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
-    ) {
+    PaCard(modifier = Modifier.fillMaxWidth(), contentPadding = dimens.spaceMd) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -341,24 +378,79 @@ private fun PeakList(peaks: List<AnalyzerPeak>, unitLabel: String) {
         return
     }
     for (peak in peaks) {
+        PeakRow(peak = peak, unitLabel = unitLabel)
+    }
+}
+
+/**
+ * 控えた読みの一覧。
+ *
+ * 新しいものを上に積む。リハで何度か測って比べる使い方が前提なので、
+ * 直前に押したものが一番上に出た方が見比べやすい。
+ */
+@Composable
+private fun SavedPeaks(
+    saved: List<SavedPeakSet>,
+    unitLabel: String,
+    onClear: () -> Unit,
+) {
+    if (saved.isEmpty()) return
+    val dimens = LocalPaDimens.current
+
+    PaCard(modifier = Modifier.fillMaxWidth(), contentPadding = dimens.spaceMd) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = buildString {
-                    append("${formatHz(peak.frequencyHz)}Hz")
-                    peak.noteName?.let { append("  $it") }
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = "%.1f %s".format(peak.levelDb, unitLabel),
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(R.string.analyzer_saved_title),
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            TextButton(onClick = onClear) {
+                Text(stringResource(R.string.analyzer_saved_clear))
+            }
         }
+
+        for (entry in saved) {
+            Text(
+                text = stringResource(R.string.analyzer_saved_entry, entry.label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            for (peak in entry.peaks) {
+                PeakRow(peak = peak, unitLabel = unitLabel)
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.analyzer_saved_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun PeakRow(peak: AnalyzerPeak, unitLabel: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = buildString {
+                append("${formatHz(peak.frequencyHz)}Hz")
+                peak.noteName?.let { append("  $it") }
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = "%.1f %s".format(peak.levelDb, unitLabel),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

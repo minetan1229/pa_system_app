@@ -17,12 +17,12 @@ import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
 import com.patoolbox.core.model.ProStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * FFT の点数。細かく見るほど時間分解能が落ちるという、動かせない交換関係がある。
@@ -70,6 +70,20 @@ data class AnalyzerPeak(
     val noteName: String?,
 )
 
+/**
+ * 控えておいた読み。
+ *
+ * リハでハウった周波数を本番前に見返す、卓の EQ に入れる値をメモする、
+ * といった使い方を想定している。画面を離れると消えるので、
+ * 残したいものは書き写してもらう前提（保存先を作るとどこに何があるか分からなくなる）。
+ *
+ * @param label 何回目の保存か。並べたときに順番が分かればよいので番号だけ持つ
+ */
+data class SavedPeakSet(
+    val label: Int,
+    val peaks: List<AnalyzerPeak>,
+)
+
 data class AnalyzerUiState(
     val isMeasuring: Boolean = false,
     /**
@@ -83,6 +97,8 @@ data class AnalyzerUiState(
     val peakFrequencyHz: Double = 0.0,
     val peakLevelDb: Double = 0.0,
     val topPeaks: List<AnalyzerPeak> = emptyList(),
+    /** 「ピーク保存」で控えた読み。新しいものが先頭 */
+    val savedPeaks: List<SavedPeakSet> = emptyList(),
     /** 利用者が置いたカーソル。null なら置いていない */
     val cursorHz: Double? = null,
     val cursorLevelDb: Double = Double.NEGATIVE_INFINITY,
@@ -115,6 +131,10 @@ data class AnalyzerUiState(
 
     /** カーソルの音名。ハウリングの帯域を人に伝えるときに使う */
     val cursorNote: String? get() = cursorHz?.let { NoteNames.fromFrequency(it)?.displayName }
+
+    /** 一番出ている成分の音名。大表示の下に添える */
+    val peakNote: String?
+        get() = if (hasReading) NoteNames.fromFrequency(peakFrequencyHz)?.displayName else null
 }
 
 /**
@@ -260,6 +280,23 @@ class AnalyzerViewModel @Inject constructor(
 
     fun clearPeaks() {
         pipeline.clearPeakHold()
+    }
+
+    /**
+     * いま出ている山を控える。
+     *
+     * ピークホールドが入っていればその線の頂点、入っていなければ現在の山を残す。
+     * 何も読めていないときは何もしない（空の行が増えるだけで、後から見て意味が無い）。
+     */
+    fun savePeaks() {
+        val state = _uiState.value
+        if (state.topPeaks.isEmpty()) return
+        val entry = SavedPeakSet(label = state.savedPeaks.size + 1, peaks = state.topPeaks)
+        _uiState.update { it.copy(savedPeaks = listOf(entry) + it.savedPeaks) }
+    }
+
+    fun clearSavedPeaks() {
+        _uiState.update { it.copy(savedPeaks = emptyList()) }
     }
 
     override fun onCleared() {

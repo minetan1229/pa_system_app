@@ -13,10 +13,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,10 +28,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.dsp.NoteNames
+import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
-import com.patoolbox.core.ui.R as CoreUiR
+import com.patoolbox.core.ui.component.PaToolScaffold
 import kotlin.math.roundToInt
+import com.patoolbox.core.ui.R as CoreUiR
 
 @Composable
 fun TunerScreen(
@@ -65,18 +65,11 @@ internal fun TunerScreen(
 ) {
     val dimens = LocalPaDimens.current
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.tuner_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(CoreUiR.string.back))
-                    }
-                },
-            )
-        },
+    PaToolScaffold(
+        tool = ToolId.TUNER,
+        onBack = onBack,
+        modifier = modifier,
+        title = stringResource(R.string.tuner_title),
     ) { innerPadding ->
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {
             KeepScreenOn(enabled = uiState.isListening)
