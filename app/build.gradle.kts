@@ -27,8 +27,8 @@ android {
     defaultConfig {
         // 公開前に自分のドメインに合わせて変更する（applicationId は後から変えられない）
         applicationId = "com.patoolbox"
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
