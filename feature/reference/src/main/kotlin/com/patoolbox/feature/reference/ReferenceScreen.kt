@@ -4,10 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,9 +11,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import com.patoolbox.core.designsystem.component.PaUnderlineTabs
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PaToolScaffold
+import com.patoolbox.core.ui.identityColor
 
 /**
  * リファレンスのタブ。
@@ -26,6 +24,8 @@ import com.patoolbox.core.ui.component.PaToolScaffold
 enum class ReferenceTab(@param:StringRes val titleRes: Int, val tool: ToolId) {
     CONNECTOR(R.string.reference_tab_connector, ToolId.CONNECTOR_REF),
     FREQUENCY(R.string.reference_tab_frequency, ToolId.FREQ_CHART),
+    DEGRADATION(R.string.reference_tab_degradation, ToolId.SIGNAL_QUALITY),
+    SIGNAL(R.string.reference_tab_signal, ToolId.TEST_SIGNALS),
     TROUBLESHOOT(R.string.reference_tab_troubleshoot, ToolId.TROUBLESHOOT),
     GLOSSARY(R.string.reference_tab_glossary, ToolId.GLOSSARY),
 }
@@ -33,12 +33,13 @@ enum class ReferenceTab(@param:StringRes val titleRes: Int, val tool: ToolId) {
 fun ToolId.toReferenceTabOrNull(): ReferenceTab? = when (this) {
     ToolId.CONNECTOR_REF -> ReferenceTab.CONNECTOR
     ToolId.FREQ_CHART -> ReferenceTab.FREQUENCY
+    ToolId.SIGNAL_QUALITY -> ReferenceTab.DEGRADATION
+    ToolId.TEST_SIGNALS -> ReferenceTab.SIGNAL
     ToolId.TROUBLESHOOT -> ReferenceTab.TROUBLESHOOT
     ToolId.GLOSSARY -> ReferenceTab.GLOSSARY
     else -> null
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferenceScreen(
     initialTab: ReferenceTab,
@@ -47,6 +48,7 @@ fun ReferenceScreen(
 ) {
     val dimens = LocalPaDimens.current
     var selectedTab by rememberSaveable { mutableStateOf(initialTab) }
+    val titles = ReferenceTab.entries.map { stringResource(it.titleRes) }
 
     // タブごとに別のツール扱いにする。解説も色も切り替わるので、
     // 「いま結線図を見ているのか用語辞典を見ているのか」が上の帯で分かる
@@ -61,19 +63,20 @@ fun ReferenceScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            PrimaryTabRow(selectedTabIndex = selectedTab.ordinal) {
-                ReferenceTab.entries.forEach { tab ->
-                    Tab(
-                        selected = tab == selectedTab,
-                        onClick = { selectedTab = tab },
-                        text = { Text(stringResource(tab.titleRes)) },
-                    )
-                }
-            }
+            // 下線の色はいま開いているタブのツール色。
+            // 上の識別帯と同じ色になるので、タブと画面の対応が目で追える
+            PaUnderlineTabs(
+                titles = titles,
+                selectedIndex = selectedTab.ordinal,
+                onSelect = { index -> selectedTab = ReferenceTab.entries[index] },
+                accent = selectedTab.tool.identityColor(),
+            )
 
             when (selectedTab) {
                 ReferenceTab.CONNECTOR -> ConnectorTab(gutter = dimens.gutter)
                 ReferenceTab.FREQUENCY -> FrequencyTab(gutter = dimens.gutter)
+                ReferenceTab.DEGRADATION -> DegradationTab(gutter = dimens.gutter)
+                ReferenceTab.SIGNAL -> SignalTab(gutter = dimens.gutter)
                 ReferenceTab.TROUBLESHOOT -> TroubleshootTab(
                     gutter = dimens.gutter,
                     minTouch = dimens.minTouch,

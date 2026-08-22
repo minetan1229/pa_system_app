@@ -5,21 +5,21 @@ import org.junit.Test
 
 /**
  * ツールカタログの不変条件を守るためのテスト。
- * 35個のテーブルは手で編集するので、うっかり壊したらここで落ちるようにしている。
+ * テーブルは手で編集するので、うっかり壊したらここで落ちるようにしている。
  */
 class ToolIdTest {
 
     @Test
-    fun `カタログは36ツールある`() {
-        assertThat(ToolId.entries).hasSize(36)
+    fun `カタログは38ツールある`() {
+        assertThat(ToolId.entries).hasSize(38)
     }
 
     @Test
-    fun `無料18 Pro18 の線引きを保つ`() {
+    fun `無料20 Pro18 の線引きを保つ`() {
         val free = ToolId.entries.count { it.access != ToolAccess.PRO }
         val pro = ToolId.entries.count { it.access == ToolAccess.PRO }
 
-        assertThat(free).isEqualTo(18)
+        assertThat(free).isEqualTo(20)
         assertThat(pro).isEqualTo(18)
     }
 

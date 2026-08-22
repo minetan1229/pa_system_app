@@ -12,28 +12,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.patoolbox.core.designsystem.component.PaPill
+import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.model.ToolAccess
 import com.patoolbox.core.ui.R
 
-/** Pro 専用 / 無料（制限あり）を示す小さなチップ。 */
+/**
+ * Pro 専用 / 無料（制限あり）を示す小さなチップ。
+ *
+ * 状態を示す札は [PaPill] に統一している。ここで独自に色を組まないのは、
+ * 4つのテーマぶんの出し分けを1か所（[PaTone]）に集めておくため。
+ */
 @Composable
 fun AccessChip(
     access: ToolAccess,
     modifier: Modifier = Modifier,
 ) {
     when (access) {
-        ToolAccess.PRO -> PaChip(
+        ToolAccess.PRO -> PaPill(
             text = stringResource(R.string.badge_pro),
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            tone = PaTone.BRAND,
             modifier = modifier,
         )
 
-        ToolAccess.FREE_LIMITED -> PaChip(
+        ToolAccess.FREE_LIMITED -> PaPill(
             text = stringResource(R.string.badge_free_limited),
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            borderColor = MaterialTheme.colorScheme.outlineVariant,
+            tone = PaTone.NEUTRAL,
             modifier = modifier,
         )
 
@@ -45,10 +49,9 @@ fun AccessChip(
 /** 未実装ツールに付ける「準備中」チップ。 */
 @Composable
 fun ComingSoonChip(modifier: Modifier = Modifier) {
-    PaChip(
+    PaPill(
         text = stringResource(R.string.coming_soon),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        tone = PaTone.WARNING,
         modifier = modifier,
     )
 }

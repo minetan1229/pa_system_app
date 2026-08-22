@@ -27,10 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.patoolbox.core.designsystem.component.contrastingInk
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.reference.HelpTopics
@@ -88,7 +88,7 @@ fun PaToolScaffold(
                         HelpAction(topic = topic)
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                 )
                 ToolIdentityBar(tool = tool, accent = accent, roleLine = roleLine)
@@ -136,7 +136,7 @@ fun ToolIdentityBar(
                 Text(
                     text = tool.badge,
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (accent.luminance() > 0.5f) Color.Black else Color.White,
+                    color = contrastingInk(accent),
                     maxLines = 1,
                 )
             }
@@ -166,7 +166,7 @@ fun ToolIdentityBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(3.dp)
+                .height(dimens.railWidth)
                 .background(accent),
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

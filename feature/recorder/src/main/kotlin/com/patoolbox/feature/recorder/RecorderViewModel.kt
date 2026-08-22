@@ -59,17 +59,23 @@ class RecorderViewModel @Inject constructor(
     private val playbackEngine: AudioPlaybackEngine,
     private val repository: RecordingRepository,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    proGate: ProGate,
+    private val proGate: ProGate,
 ) : ViewModel() {
 
+    /**
+     * 画面に出す状態の本体。
+     *
+     * Pro の状態も必ずここに書き戻す。[uiState] を作るときの combine で
+     * 混ぜるだけにすると、画面には Pro と出るのに [startRecording] が見る
+     * `local.value.proStatus` は Free のままで、録音ボタンが無反応になる。
+     */
     private val local = MutableStateFlow(RecorderUiState())
 
     val uiState: StateFlow<RecorderUiState> = combine(
         local,
         repository.observeAll(),
-        proGate.proStatus,
-    ) { state, recordings, proStatus ->
-        state.copy(recordings = recordings, proStatus = proStatus)
+    ) { state, recordings ->
+        state.copy(recordings = recordings)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -82,6 +88,11 @@ class RecorderViewModel @Inject constructor(
     private var blocksSincePublish = 0
 
     init {
+        viewModelScope.launch {
+            proGate.proStatus.collect { status ->
+                local.update { it.copy(proStatus = status) }
+            }
+        }
         // 前回の録音が中断していると、行の無いファイルが残る
         viewModelScope.launch { withContext(ioDispatcher) { repository.pruneOrphans() } }
     }
@@ -93,7 +104,12 @@ class RecorderViewModel @Inject constructor(
     fun startRecording() {
         val state = local.value
         if (state.isRecording) return
-        if (!state.proStatus.isPro) return
+        // 黙って return しない。押しても何も起きない録音ボタンは、
+        // 利用者からは「壊れている」と区別がつかない
+        if (!state.proStatus.isPro) {
+            local.update { it.copy(error = "録音は Pro の機能です") }
+            return
+        }
         if (!captureEngine.hasPermission()) {
             local.update { it.copy(error = "マイクの許可がありません") }
             return

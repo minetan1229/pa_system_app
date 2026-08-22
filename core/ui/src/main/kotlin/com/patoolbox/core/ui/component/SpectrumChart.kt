@@ -9,10 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -78,6 +80,24 @@ private val GRID_FREQUENCIES = doubleArrayOf(
 )
 
 /**
+ * 図に立てる印。
+ *
+ * ハウリングしている周波数を波形の上で名指しするために使う。
+ * 山があること自体は波形で分かるが、「その山がハウリングだと判断された」ことは
+ * 波形には出ない。判断の結果は別のしるしで重ねる必要がある。
+ *
+ * @param active いま鳴っているか。止まったものは薄い点線にして、
+ *   「さっき鳴っていた場所」として残す
+ * @param weight 0〜1。線の太さに反映する。長く鳴っているものほど太くする用途
+ */
+data class SpectrumMarker(
+    val frequencyHz: Double,
+    val label: String,
+    val active: Boolean = true,
+    val weight: Float = 1f,
+)
+
+/**
  * 対数周波数軸のスペクトラム図。
  *
  * 目盛りの数字を必ず出す。数字の無い波形は「山がある」ことしか伝えず、
@@ -88,6 +108,7 @@ private val GRID_FREQUENCIES = doubleArrayOf(
  * @param onCursorChange 触った位置の周波数を返す。null を渡すと触れない図になる
  * @param harmonics カーソルの倍音を何次まで薄く示すか。0 なら出さない。
  *   ハムは 50/100/150Hz と等間隔に並ぶので、基音に合わせると一目で見分けられる
+ * @param markers 波形に重ねる印。ハウリング検出の結果を出すのに使う
  */
 @Composable
 fun SpectrumChart(
@@ -99,6 +120,7 @@ fun SpectrumChart(
     cursorHz: Double? = null,
     onCursorChange: ((Double?) -> Unit)? = null,
     harmonics: Int = 0,
+    markers: List<SpectrumMarker> = emptyList(),
     showAxis: Boolean = true,
     height: Dp = 240.dp,
 ) {
@@ -110,6 +132,13 @@ fun SpectrumChart(
     val gridColor = MaterialTheme.colorScheme.outlineVariant
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val labelStyle = remember(labelColor) { TextStyle(fontSize = 9.sp, color = labelColor) }
+
+    // 印の色。いま鳴っているものは警告色、止まったものは無彩色に落とす。
+    // 色だけで区別せず、線種（実線／点線）でも分けているのは暗所モードのため
+    val markerColor = MaterialTheme.colorScheme.error
+    val markerPastColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val markerInkOnActive = MaterialTheme.colorScheme.onError
+    val markerLabelBackground = MaterialTheme.colorScheme.surface
 
     val density = LocalDensity.current
     val axisWidth = if (showAxis) with(density) { AXIS_WIDTH.toPx() } else 0f
@@ -161,6 +190,22 @@ fun SpectrumChart(
             drawTrace(peakHoldDb, range, axisWidth, plotWidth, plotHeight, peakColor, null, PEAK_WIDTH)
         }
 
+        if (markers.isNotEmpty() && maxHz > minHz) {
+            drawMarkers(
+                markers = markers,
+                minHz = minHz,
+                maxHz = maxHz,
+                axisWidth = axisWidth,
+                plotWidth = plotWidth,
+                plotHeight = plotHeight,
+                activeColor = markerColor,
+                pastColor = markerPastColor,
+                activeInk = markerInkOnActive,
+                labelBackground = markerLabelBackground,
+                textMeasurer = textMeasurer,
+            )
+        }
+
         if (cursorHz != null && maxHz > minHz) {
             // 倍音を先に薄く引く。基音の線が倍音に埋もれないよう順番を守る
             for (order in 2..harmonics) {
@@ -199,6 +244,91 @@ private fun xToHz(x: Float, axisWidth: Float, width: Float, minHz: Double, maxHz
     if (plotWidth <= 0f || maxHz <= minHz) return minHz
     val t = ((x - axisWidth) / plotWidth).coerceIn(0f, 1f)
     return minHz * exp(t.toDouble() * ln(maxHz / minHz))
+}
+
+/**
+ * ハウリングの印を波形の上に立てる。
+ *
+ * 線だけでは「どこか」しか伝わらないので、**周波数の数字を必ず添える**。
+ * 数字が無いと、図を見た人が卓の EQ に入れる値を決められない。
+ *
+ * ラベルは近いものどうしが重なるので、上から3段に振り分ける。
+ * 重ねて描くと、2本が近いとき（1/6 オクターブ差など）にどちらも読めなくなる。
+ */
+private fun DrawScope.drawMarkers(
+    markers: List<SpectrumMarker>,
+    minHz: Double,
+    maxHz: Double,
+    axisWidth: Float,
+    plotWidth: Float,
+    plotHeight: Float,
+    activeColor: Color,
+    pastColor: Color,
+    activeInk: Color,
+    labelBackground: Color,
+    textMeasurer: TextMeasurer,
+) {
+    val span = ln(maxHz / minHz)
+    // 段ごとの「ここまで文字が埋まっている」x。次の段へ送るかの判定に使う
+    val rowRightEdge = FloatArray(MARKER_LABEL_ROWS) { -1f }
+
+    markers
+        .sortedBy { it.frequencyHz }
+        .forEach { marker ->
+            val hz = marker.frequencyHz.coerceIn(minHz, maxHz)
+            val x = axisWidth + (plotWidth * ln(hz / minHz) / span).toFloat()
+            val color = if (marker.active) activeColor else pastColor
+
+            val strokeWidth = if (marker.active) {
+                MARKER_WIDTH + MARKER_WIDTH_PER_WEIGHT * marker.weight.coerceIn(0f, 1f)
+            } else {
+                MARKER_PAST_WIDTH
+            }
+
+            drawLine(
+                color = if (marker.active) color else color.copy(alpha = MARKER_PAST_ALPHA),
+                start = Offset(x, 0f),
+                end = Offset(x, plotHeight),
+                strokeWidth = strokeWidth,
+                pathEffect = if (marker.active) {
+                    null
+                } else {
+                    PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
+                },
+            )
+
+            val layout = textMeasurer.measure(
+                text = marker.label,
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    color = if (marker.active) activeInk else pastColor,
+                ),
+            )
+
+            // 線の右に置く。右端に寄りすぎたら左へ返す
+            var labelX = x + MARKER_LABEL_GAP
+            if (labelX + layout.size.width > axisWidth + plotWidth) {
+                labelX = x - MARKER_LABEL_GAP - layout.size.width
+            }
+
+            val row = (0 until MARKER_LABEL_ROWS)
+                .firstOrNull { labelX > rowRightEdge[it] }
+                ?: (0 until MARKER_LABEL_ROWS).minBy { rowRightEdge[it] }
+            rowRightEdge[row] = labelX + layout.size.width + MARKER_LABEL_GAP
+
+            val labelY = MARKER_LABEL_GAP + row * (layout.size.height + MARKER_LABEL_GAP)
+
+            drawRoundRect(
+                color = if (marker.active) activeColor else labelBackground,
+                topLeft = Offset(labelX - 3f, labelY - 2f),
+                size = Size(
+                    layout.size.width + 6f,
+                    layout.size.height + 4f,
+                ),
+                cornerRadius = CornerRadius(3f, 3f),
+            )
+            drawText(textLayoutResult = layout, topLeft = Offset(labelX, labelY))
+        }
 }
 
 private fun DrawScope.drawTrace(
@@ -321,3 +451,13 @@ private const val PEAK_WIDTH = 1.5f
 private const val CURSOR_WIDTH = 2f
 private const val CURSOR_DOT_RADIUS = 6f
 private const val HARMONIC_ALPHA = 0.35f
+
+/** ハウリングの印 */
+private const val MARKER_WIDTH = 2f
+private const val MARKER_WIDTH_PER_WEIGHT = 3f
+private const val MARKER_PAST_WIDTH = 1.5f
+private const val MARKER_PAST_ALPHA = 0.55f
+private const val MARKER_LABEL_GAP = 4f
+
+/** ラベルを振り分ける段数。4段以上にすると波形そのものが隠れる */
+private const val MARKER_LABEL_ROWS = 3

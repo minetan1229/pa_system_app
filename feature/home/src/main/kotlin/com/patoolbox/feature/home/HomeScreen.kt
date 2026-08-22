@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -37,7 +38,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.patoolbox.core.designsystem.component.PaPill
 import com.patoolbox.core.designsystem.component.PaSectionHeader
+import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ProSource
 import com.patoolbox.core.model.ToolCategory
@@ -114,22 +117,27 @@ internal fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.home_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                },
-                actions = {
-                    TextButton(onClick = onSettingsClick) {
-                        Text(stringResource(R.string.home_settings))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-            )
+            // 上帯は面の色（白）にして下端に線を引く。背景と同色にすると
+            // スクロールしたときにカードが帯の下に潜って見えず、境界が消える
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.home_title),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    },
+                    actions = {
+                        TextButton(onClick = onSettingsClick) {
+                            Text(stringResource(R.string.home_settings))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
         },
     ) { innerPadding ->
         LazyVerticalGrid(
@@ -147,7 +155,10 @@ internal fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceMd)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+                    modifier = Modifier.padding(top = dimens.spaceMd),
+                ) {
                     SearchField(query = uiState.query, onQueryChange = onQueryChange)
                     ProStatusLine(uiState)
                 }
@@ -209,8 +220,8 @@ internal fun HomeScreen(
 }
 
 /**
- * 検索。36枚のカードを縦に探すより打った方が速いので、常に一番上に置いている。
- * 枠線を消して面で見せるのは、押せる場所だと分かればよく、
+ * 検索。37枚のカードを縦に探すより打った方が速いので、常に一番上に置いている。
+ * 角丸を浅くして面で見せるのは、押せる場所だと分かればよく、
  * 入力欄そのものを主役にしたくないため。
  */
 @Composable
@@ -222,7 +233,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         singleLine = true,
         placeholder = { Text(stringResource(R.string.home_search_hint)) },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        shape = RoundedCornerShape(dimens.cornerLarge),
+        shape = RoundedCornerShape(dimens.cornerSmall),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -259,36 +270,27 @@ private fun SectionHeader(
     }
 }
 
+/**
+ * Pro の状態。
+ *
+ * ピルに統一しているのは、状態を示す札が画面ごとに違う形をしていると
+ * 「これは状態なのか操作なのか」が読み取れなくなるため。
+ */
 @Composable
 private fun ProStatusLine(
     uiState: HomeUiState,
     modifier: Modifier = Modifier,
 ) {
-    val dimens = LocalPaDimens.current
     val text = if (uiState.proStatus.isPro) {
         stringResource(R.string.home_pro_active, uiState.proStatus.source.label())
     } else {
         stringResource(R.string.home_pro_inactive)
     }
 
-    Text(
+    PaPill(
         text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = if (uiState.proStatus.isPro) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        modifier = modifier
-            .background(
-                color = if (uiState.proStatus.isPro) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
-                },
-                shape = RoundedCornerShape(dimens.cornerSmall),
-            )
-            .padding(horizontal = dimens.spaceMd, vertical = dimens.spaceSm),
+        tone = if (uiState.proStatus.isPro) PaTone.BRAND else PaTone.NEUTRAL,
+        modifier = modifier,
     )
 }
 

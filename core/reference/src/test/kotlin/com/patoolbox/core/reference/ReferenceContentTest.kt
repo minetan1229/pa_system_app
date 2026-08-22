@@ -178,8 +178,271 @@ class ReferenceContentTest {
     }
 
     @Test
-    fun `範囲外の周波数では何も返らない`() {
-        assertThat(FrequencyChart.tipsAt(19_999.0)).isEmpty()
+    fun `可聴域の外では何も返らない`() {
+        // 可聴域の上端（20kHz）は「切って良い帯域」として登録があるので、
+        // 範囲外の判定はその外側で確かめる
+        assertThat(FrequencyChart.tipsAt(25_000.0)).isEmpty()
+        assertThat(FrequencyChart.tipsAt(10.0)).isEmpty()
+    }
+
+    @Test
+    fun `帯域には必ず数字入りのワンアドバイスが付いている`() {
+        // 「ここが効く」だけでは卓の前で手が止まる。
+        // 中心周波数か量のどちらかは必ず数字で書く決まりにしている
+        FrequencyChart.ALL.forEach { instrument ->
+            instrument.tips.forEach { tip ->
+                assertWithMessage("${instrument.instrument} / ${tip.label}")
+                    .that(tip.advice)
+                    .isNotEmpty()
+                assertWithMessage("${instrument.instrument} / ${tip.label} に数字が無い")
+                    .that(tip.advice.any { it.isDigit() })
+                    .isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `楽器ごとに作り方が埋まっている`() {
+        FrequencyChart.ALL.forEach { instrument ->
+            assertWithMessage(instrument.instrument).that(instrument.role).isNotEmpty()
+            assertWithMessage(instrument.instrument).that(instrument.micTip).isNotEmpty()
+            assertWithMessage(instrument.instrument).that(instrument.dynamicsTip).isNotEmpty()
+            assertWithMessage(instrument.instrument).that(instrument.conflicts).isNotEmpty()
+            assertWithMessage(instrument.instrument).that(instrument.pitfalls).isNotEmpty()
+            assertWithMessage(instrument.instrument).that(instrument.tips).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `ハイパスは基音の上端より下に置かれている`() {
+        // 基音の下端に踏み込むハイパスは正しい（エレキギターの 100Hz、
+        // スピーチの 120Hz は、基音の最低音を捨てても成立するので現場の定番）。
+        // 一方で基音の範囲を丸ごと超えるハイパスは、その楽器を消す指示になる
+        FrequencyChart.ALL.forEach { instrument ->
+            val highPass = instrument.highPassHz ?: return@forEach
+            assertWithMessage("${instrument.instrument} のハイパスが基音を全部削っている")
+                .that(highPass.toDouble())
+                .isLessThan(instrument.fundamentalToHz)
+            assertWithMessage("${instrument.instrument} のハイパスが現実的な範囲を外れている")
+                .that(highPass)
+                .isIn(20..500)
+        }
+    }
+
+    @Test
+    fun `タムは3点が別々に載っている`() {
+        // 「タム」1枚だと、3点で同じ EQ を使い回す原因になる
+        val names = FrequencyChart.ALL.map { it.instrument }
+        assertThat(names).contains("ハイタム")
+        assertThat(names).contains("ロータム")
+        assertThat(names).contains("フロアタム")
+    }
+
+    @Test
+    fun `タムの重心はハイタムからフロアタムへ下がっていく`() {
+        val high = FrequencyChart.ALL.first { it.instrument == "ハイタム" }
+        val low = FrequencyChart.ALL.first { it.instrument == "ロータム" }
+        val floor = FrequencyChart.ALL.first { it.instrument == "フロアタム" }
+
+        assertThat(high.fundamentalFromHz).isGreaterThan(low.fundamentalFromHz)
+        assertThat(low.fundamentalFromHz).isGreaterThan(floor.fundamentalFromHz)
+    }
+
+    @Test
+    fun `全分類に楽器がある`() {
+        InstrumentGroup.entries.forEach { group ->
+            assertWithMessage(group.label).that(FrequencyChart.byGroup(group)).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `帯域チャートは症状の言葉でも引ける`() {
+        // 現場で打つのは楽器名ではなく症状のことが多い
+        assertThat(FrequencyChart.search("ピエゾ").map { it.instrument })
+            .contains("アコースティックギター（ピエゾ）")
+        assertThat(FrequencyChart.search("こもり")).isNotEmpty()
+        assertThat(FrequencyChart.search("")).hasSize(FrequencyChart.ALL.size)
+        assertThat(FrequencyChart.search("該当しない語句xyz")).isEmpty()
+    }
+
+    // --- 帯域辞書 ---
+
+    @Test
+    fun `帯域辞書は可聴域を隙間なく覆っている`() {
+        // 隙間があると「その周波数だけ引けない」ことになる。
+        // ハウリング検出から引かれる表なので、抜けは実害になる
+        val sorted = BandDictionary.ALL.sortedBy { it.fromHz }
+
+        assertThat(sorted.first().fromHz).isEqualTo(20.0)
+        assertThat(sorted.last().toHz).isEqualTo(20_000.0)
+        sorted.zipWithNext().forEach { (lower, upper) ->
+            assertWithMessage("${lower.label} と ${upper.label} の間に隙間がある")
+                .that(lower.toHz)
+                .isEqualTo(upper.fromHz)
+        }
+    }
+
+    @Test
+    fun `どの周波数からも帯域を引ける`() {
+        listOf(25.0, 60.0, 100.0, 250.0, 500.0, 1_000.0, 2_000.0, 3_150.0, 6_300.0, 12_000.0)
+            .forEach { hz ->
+                assertWithMessage("$hz Hz が引けない")
+                    .that(BandDictionary.at(hz))
+                    .isNotNull()
+            }
+        // 可聴域の外は引けない
+        assertThat(BandDictionary.at(10.0)).isNull()
+        assertThat(BandDictionary.at(25_000.0)).isNull()
+    }
+
+    @Test
+    fun `帯域辞書は数字で検索できる`() {
+        // アナライザやハウリング検出が出すのは数字なので、そのまま打てること
+        val hit = BandDictionary.search("250").single()
+
+        assertThat(hit.contains(250.0)).isTrue()
+        assertThat(BandDictionary.search("こもり")).isNotEmpty()
+        assertThat(BandDictionary.search("")).hasSize(BandDictionary.ALL.size)
+        assertThat(BandDictionary.search("該当しない語句xyz")).isEmpty()
+    }
+
+    @Test
+    fun `帯域辞書の上げ下げには数字が入っている`() {
+        // 「上げると太くなる」だけでは卓の前で手が止まる
+        BandDictionary.ALL.forEach { band ->
+            assertWithMessage("${band.label} の boost に数字が無い")
+                .that(band.boost.any { it.isDigit() })
+                .isTrue()
+            assertWithMessage("${band.label} の cut に数字が無い")
+                .that(band.cut.any { it.isDigit() })
+                .isTrue()
+            assertWithMessage(band.label).that(band.lives).isNotEmpty()
+            assertWithMessage(band.label).that(band.problems).isNotEmpty()
+            assertWithMessage(band.label).that(band.feedbackNote).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `ハウリングしやすい帯域が中域に集まっている`() {
+        // 実際に回るのは 300Hz〜5kHz。ここが空になる編集は事故
+        val high = BandDictionary.byRisk(FeedbackRisk.HIGH)
+
+        assertThat(high).isNotEmpty()
+        high.forEach { band ->
+            assertWithMessage("${band.label} が回りやすい扱いになっている")
+                .that(band.centerHz)
+                .isIn(com.google.common.collect.Range.closed(200.0, 8_000.0))
+        }
+    }
+
+    // --- テスト信号 ---
+
+    @Test
+    fun `テスト信号は全種類に項目がある`() {
+        TestSignalKind.entries.forEach { kind ->
+            assertWithMessage(kind.label).that(TestSignalGuide.byKind(kind)).isNotEmpty()
+        }
+        assertThat(TestSignalGuide.ALL.map { it.name }).containsNoDuplicates()
+    }
+
+    @Test
+    fun `ノイズの傾きが定義どおり`() {
+        // ここが狂うと図がそのまま嘘になる
+        fun slopeOf(name: String) = TestSignalGuide.ALL.first { it.name.startsWith(name) }
+            .slopeDbPerOctave
+
+        assertThat(slopeOf("ピンクノイズ")).isEqualTo(-3.0)
+        assertThat(slopeOf("ホワイトノイズ")).isEqualTo(0.0)
+        assertThat(slopeOf("ブラウンノイズ")).isEqualTo(-6.0)
+    }
+
+    @Test
+    fun `テスト信号には用途とレベルの目安がある`() {
+        TestSignalGuide.ALL.forEach { signal ->
+            assertWithMessage(signal.name).that(signal.soundsLike).isNotEmpty()
+            assertWithMessage(signal.name).that(signal.whatItIs).isNotEmpty()
+            assertWithMessage(signal.name).that(signal.useFor).isNotEmpty()
+            assertWithMessage(signal.name).that(signal.levelTip).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `機材を壊す信号には注意が書いてある`() {
+        // ホワイトノイズ・方形波・連続サイン波はツイータを焼く。
+        // 注意が消えた状態で配るわけにはいかない
+        listOf("ホワイトノイズ", "サイン波", "方形波").forEach { name ->
+            val signal = TestSignalGuide.ALL.first { it.name.startsWith(name) }
+            assertWithMessage(signal.name).that(signal.cautions).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `テスト信号は日本語でも英語でも引ける`() {
+        assertThat(TestSignalGuide.search("ピンク").map { it.name }).contains("ピンクノイズ")
+        assertThat(TestSignalGuide.search("pink").map { it.name }).contains("ピンクノイズ")
+        assertThat(TestSignalGuide.search("sweep")).isNotEmpty()
+        assertThat(TestSignalGuide.search("")).hasSize(TestSignalGuide.ALL.size)
+        assertThat(TestSignalGuide.search("該当しない語句xyz")).isEmpty()
+    }
+
+    // --- 音質劣化 ---
+
+    @Test
+    fun `劣化の項目名は重複しない`() {
+        assertThat(SignalDegradation.ALL.map { it.title }).containsNoDuplicates()
+    }
+
+    @Test
+    fun `劣化はすべての項目が症状と対処を持つ`() {
+        SignalDegradation.ALL.forEach { item ->
+            assertWithMessage(item.title).that(item.symptom).isNotEmpty()
+            assertWithMessage(item.title).that(item.mechanism).isNotEmpty()
+            assertWithMessage(item.title).that(item.amount).isNotEmpty()
+            assertWithMessage(item.title).that(item.fixes).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `劣化の量には数字が入っている`() {
+        // 「劣化する」だけでは対処する価値があるか判断できない
+        SignalDegradation.ALL.forEach { item ->
+            assertWithMessage("${item.title} の量に数字が無い")
+                .that(item.amount.any { it.isDigit() })
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `劣化は信号経路の全段に項目がある`() {
+        DegradationStage.entries.forEach { stage ->
+            assertWithMessage(stage.label).that(SignalDegradation.byStage(stage)).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `劣化は上流から下流の順に並んでいる`() {
+        // 並び順そのものが「上から確かめれば上流から確かめたことになる」という
+        // この画面の作りを支えているので、順番が崩れたら落とす
+        val ordinals = SignalDegradation.ALL.map { it.stage.ordinal }
+        assertThat(ordinals).isInOrder()
+    }
+
+    @Test
+    fun `不可逆な劣化が漏れていない`() {
+        // 現場で最も損失が大きいのは「後から直せない」種類。
+        // ここが空になる編集は事故なので見張る
+        val fatal = SignalDegradation.bySeverity(DegradationSeverity.FATAL).map { it.title }
+        assertThat(fatal).isNotEmpty()
+        assertThat(fatal).contains("入力段のクリップ（歪み）")
+    }
+
+    @Test
+    fun `劣化は症状の言葉で引ける`() {
+        assertThat(SignalDegradation.search("ブーン")).isNotEmpty()
+        assertThat(SignalDegradation.search("bluetooth").map { it.title })
+            .contains("Bluetooth 経由の再エンコード")
+        assertThat(SignalDegradation.search("")).hasSize(SignalDegradation.ALL.size)
+        assertThat(SignalDegradation.search("該当しない語句xyz")).isEmpty()
     }
 
     // --- トラブルシュート ---

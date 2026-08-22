@@ -4,6 +4,8 @@
 
     <string name="reference_tab_connector">結線</string>
     <string name="reference_tab_frequency">帯域</string>
+    <string name="reference_tab_degradation">劣化</string>
+    <string name="reference_tab_signal">信号</string>
     <string name="reference_tab_troubleshoot">切り分け</string>
     <string name="reference_tab_glossary">用語</string>
 
@@ -22,6 +24,7 @@
     <string name="reference_search">用語を検索</string>
     <string name="reference_no_result">一致するものがありません</string>
     <string name="reference_term_count">%1$d 語</string>
+    <string name="reference_count">%1$d 件</string>
 
     <!-- コネクタ図鑑 -->
     <string name="reference_connector_search">コネクタ・症状で検索</string>
@@ -29,4 +32,62 @@
     <string name="reference_connector_count">%1$d 件</string>
     <string name="reference_advanced_show">上級者向けの補足を開く</string>
     <string name="reference_advanced_hide">補足を閉じる</string>
+
+    <!-- 帯域チャート -->
+    <string name="reference_band_search">楽器・症状で検索</string>
+    <string name="reference_band_search_hint">ハイタム、こもる、ピエゾ、ハウリング など</string>
+    <string name="reference_band_group_all">すべて</string>
+    <string name="reference_band_advice">ワンアドバイス</string>
+    <string name="reference_band_mic">マイキング</string>
+    <string name="reference_band_dynamics">コンプ・ゲート</string>
+    <string name="reference_band_conflicts">ぶつかる相手</string>
+    <string name="reference_band_pitfalls">やりがちな失敗</string>
+    <string name="reference_band_highpass">ハイパス %1$d Hz</string>
+    <string name="reference_band_highpass_none">ハイパスなし</string>
+    <string name="reference_band_detail_show">この楽器の作り方を開く</string>
+    <string name="reference_band_detail_hide">閉じる</string>
+    <string name="reference_band_count">%1$d 楽器</string>
+    <string name="reference_band_tips_count">%1$d 帯域</string>
+
+    <!-- 音質劣化 -->
+    <string name="reference_degradation_search">症状・原因で検索</string>
+    <string name="reference_degradation_search_hint">ブーン、曇る、割れる、遅れる など</string>
+    <string name="reference_degradation_symptom">こう聞こえる</string>
+    <string name="reference_degradation_mechanism">何が起きているか</string>
+    <string name="reference_degradation_amount">どのくらい</string>
+    <string name="reference_degradation_fixes">いまできる手当て</string>
+    <string name="reference_degradation_prevention">次から防ぐ</string>
+    <string name="reference_degradation_show">対処を開く</string>
+    <string name="reference_degradation_hide">閉じる</string>
+    <string name="reference_degradation_stage_all">すべて</string>
+
+    <!-- 帯域辞書 -->
+    <string name="reference_band_mode_instrument">楽器から引く</string>
+    <string name="reference_band_mode_dictionary">帯域から引く</string>
+    <string name="reference_dict_search">周波数・症状で検索</string>
+    <string name="reference_dict_search_hint">250、こもる、刺さる、ハウリング など</string>
+    <string name="reference_dict_intro_title">数字から意味に戻る表</string>
+    <string name="reference_dict_intro_body">アナライザやハウリング検出が出した周波数を、そのまま数字で検索できます（例: 250）。上げ下げの目安は中心周波数・Q・量まで書いてあります</string>
+    <string name="reference_dict_title">%1$s 〜 %2$s Hz　%3$s</string>
+    <string name="reference_dict_center">中心 %1$s Hz</string>
+    <string name="reference_dict_lives">ここに居るもの</string>
+    <string name="reference_dict_boost">上げると</string>
+    <string name="reference_dict_cut">下げると</string>
+    <string name="reference_dict_problems">起きる問題</string>
+    <string name="reference_dict_feedback">ハウリング: %1$s</string>
+    <string name="reference_dict_check">耳での手がかり</string>
+
+    <!-- テスト信号 -->
+    <string name="reference_signal_search">信号名・用途で検索</string>
+    <string name="reference_signal_search_hint">ピンク、ホワイト、スイープ、1kHz など</string>
+    <string name="reference_signal_kind_all">すべて</string>
+    <string name="reference_signal_intro_title">スピーカーに入れる前に</string>
+    <string name="reference_signal_intro_body">同じ表示レベルでも、信号によってアンプとスピーカーの負担は10dB以上違います。ホワイトノイズ・方形波・連続サイン波はツイータを焼きます。必ず音量を下げてから出してください</string>
+    <string name="reference_signal_sounds">どう聞こえるか</string>
+    <string name="reference_signal_use">何に使うか</string>
+    <string name="reference_signal_in_app">このアプリでは</string>
+    <string name="reference_signal_what">何が起きているか</string>
+    <string name="reference_signal_level">レベルの決め方</string>
+    <string name="reference_signal_detail_show">仕組みとレベルの決め方を開く</string>
+    <string name="reference_signal_detail_hide">閉じる</string>
 </resources>

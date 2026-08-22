@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.patoolbox.core.designsystem.component.PaCard
+import com.patoolbox.core.designsystem.component.contrastingInk
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.R
@@ -61,7 +61,7 @@ fun ToolCard(
             .fillMaxWidth()
             .defaultMinSize(minHeight = dimens.toolCardMinHeight),
         onClick = onClick,
-        corner = dimens.cornerLarge,
+        corner = dimens.cardCorner,
         contentPadding = dimens.spaceMd,
         verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
     ) {
@@ -111,10 +111,11 @@ private fun ToolBadge(
     size: Dp,
     modifier: Modifier = Modifier,
 ) {
+    val dimens = LocalPaDimens.current
     Box(
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(dimens.cornerSmall))
             .background(accent),
         contentAlignment = Alignment.Center,
     ) {
@@ -123,7 +124,7 @@ private fun ToolBadge(
             style = MaterialTheme.typography.labelMedium,
             // 白か黒かは面の明るさで決める。固定にすると、
             // カテゴリ色のうち明るいもの（現場ドキュメントの橙）で読めなくなる
-            color = if (accent.luminance() > 0.5f) Color.Black else Color.White,
+            color = contrastingInk(accent),
             maxLines = 1,
             textAlign = TextAlign.Center,
         )

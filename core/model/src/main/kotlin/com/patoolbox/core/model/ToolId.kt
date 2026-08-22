@@ -48,8 +48,10 @@ enum class ToolId(
     COVERAGE_CALC(ToolCategory.CALC, ToolAccess.PRO, "COV", phase = 4, implemented = true),
     CONNECTOR_REF(ToolCategory.CALC, ToolAccess.FREE, "PIN", phase = 2, implemented = true),
     FREQ_CHART(ToolCategory.CALC, ToolAccess.FREE, "EQ", phase = 2, implemented = true),
+    SIGNAL_QUALITY(ToolCategory.CALC, ToolAccess.FREE, "劣化", phase = 2, implemented = true),
     TROUBLESHOOT(ToolCategory.CALC, ToolAccess.FREE_LIMITED, "FIX", phase = 2, implemented = true),
     GLOSSARY(ToolCategory.CALC, ToolAccess.FREE, "用語", phase = 2, implemented = true),
+    TEST_SIGNALS(ToolCategory.CALC, ToolAccess.FREE, "信号", phase = 2, implemented = true),
     WIRELESS_COORD(ToolCategory.CALC, ToolAccess.PRO, "MHz", phase = 4, implemented = true),
 
     // --- C. 現場ドキュメント ---

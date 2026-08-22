@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feedback_title">ハウリング検出</string>
-    <string name="feedback_none">発振している成分はありません</string>
+    <string name="feedback_none">いま発振している成分はありません</string>
     <string name="feedback_waiting">測定開始を押してください</string>
-    <string name="feedback_detected">%1$d 箇所で発振しています</string>
+    <string name="feedback_empty_body">開始すると、鳴った周波数を記録し続けます。止まったものも残るので、リハで拾って本番前に見返せます</string>
     <string name="feedback_band">%1$s Hz 帯</string>
-    <string name="feedback_detail">%1$s Hz / %2$s / 周囲より %3$s dB</string>
-    <string name="feedback_action">その帯域を Q 狭めで数dB切る</string>
+    <string name="feedback_action">その帯域を Q 狭め（1/3オクターブ以内）で 3〜6dB 切る</string>
+    <string name="feedback_note_title">EQ で追いかける前に</string>
     <string name="feedback_note">切りすぎると音が痩せます。3〜4箇所までにとどめ、まず配置とゲインを見直してください</string>
     <string name="feedback_pro">この機能は Pro で使えます</string>
+
+    <!-- 大表示 -->
+    <string name="feedback_worst_caption">累計 %1$s / %2$d 回 / 最長 %3$s</string>
+
+    <!-- 図 -->
+    <string name="feedback_legend_now">いま鳴っている</string>
+    <string name="feedback_legend_past">さっき鳴っていた</string>
+    <string name="feedback_legend_peak">ピーク保持</string>
+
+    <!-- 操作 -->
+    <string name="feedback_elapsed">記録 %1$s</string>
+    <string name="feedback_track_count">1秒以上 %1$d 本</string>
+    <string name="feedback_active_count">いま %1$d 本</string>
+    <string name="feedback_sensitivity">感度</string>
+    <string name="feedback_sort">並べ替え</string>
+    <string name="feedback_clear">履歴クリア</string>
+
+    <!-- 履歴の1行 -->
+    <string name="feedback_track_title">%1$s Hz / %2$s</string>
+    <string name="feedback_state_now">発振中</string>
+    <string name="feedback_state_past">停止</string>
+    <string name="feedback_stat_total">累計</string>
+    <string name="feedback_stat_longest">最長連続</string>
+    <string name="feedback_stat_episodes">回数</string>
+    <string name="feedback_stat_prominence">突出量</string>
+    <string name="feedback_stat_times">%1$d 回</string>
+
+    <string name="feedback_verdict_sustained">ひと続きで長く鳴っている。会場の共振かモニターの回り込み。EQ で切る価値が高い</string>
+    <string name="feedback_verdict_repeating">短く何度も出ている。演者が動いたときだけ回っている可能性。まず配置と持ち方を確認</string>
+    <string name="feedback_verdict_drifting">周波数が %1$s 〜 %2$s Hz と動いている。ハウリングではなく楽器や声の可能性がある</string>
+    <string name="feedback_verdict_short">まだ短い。芽の段階なので、ゲインを 1〜2dB 下げるだけで消えることが多い</string>
 </resources>

@@ -99,10 +99,14 @@
     <string name="tool_connector_ref_desc">XLR/TRS/Speakon/DI、ファンタム、グランドリフト</string>
     <string name="tool_freq_chart_title">楽器帯域チャート</string>
     <string name="tool_freq_chart_desc">基音・倍音・おいしい帯域・切る帯域のEQ早見表</string>
+    <string name="tool_signal_quality_title">音質劣化チェック</string>
+    <string name="tool_signal_quality_desc">どこで音が悪くなるか。ゲイン・ケーブル・無線・会場を上流から</string>
     <string name="tool_troubleshoot_title">トラブルシュート</string>
     <string name="tool_troubleshoot_desc">音が出ない/ハウる/ハムノイズを分岐式で切り分け</string>
     <string name="tool_glossary_title">PA用語辞典</string>
     <string name="tool_glossary_desc">用語と略語（FOH/AUX/DCAなど）を日英で引く</string>
+    <string name="tool_test_signals_title">テスト信号ガイド</string>
+    <string name="tool_test_signals_desc">ピンク/ホワイトノイズ・スイープの違いと使い分け</string>
     <string name="tool_wireless_coord_title">ワイヤレス周波数調整</string>
     <string name="tool_wireless_coord_desc">使用可能帯域、ch間隔、3次相互変調の衝突チェック</string>
 

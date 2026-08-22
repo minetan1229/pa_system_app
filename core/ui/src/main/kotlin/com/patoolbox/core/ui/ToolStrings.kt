@@ -32,8 +32,10 @@ val ToolId.titleRes: Int
         ToolId.COVERAGE_CALC -> R.string.tool_coverage_calc_title
         ToolId.CONNECTOR_REF -> R.string.tool_connector_ref_title
         ToolId.FREQ_CHART -> R.string.tool_freq_chart_title
+        ToolId.SIGNAL_QUALITY -> R.string.tool_signal_quality_title
         ToolId.TROUBLESHOOT -> R.string.tool_troubleshoot_title
         ToolId.GLOSSARY -> R.string.tool_glossary_title
+        ToolId.TEST_SIGNALS -> R.string.tool_test_signals_title
         ToolId.WIRELESS_COORD -> R.string.tool_wireless_coord_title
         ToolId.PATCH_SHEET -> R.string.tool_patch_sheet_title
         ToolId.STAGE_PLOT -> R.string.tool_stage_plot_title
@@ -73,8 +75,10 @@ val ToolId.descriptionRes: Int
         ToolId.COVERAGE_CALC -> R.string.tool_coverage_calc_desc
         ToolId.CONNECTOR_REF -> R.string.tool_connector_ref_desc
         ToolId.FREQ_CHART -> R.string.tool_freq_chart_desc
+        ToolId.SIGNAL_QUALITY -> R.string.tool_signal_quality_desc
         ToolId.TROUBLESHOOT -> R.string.tool_troubleshoot_desc
         ToolId.GLOSSARY -> R.string.tool_glossary_desc
+        ToolId.TEST_SIGNALS -> R.string.tool_test_signals_desc
         ToolId.WIRELESS_COORD -> R.string.tool_wireless_coord_desc
         ToolId.PATCH_SHEET -> R.string.tool_patch_sheet_desc
         ToolId.STAGE_PLOT -> R.string.tool_stage_plot_desc

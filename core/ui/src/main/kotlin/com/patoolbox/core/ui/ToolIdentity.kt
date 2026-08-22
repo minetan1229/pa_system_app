@@ -52,6 +52,9 @@ fun ToolId.identityColor(): Color {
         ToolId.METRONOME -> Color(0xFF6FA8A0)
         ToolId.RECORDER -> Color(0xFFCC3355)
 
+        // --- リファレンス: 劣化だけ色を分ける（症状から引く画面で、他のリファレンスと役割が違う） ---
+        ToolId.SIGNAL_QUALITY -> Color(0xFFB0453C)
+
         // --- それ以外はカテゴリ色に従う ---
         else -> category.accentColor()
     }

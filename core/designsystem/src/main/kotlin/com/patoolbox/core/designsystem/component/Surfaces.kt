@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 
@@ -76,8 +77,11 @@ fun PaSectionHeader(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceXs / 2)) {
             Text(
+                // 見出しは大きさではなく太さと余白で作る。
+                // 情報量の多い画面で見出しだけ大きいと、目が見出しに引っ張られて
+                // 中身が読まれなくなる（Cloudflare のダッシュボードと同じ考え方）
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (subtitle != null) {
@@ -110,8 +114,12 @@ fun PaStat(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
+            // 値は等幅。桁が変わるたびに横位置が動くと、
+            // 並べた札を上から読み比べられない
             text = value,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontFamily = FontFamily.Monospace,
+            ),
             color = valueColor,
         )
     }

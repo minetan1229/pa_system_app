@@ -2,6 +2,7 @@ package com.patoolbox.feature.reference
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -30,12 +29,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.patoolbox.core.designsystem.component.PaNotice
+import com.patoolbox.core.designsystem.component.PaPanel
+import com.patoolbox.core.designsystem.component.PaPill
+import com.patoolbox.core.designsystem.component.PaSectionHeader
+import com.patoolbox.core.designsystem.component.PaTone
+import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.reference.Connector
 import com.patoolbox.core.reference.ConnectorCategory
 import com.patoolbox.core.reference.Connectors
-import com.patoolbox.core.reference.FrequencyChart
 import com.patoolbox.core.reference.Glossary
-import com.patoolbox.core.reference.InstrumentBands
 import com.patoolbox.core.reference.TroubleshootFlow
 import com.patoolbox.core.reference.TroubleshootQuestion
 import com.patoolbox.core.reference.TroubleshootResolution
@@ -51,6 +54,7 @@ import com.patoolbox.core.reference.Troubleshooting
  */
 @Composable
 internal fun ConnectorTab(gutter: Dp) {
+    val dimens = LocalPaDimens.current
     var query by rememberSaveable { mutableStateOf("") }
     val results = remember(query) { Connectors.search(query) }
     val searching = query.isNotBlank()
@@ -64,13 +68,13 @@ internal fun ConnectorTab(gutter: Dp) {
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = gutter, vertical = 8.dp),
+                .padding(horizontal = gutter, vertical = dimens.spaceSm),
         )
 
         if (searching) {
             Text(
                 text = stringResource(R.string.reference_connector_count, results.size),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = gutter),
             )
@@ -88,12 +92,12 @@ internal fun ConnectorTab(gutter: Dp) {
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 start = gutter,
                 end = gutter,
-                bottom = gutter,
+                bottom = dimens.spaceXl,
             ),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
         ) {
             if (searching) {
                 items(results, key = { it.name }) { connector ->
@@ -104,14 +108,11 @@ internal fun ConnectorTab(gutter: Dp) {
 
             ConnectorCategory.entries.forEach { category ->
                 item(key = "cat_${category.name}") {
-                    Column {
-                        SectionHeader(category.label)
-                        Text(
-                            text = category.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    PaSectionHeader(
+                        title = category.label,
+                        subtitle = category.description,
+                        modifier = Modifier.padding(top = dimens.spaceSm),
+                    )
                 }
                 items(Connectors.byCategory(category), key = { it.name }) { connector ->
                     ConnectorCard(connector, showCategory = false)
@@ -130,159 +131,64 @@ internal fun ConnectorTab(gutter: Dp) {
  */
 @Composable
 private fun ConnectorCard(connector: Connector, showCategory: Boolean) {
+    val dimens = LocalPaDimens.current
     var expanded by rememberSaveable(connector.name) { mutableStateOf(false) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
+    PaPanel(
+        title = connector.name,
+        subtitle = connector.summary,
+        trailing = if (showCategory) {
+            { PaPill(text = connector.category.label) }
+        } else {
+            null
+        },
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            if (showCategory) {
+        connector.pins.forEach { pin ->
+            Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
                 Text(
-                    text = connector.category.label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    text = pin.pin,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.width(PIN_COLUMN_WIDTH),
                 )
-            }
-            Text(
-                text = connector.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = connector.summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            connector.pins.forEach { pin ->
-                Row {
-                    Text(
-                        text = pin.pin,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.width(96.dp),
-                    )
-                    Text(
-                        text = pin.signal,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-
-            if (connector.cautions.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
                 Text(
-                    text = stringResource(R.string.reference_caution),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.error,
+                    text = pin.signal,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
                 )
-                connector.cautions.forEach { caution ->
-                    Text(
-                        text = "・$caution",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            if (connector.advanced.isEmpty()) return@Column
-
-            TextButton(onClick = { expanded = !expanded }) {
-                Text(
-                    stringResource(
-                        if (expanded) {
-                            R.string.reference_advanced_hide
-                        } else {
-                            R.string.reference_advanced_show
-                        },
-                    ),
-                )
-            }
-            if (expanded) {
-                connector.advanced.forEach { note ->
-                    Text(
-                        text = "・$note",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
             }
         }
-    }
-}
 
-@Composable
-internal fun FrequencyTab(gutter: Dp) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(gutter),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(FrequencyChart.ALL, key = { it.instrument }) { instrument ->
-            InstrumentCard(instrument)
-        }
-    }
-}
-
-@Composable
-private fun InstrumentCard(instrument: InstrumentBands) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = instrument.instrument,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+        if (connector.cautions.isNotEmpty()) {
+            PaNotice(
+                title = stringResource(R.string.reference_caution),
+                body = connector.cautions.joinToString("\n") { "・$it" },
+                tone = PaTone.DANGER,
             )
+        }
+
+        if (connector.advanced.isEmpty()) return@PaPanel
+
+        TextButton(onClick = { expanded = !expanded }) {
             Text(
-                text = stringResource(
-                    R.string.reference_fundamental,
-                    formatHz(instrument.fundamentalFromHz),
-                    formatHz(instrument.fundamentalToHz),
+                stringResource(
+                    if (expanded) {
+                        R.string.reference_advanced_hide
+                    } else {
+                        R.string.reference_advanced_show
+                    },
                 ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
-            instrument.tips.forEach { tip ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = stringResource(
-                            R.string.reference_band_range,
-                            formatHz(tip.fromHz),
-                            formatHz(tip.toHz),
-                        ),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.width(112.dp),
-                    )
-                    Column {
-                        Text(
-                            text = tip.label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = tip.effect,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
+        }
+        if (expanded) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            connector.advanced.forEach { note ->
+                Text(
+                    text = "・$note",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }
@@ -294,6 +200,7 @@ private fun InstrumentCard(instrument: InstrumentBands) {
  */
 @Composable
 internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
+    val dimens = LocalPaDimens.current
     var flow by remember { mutableStateOf<TroubleshootFlow?>(null) }
     val history = remember { mutableStateListOf<String>() }
 
@@ -301,39 +208,32 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
     if (current == null) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(gutter),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(gutter),
+            verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
         ) {
-            item { SectionHeader(stringResource(R.string.reference_select_flow)) }
+            item {
+                PaSectionHeader(title = stringResource(R.string.reference_select_flow))
+            }
             items(Troubleshooting.ALL, key = { it.title }) { candidate ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    ),
+                PaPanel(
+                    title = candidate.title,
+                    subtitle = candidate.summary,
+                    onClick = {
+                        flow = candidate
+                        history.clear()
+                        history += candidate.startId
+                    },
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = candidate.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = candidate.summary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Button(
-                            onClick = {
-                                flow = candidate
-                                history.clear()
-                                history += candidate.startId
-                            },
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .heightIn(min = minTouch),
-                        ) { Text(candidate.title) }
-                    }
+                    Button(
+                        onClick = {
+                            flow = candidate
+                            history.clear()
+                            history += candidate.startId
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = minTouch),
+                    ) { Text(candidate.title) }
                 }
             }
         }
@@ -347,7 +247,7 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
         modifier = Modifier
             .fillMaxSize()
             .padding(gutter),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
     ) {
         Text(
             text = current.title,
@@ -362,7 +262,7 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
                     Button(
                         onClick = { history += step.yesId },
                         modifier = Modifier
@@ -379,34 +279,30 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
             }
 
             is TroubleshootResolution -> {
-                Text(
-                    text = stringResource(R.string.reference_cause),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = step.cause,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = stringResource(R.string.reference_actions),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                step.actions.forEach { action ->
-                    Text(
-                        text = "・$action",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                PaPanel(
+                    title = step.cause,
+                    subtitle = stringResource(R.string.reference_cause),
+                    trailing = {
+                        PaPill(
+                            text = stringResource(R.string.reference_actions),
+                            tone = PaTone.SUCCESS,
+                        )
+                    },
+                ) {
+                    step.actions.forEach { action ->
+                        Text(
+                            text = "・$action",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
 
             null -> Unit
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
             TextButton(
                 onClick = { if (history.size > 1) history.removeAt(history.lastIndex) },
                 enabled = history.size > 1,
@@ -423,6 +319,7 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
 
 @Composable
 internal fun GlossaryTab(gutter: Dp) {
+    val dimens = LocalPaDimens.current
     var query by rememberSaveable { mutableStateOf("") }
     val results = remember(query) { Glossary.search(query) }
 
@@ -434,11 +331,11 @@ internal fun GlossaryTab(gutter: Dp) {
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = gutter, vertical = 8.dp),
+                .padding(horizontal = gutter, vertical = dimens.spaceSm),
         )
         Text(
             text = stringResource(R.string.reference_term_count, results.size),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = gutter),
         )
@@ -455,56 +352,29 @@ internal fun GlossaryTab(gutter: Dp) {
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 start = gutter,
                 end = gutter,
-                bottom = gutter,
+                bottom = dimens.spaceXl,
             ),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
         ) {
             items(results, key = { it.term }) { term ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    ),
+                PaPanel(
+                    title = term.term,
+                    subtitle = term.english,
+                    trailing = null,
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = term.term,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = term.english,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Text(
-                            text = term.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    Text(
+                        text = term.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
     }
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(top = 8.dp),
-    )
-}
-
-private fun formatHz(hz: Double): String = when {
-    hz >= 1000 -> "%.1fk".format(hz / 1000)
-    else -> "%.0f".format(hz)
-}
+/** XLR の「1」から Dante の「RJ45 / etherCON」まで収まる幅 */
+private val PIN_COLUMN_WIDTH = 104.dp
