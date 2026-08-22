@@ -11,9 +11,9 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ## ダウンロード
 
-### ⬇ [**PA Toolbox v0.3.0 をダウンロード（APK・2.4MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.3.0.apk)
+### ⬇ [**PA Toolbox v0.4.0 をダウンロード（APK・2.5MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.4.0.apk)
 
-Android 8.0（API 26）以降。**36ツールすべてが使えます。**
+Android 8.0（API 26）以降。**38ツールすべてが使えます。**
 
 **入れかた**
 
@@ -36,7 +36,7 @@ Android 8.0（API 26）以降。**36ツールすべてが使えます。**
 
 ---
 
-## 現在の状態: **36ツールすべて実装済み**（Phase 5 の課金・法務のみ未着手）
+## 現在の状態: **38ツールすべて実装済み**（Phase 5 の課金・法務のみ未着手）
 
 **いま APK を入れれば全機能が使える。** 課金が未実装なので、
 Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
@@ -54,9 +54,9 @@ Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
 | 0 | マルチモジュール構成、テーマ3種、ツールランチャー、ProGate、CI | 実装済み |
 | 1 | 計測コア（SPL / RTA / シグナルジェネレータ / チューナー / メトロノーム / 校正） | 実装済み |
 | 2 | 計算機4種（ディレイ / BPM / dB換算 / インピーダンス） | 実装済み |
-| 2 | リファレンス4種（結線図 / 帯域チャート / トラブルシュート / 用語辞典） | 実装済み |
+| 2 | リファレンス6種（結線図 / 帯域チャート・帯域辞書 / 音質劣化 / テスト信号 / トラブルシュート / 用語辞典） | 実装済み |
 | 3 | 案件管理 / パッチ表 / 進行表 / 本番タイマー / PDF出力 | 実装済み |
-| 4 | SPLロガー / ハウリング検出 / 電源計算 / カバレッジ | 実装済み |
+| 4 | SPLロガー / ハウリング検出（履歴・スペクトラム図つき） / 電源計算 / カバレッジ | 実装済み |
 | 4 | ディレイ実測 / 極性チェック / 残響測定（IR・RT60） | 実装済み（実機未検証） |
 | 4 | スペクトラムアナライザ / スペクトログラム | 実装済み |
 | 4 | ステージプロット | 実装済み |
@@ -67,7 +67,7 @@ Pro のツールも含めて開放している（`PRE_RELEASE_UNLOCK`）。
 | 6 | SE パッド（取り込み / オフライン再生 / 同時発音） | 実装済み（実機未検証） |
 | 6 | 本番モード（通知オフ・画面点灯・音声フォーカスを個別に選択） | 実装済み（実機未検証） |
 
-36ツールの一覧は [ToolId.kt](core/model/src/main/kotlin/com/patoolbox/core/model/ToolId.kt) が唯一の定義。
+38ツールの一覧は [ToolId.kt](core/model/src/main/kotlin/com/patoolbox/core/model/ToolId.kt) が唯一の定義。
 ホーム画面には未実装ツールも「準備中」として並ぶ（何がいつ来るか分かる方が実用的なので、非表示にしていない）。
 
 ---
@@ -139,7 +139,7 @@ core/
   model                 純Kotlin。ToolId カタログ、ProStatus、校正プロファイル
   dsp                   純Kotlin。A/C重み、FFT、オクターブバンド、騒音計、信号生成、ピッチ検出
   calc                  純Kotlin。音速・ディレイ・BPM・dB換算・インピーダンス・混変調・請求・稼働
-  reference             純Kotlin。結線図・帯域チャート・切り分け・用語辞典の内容
+  reference             純Kotlin。結線図・帯域チャート・帯域辞書・テスト信号・切り分け・用語辞典の内容
   audio                 AudioRecord / AudioTrack。core:dsp を Android の音声APIに繋ぐ
                         スイープ測定（再生と録音を同時に回す一発測定）もここ
   designsystem          テーマ4種、寸法、BigReadout（巨大数値表示）
@@ -155,7 +155,7 @@ feature/
   spl                   SPLメーター（Leq / Lmax / 統計レベル / A-C-Z / F-S-I）
   calc                  計算機4種（タブ構成）
   reference             リファレンス4種（タブ構成）
-  feedback              ハウリング検出（Pro）
+  feedback              ハウリング検出（Pro）。発振の履歴を累計時間で並べ、スペクトラム図に印を立てる
   measure               ディレイ実測 / 極性チェック / 残響測定（Pro）
                         3ツールとも測定行為は「スイープ1回」なので1モジュールにまとめている
   stageplot             ステージプロット（Pro）。描画は core:export に置いて PDF と共有
