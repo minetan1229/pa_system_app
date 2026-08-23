@@ -11,7 +11,7 @@ SPLメーター・RTA・シグナルジェネレータからパッチ表・進�
 
 ## ダウンロード
 
-### ⬇ [**PA Toolbox v0.4.0 をダウンロード（APK・2.5MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.4.0.apk)
+### ⬇ [**PA Toolbox v0.5.0 をダウンロード（APK・2.6MB）**](https://github.com/minetan1229/pa_system_app/raw/main/dist/pa-toolbox-v0.5.0.apk)
 
 Android 8.0（API 26）以降。**38ツールすべてが使えます。**
 
@@ -120,7 +120,7 @@ JAVA_HOME="/c/Program Files/Android/Android Studio/jbr" ./gradlew assembleDebug
 JAVA_HOME="/c/Program Files/Android/Android Studio/jbr" ./gradlew assembleRelease
 ```
 
-`app/build/outputs/apk/release/app-release.apk` ができる（約2MB）。
+`app/build/outputs/apk/release/app-release.apk` ができる（約2.6MB）。
 これを端末に転送し、「提供元不明のアプリ」を許可してインストールする。
 
 署名は **`keystore.properties` があればその鍵、無ければデバッグ鍵** を使う。
