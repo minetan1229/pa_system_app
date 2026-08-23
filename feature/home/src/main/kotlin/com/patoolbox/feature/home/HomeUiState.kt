@@ -20,6 +20,8 @@ data class HomeUiState(
     val favoriteTools: List<ToolId> = emptyList(),
     val calibration: CalibrationSummary = CalibrationSummary(),
     val profile: FieldProfile = FieldProfile.Default,
+    /** false なら、慣れの度合いをまだ自分で選んでいない。ホームの最初の案内を出す */
+    val hasChosenExperienceLevel: Boolean = false,
 ) {
     val level: ExperienceLevel get() = profile.level
 }

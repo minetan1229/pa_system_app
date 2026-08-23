@@ -6,6 +6,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
 import com.patoolbox.core.model.StageItem
+import com.patoolbox.core.model.StageItemColor
 import com.patoolbox.core.model.StagePlot
 import com.patoolbox.core.model.StageShape
 
@@ -68,15 +69,31 @@ object StageGeometry {
  */
 class StagePlotRenderer {
 
+    /**
+     * @param itemPalette 記号の地色。[StageItem.colorIndex] で引く
+     *   （[StageItemColor.COUNT] 個ぶん必要）
+     * @param itemTextPalette [itemPalette] それぞれに乗せる文字色。
+     *   固定1色にしないのは、色によって白文字と黒文字のどちらが読めるかが変わるため
+     *   （呼び出し側で `contrastingInk` を通した値を渡す）
+     */
     data class Colors(
         val stageOutline: Int,
         val stageFill: Int,
-        val itemFill: Int,
+        val itemPalette: List<Int>,
+        val itemTextPalette: List<Int>,
         val itemOutline: Int,
-        val itemText: Int,
         val label: Int,
         val selectedOutline: Int,
-    )
+    ) {
+        init {
+            require(itemPalette.size == StageItemColor.COUNT) {
+                "itemPalette は ${StageItemColor.COUNT} 色ぶん必要"
+            }
+            require(itemTextPalette.size == StageItemColor.COUNT) {
+                "itemTextPalette は ${StageItemColor.COUNT} 色ぶん必要"
+            }
+        }
+    }
 
     private val paint = Paint().apply { isAntiAlias = true }
     private val textPaint = Paint().apply { isAntiAlias = true }
@@ -146,8 +163,10 @@ class StagePlotRenderer {
     ) {
         val rect = StageGeometry.itemBounds(item, stage)
 
+        val colorIndex = StageItemColor.coerce(item.colorIndex)
+
         paint.style = Paint.Style.FILL
-        paint.color = colors.itemFill
+        paint.color = colors.itemPalette[colorIndex]
         drawShape(canvas, item, rect)
 
         paint.style = Paint.Style.STROKE
@@ -158,7 +177,7 @@ class StagePlotRenderer {
         // バッジは記号の中、名前はその下。図が混んでも名前だけは読めるようにする
         val badgeSize = (rect.height() * BADGE_FONT_RATIO).coerceAtMost(rect.width() * 0.4f)
         textPaint.textSize = badgeSize
-        textPaint.color = colors.itemText
+        textPaint.color = colors.itemTextPalette[colorIndex]
         textPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         drawCentered(canvas, item.symbol.badge, rect.centerX(), rect.centerY() + badgeSize * 0.35f)
 

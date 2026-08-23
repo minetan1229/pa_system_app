@@ -232,13 +232,13 @@ private fun DegradationStage.rail(): Color {
         }
     }
     return when (this) {
-        DegradationStage.SOURCE -> Color(0xFFC2410C)
-        DegradationStage.CABLE -> Color(0xFF9A7100)
-        DegradationStage.GAIN -> Color(0xFFB0392F)
-        DegradationStage.PROCESSING -> Color(0xFF6D3BC4)
-        DegradationStage.TRANSPORT -> Color(0xFF1E4FA8)
-        DegradationStage.OUTPUT -> Color(0xFF0E7A62)
-        DegradationStage.VENUE -> Color(0xFF127C8C)
-        DegradationStage.RECORD -> Color(0xFF55606B)
+        DegradationStage.SOURCE -> Color(0xFFB9673E)
+        DegradationStage.CABLE -> Color(0xFF9A8248)
+        DegradationStage.GAIN -> Color(0xFFA55145)
+        DegradationStage.PROCESSING -> Color(0xFF8E7BC4)
+        DegradationStage.TRANSPORT -> Color(0xFF5F82BF)
+        DegradationStage.OUTPUT -> Color(0xFF4E9179)
+        DegradationStage.VENUE -> Color(0xFF4E96A5)
+        DegradationStage.RECORD -> Color(0xFF6E6C64)
     }
 }

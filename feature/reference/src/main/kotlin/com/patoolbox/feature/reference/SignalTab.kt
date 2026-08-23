@@ -237,9 +237,9 @@ private fun TestSignalKind.rail(): Color {
         }
     }
     return when (this) {
-        TestSignalKind.NOISE -> Color(0xFF8E6BE8)
-        TestSignalKind.TONE -> Color(0xFFE8A33D)
-        TestSignalKind.SWEEP -> Color(0xFFE07B39)
-        TestSignalKind.SPECIAL -> Color(0xFF0E7A62)
+        TestSignalKind.NOISE -> Color(0xFF8E7BC4)
+        TestSignalKind.TONE -> Color(0xFFD9A362)
+        TestSignalKind.SWEEP -> Color(0xFFD97757)
+        TestSignalKind.SPECIAL -> Color(0xFF4E9179)
     }
 }

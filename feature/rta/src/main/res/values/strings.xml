@@ -5,6 +5,8 @@
     <string name="rta_resolution">分解能</string>
     <string name="rta_weighting">重み付け</string>
     <string name="rta_peak_hold">ピークホールド</string>
+    <string name="rta_peak_hold_short">5秒</string>
+    <string name="rta_peak_hold_long">10秒</string>
     <string name="rta_averaging">平均化</string>
     <string name="rta_avg_fast">速い</string>
     <string name="rta_avg_normal">標準</string>

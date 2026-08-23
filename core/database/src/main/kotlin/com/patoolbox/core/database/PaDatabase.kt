@@ -62,7 +62,7 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         WorkLogEntity::class,
         SoundCueEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         // v2: calibration_profiles を追加
@@ -79,6 +79,8 @@ import com.patoolbox.core.database.entity.StagePlotEntity
         AutoMigration(from = 6, to = 7),
         // v8: sound_cues を追加
         AutoMigration(from = 7, to = 8),
+        // v9: stage_items に colorIndex を追加
+        AutoMigration(from = 8, to = 9),
     ],
 )
 abstract class PaDatabase : RoomDatabase() {

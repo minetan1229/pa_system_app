@@ -51,6 +51,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
                     ?.let { stored -> ConsoleType.entries.firstOrNull { it.name == stored } }
                     ?: FieldProfile.Default.console,
             ),
+            hasChosenExperienceLevel = prefs[Keys.HAS_CHOSEN_EXPERIENCE_LEVEL] ?: false,
         )
     }
 
@@ -64,7 +65,10 @@ class DataStoreUserPreferencesRepository @Inject constructor(
     }
 
     override suspend fun setExperienceLevel(level: ExperienceLevel) {
-        dataStore.edit { it[Keys.EXPERIENCE_LEVEL] = level.name }
+        dataStore.edit { prefs ->
+            prefs[Keys.EXPERIENCE_LEVEL] = level.name
+            prefs[Keys.HAS_CHOSEN_EXPERIENCE_LEVEL] = true
+        }
     }
 
     override suspend fun setConsoleType(console: ConsoleType) {
@@ -104,6 +108,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val SHOW_MODE_SCREEN_ON = booleanPreferencesKey("show_mode_keep_screen_on")
         val SHOW_MODE_OTHER_AUDIO = booleanPreferencesKey("show_mode_allow_other_audio")
         val EXPERIENCE_LEVEL = stringPreferencesKey("experience_level")
+        val HAS_CHOSEN_EXPERIENCE_LEVEL = booleanPreferencesKey("has_chosen_experience_level")
         val CONSOLE_TYPE = stringPreferencesKey("console_type")
     }
 }

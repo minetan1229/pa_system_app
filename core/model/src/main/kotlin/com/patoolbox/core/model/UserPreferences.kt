@@ -13,6 +13,14 @@ data class UserPreferences(
     val showMode: ShowModeSettings = ShowModeSettings.Default,
     /** 慣れの度合いと卓の種類。ホームの並べ方と説明の量を決める */
     val profile: FieldProfile = FieldProfile.Default,
+    /**
+     * 慣れの度合いを一度でも自分で選んだか。
+     *
+     * false のあいだはホームの最初の1回だけ、大きく尋ねる案内を出す
+     * （[FieldProfile.level] の既定は中級だが、それを「選んだ」とは区別する）。
+     * 選んだあとは設定画面からいつでも変えられる。
+     */
+    val hasChosenExperienceLevel: Boolean = false,
 ) {
     companion object {
         val Default = UserPreferences()

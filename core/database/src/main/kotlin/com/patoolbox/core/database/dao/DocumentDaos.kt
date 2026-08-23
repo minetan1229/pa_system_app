@@ -124,6 +124,10 @@ interface StagePlotDao {
      */
     @Query("UPDATE stage_items SET x = :x, y = :y WHERE id = :id")
     suspend fun moveItem(id: Long, x: Float, y: Float)
+
+    /** 色だけを書く。[moveItem] と同じ理由で、他の列には触らない。 */
+    @Query("UPDATE stage_items SET colorIndex = :colorIndex WHERE id = :id")
+    suspend fun recolorItem(id: Long, colorIndex: Int)
 }
 
 @Dao

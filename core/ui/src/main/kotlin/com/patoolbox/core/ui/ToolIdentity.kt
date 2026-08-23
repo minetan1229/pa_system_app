@@ -18,6 +18,11 @@ import com.patoolbox.core.model.ToolId
  * 　音楽の道具＝黄緑。
  * 危険（大音量が出る）ものを暖色に寄せているのは、
  * 一覧の中で先に目に入るようにするため。
+ *
+ * 彩度は落としてある。地が生成りの紙（#F0EEE6）なので、
+ * 純度の高い色を上に置くと、その画面だけ別のアプリのように浮く。
+ * どれも [com.patoolbox.core.designsystem.component.contrastingInk] で
+ * 白黒どちらかの文字が 4.5:1 以上で乗ることを確認済み。
  */
 @Composable
 fun ToolId.identityColor(): Color {
@@ -32,28 +37,28 @@ fun ToolId.identityColor(): Color {
     }
     return when (this) {
         // --- 計測: レベル系（青緑） ---
-        ToolId.SPL_METER -> Color(0xFF00B3C4)
-        ToolId.SPL_LOGGER -> Color(0xFF0E8C99)
+        ToolId.SPL_METER -> Color(0xFF4E9AA6)
+        ToolId.SPL_LOGGER -> Color(0xFF2F6A75)
 
         // --- 計測: 周波数系（青〜紫） ---
-        ToolId.RTA -> Color(0xFF2FA36B)
-        ToolId.FFT -> Color(0xFF5B8DEF)
-        ToolId.SPECTROGRAM -> Color(0xFF8E6BE8)
-        ToolId.FEEDBACK_FINDER -> Color(0xFFE0483C)
+        ToolId.RTA -> Color(0xFF5A9B72)
+        ToolId.FFT -> Color(0xFF6F8FCB)
+        ToolId.SPECTROGRAM -> Color(0xFF9084C9)
+        ToolId.FEEDBACK_FINDER -> Color(0xFFD2604F)
 
         // --- 計測: 音を出して測る（橙〜赤） ---
-        ToolId.SIGNAL_GENERATOR -> Color(0xFFE8A33D)
-        ToolId.DELAY_FINDER -> Color(0xFFE07B39)
-        ToolId.POLARITY_CHECK -> Color(0xFFD65C8A)
-        ToolId.ROOM_MEASURE -> Color(0xFFB05CD6)
+        ToolId.SIGNAL_GENERATOR -> Color(0xFFD9A362)
+        ToolId.DELAY_FINDER -> Color(0xFFD97757)
+        ToolId.POLARITY_CHECK -> Color(0xFFC4738F)
+        ToolId.ROOM_MEASURE -> Color(0xFFA97BC0)
 
         // --- 計測: 音楽の道具（黄緑） ---
-        ToolId.TUNER -> Color(0xFF8FBF3F)
-        ToolId.METRONOME -> Color(0xFF6FA8A0)
-        ToolId.RECORDER -> Color(0xFFCC3355)
+        ToolId.TUNER -> Color(0xFF9BAE63)
+        ToolId.METRONOME -> Color(0xFF7FA79E)
+        ToolId.RECORDER -> Color(0xFFC15D6E)
 
         // --- リファレンス: 劣化だけ色を分ける（症状から引く画面で、他のリファレンスと役割が違う） ---
-        ToolId.SIGNAL_QUALITY -> Color(0xFFB0453C)
+        ToolId.SIGNAL_QUALITY -> Color(0xFFA34E41)
 
         // --- それ以外はカテゴリ色に従う ---
         else -> category.accentColor()

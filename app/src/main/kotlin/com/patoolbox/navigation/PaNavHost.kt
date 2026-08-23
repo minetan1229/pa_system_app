@@ -44,6 +44,7 @@ import com.patoolbox.feature.settings.SettingsScreen
 import com.patoolbox.feature.stageplot.StagePlotEditorScreen
 import com.patoolbox.feature.stageplot.StagePlotListScreen
 import com.patoolbox.feature.sfx.SfxScreen
+import com.patoolbox.feature.showrunner.ShowRunnerScreen
 import com.patoolbox.feature.showtimer.ShowTimerScreen
 import com.patoolbox.feature.spl.SplLogScreen
 import com.patoolbox.feature.spl.SplScreen
@@ -286,6 +287,8 @@ private fun ToolDestination(
         ToolId.CLOUD_BACKUP -> BackupScreen(onBack = onBack)
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
+
+        ToolId.SHOW_RUNNER -> ShowRunnerScreen(onBack = onBack)
 
         ToolId.SFX_PADS -> SfxScreen(onBack = onBack)
 

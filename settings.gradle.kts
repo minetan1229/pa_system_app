@@ -74,6 +74,7 @@ include(":feature:recorder")
 include(":feature:business")
 include(":feature:patch")
 include(":feature:showtimer")
+include(":feature:showrunner")
 // SE パッド。取り込んだ音をアプリ内に持ち、オフラインで鳴らす
 include(":feature:sfx")
 include(":feature:job")

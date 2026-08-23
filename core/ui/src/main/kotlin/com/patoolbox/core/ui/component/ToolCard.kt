@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -43,10 +44,17 @@ import com.patoolbox.core.ui.titleRes
  * 暗いFOHでも屋外でも読めることを優先した結果で、material-icons-extended（約30MB）を
  * 抱え込まずに済むという副作用もある。★も同じ理由でグリフを直接使っている。
  *
- * バッジは色面で塗る。38枚が並ぶ画面では、文字を読む前に色と位置で当たりを
- * 付けられることの方が速さに効く。
+ * バッジは色面で塗り、カードの左端にも同じ色の帯を出す。38枚が並ぶ画面では、
+ * 文字を読む前に色と位置で当たりを付けられることの方が速さに効く。
+ * 帯とバッジで2か所に同じ色を置いているのは、説明文を省いた表示（[compact]）で
+ * バッジしか色が無くなると、分類の切れ目がスクロール中に見えなくなるため。
  *
- * @param compact 説明文を省く。上級者の表示で、同じ面積により多く並べるために使う
+ * 説明文は段によらず常に出す。前は上級者の表示（[compact]）で説明を省いていたが、
+ * 「上級者だから中身を読ませない」という判断をこちら側でしないことにした——
+ * 読み飛ばすかどうかは利用者が決めることで、こちらは省略しない。
+ *
+ * @param compact 高さと1行あたりの説明の行数を詰める。上級者の表示で、
+ *   同じ面積により多く並べるために使う（**説明そのものは消えない**）
  * @param showLevelBadge 前提知識の要る道具に札を付ける。初心者の表示で使う。
  *   **札を付けても押せなくはしない**（隠すと「入っていない」と思われる）
  */
@@ -74,6 +82,7 @@ fun ToolCard(
                 },
             ),
         onClick = onClick,
+        rail = accent,
         corner = dimens.cardCorner,
         contentPadding = dimens.spaceMd,
         verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
@@ -99,16 +108,15 @@ fun ToolCard(
             overflow = TextOverflow.Ellipsis,
         )
 
-        if (!compact) {
-            Text(
-                text = stringResource(tool.descriptionRes),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
-            )
-        }
+        Text(
+            text = stringResource(tool.descriptionRes),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // compact でも0行にはしない。2行あれば大抵の説明は読み切れる
+            maxLines = if (compact) 2 else 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
             AccessChip(access = tool.access)
@@ -139,9 +147,13 @@ private fun ToolBadge(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            // 44dp の面に 12sp を置くと余白ばかりになるので、バッジだけ一段大きくする。
+            // 等幅なのは "1/3" "Ω" のような記号混じりを縦に揃えるため
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontFamily = FontFamily.Monospace,
+            ),
             // 白か黒かは面の明るさで決める。固定にすると、
-            // カテゴリ色のうち明るいもの（現場ドキュメントの橙）で読めなくなる
+            // カテゴリ色のうち明るいもの（暗色テーマの淡い値）で読めなくなる
             color = contrastingInk(accent),
             maxLines = 1,
             textAlign = TextAlign.Center,

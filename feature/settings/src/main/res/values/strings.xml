@@ -18,7 +18,7 @@
     <string name="settings_level">表示のしかた</string>
     <string name="settings_level_desc">機能は隠しません。並べ方と説明の量だけが変わります。</string>
     <string name="settings_level_beginner">初心者</string>
-    <string name="settings_level_beginner_desc">説明を多めに出し、上級の道具には札を付ける</string>
+    <string name="settings_level_beginner_desc">説明を多めに出し、読み違えやすい道具に札を付ける（押せなくはならない）</string>
     <string name="settings_level_intermediate">中級者</string>
     <string name="settings_level_intermediate_desc">よく使う4つと分類の入口だけをホームに出す（既定）</string>
     <string name="settings_level_advanced">上級者</string>

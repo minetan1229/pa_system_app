@@ -61,6 +61,11 @@ class SpectrumPipeline(
     private val scratch = DoubleArray(columns)
     private val smoothedPowers = DoubleArray(columns)
     private val peakPowers = DoubleArray(columns)
+    /** 各カラムのピークを更新した時刻（[elapsedSeconds] 基準）。保持時間の期限切れ判定に使う */
+    private val peakSetAtSeconds = DoubleArray(columns)
+    /** analyze() を呼ぶたびに hopSeconds ずつ進める内部時計。
+     * System 時刻を使わないのは、JVM テストで結果を決定的にするため */
+    private var elapsedSeconds = 0.0
     private var hasFrame = false
 
     /** 各カラムの中心周波数。目盛りとカーソルの逆引きに使う */
@@ -77,6 +82,8 @@ class SpectrumPipeline(
      * @param averagingCoefficient 指数移動平均の係数（0<a<=1）。小さいほど落ち着く
      * @param offsetDb 校正オフセット。未校正なら 0 を渡す（表示は dBFS になる）
      * @param peakHold ピーク保持を返すかどうか
+     * @param peakHoldSeconds ピークを保持する秒数。この秒数のあいだ更新が無いカラムは
+     *   現在値まで下ろす。既定は無期限（値を渡さなければ今までどおり上がりっぱなし）
      */
     fun analyze(
         frame: FloatArray,
@@ -84,6 +91,7 @@ class SpectrumPipeline(
         averagingCoefficient: Double = DEFAULT_AVERAGING,
         offsetDb: Double = 0.0,
         peakHold: Boolean = false,
+        peakHoldSeconds: Double = Double.POSITIVE_INFINITY,
     ): SpectrumSnapshot {
         val spectrum = analyzer.powerSpectrum(frame)
 
@@ -95,13 +103,25 @@ class SpectrumPipeline(
 
         mapper.map(spectrum, smoothing, scratch)
 
+        elapsedSeconds += hopSeconds
         for (i in scratch.indices) {
             smoothedPowers[i] = if (hasFrame) {
                 smoothedPowers[i] + averagingCoefficient * (scratch[i] - smoothedPowers[i])
             } else {
                 scratch[i]
             }
-            if (smoothedPowers[i] > peakPowers[i]) peakPowers[i] = smoothedPowers[i]
+            when {
+                smoothedPowers[i] > peakPowers[i] -> {
+                    peakPowers[i] = smoothedPowers[i]
+                    peakSetAtSeconds[i] = elapsedSeconds
+                }
+                // 保持時間を過ぎたら現在値まで下ろす。ここで下ろした値も
+                // 次のフレームからまた「新しいピーク」として保持され直す
+                elapsedSeconds - peakSetAtSeconds[i] >= peakHoldSeconds -> {
+                    peakPowers[i] = smoothedPowers[i]
+                    peakSetAtSeconds[i] = elapsedSeconds
+                }
+            }
         }
         hasFrame = true
 
@@ -127,6 +147,7 @@ class SpectrumPipeline(
 
     fun clearPeakHold() {
         peakPowers.fill(0.0)
+        peakSetAtSeconds.fill(elapsedSeconds)
     }
 
     /** FFT 点数を変えたときなど、溜まっているものを全部捨てる */
@@ -134,6 +155,8 @@ class SpectrumPipeline(
         accumulator.reset()
         smoothedPowers.fill(0.0)
         peakPowers.fill(0.0)
+        peakSetAtSeconds.fill(0.0)
+        elapsedSeconds = 0.0
         hasFrame = false
     }
 

@@ -112,8 +112,30 @@ data class StageItem(
     val label: String = "",
     val x: Float = 0.5f,
     val y: Float = 0.5f,
+    /**
+     * この記号だけの色。[StageItemColor.PALETTE] の添字（余りで循環させる）。
+     *
+     * 記号（[symbol]）だけでは同じ楽器が複数あるとき（マイク3本など）を
+     * 見分けられない。現場で配線しながら「あの赤いマイク」と呼べるよう、
+     * 個体を色で区別できるようにしてある。
+     */
+    val colorIndex: Int = 0,
 ) {
     val displayLabel: String get() = label.ifBlank { symbol.defaultLabel }
+}
+
+/**
+ * [StageItem.colorIndex] が指す色そのもの。
+ *
+ * 実際の色（Compose の Color、PDF 描画用の ARGB）は呼び出し側が持つ
+ * （[core:model] は Android 描画に依存させない）。ここでは「何色目まであるか」と
+ * 「この記号の初期値は何色目か」という、値そのものの意味だけを決める。
+ */
+object StageItemColor {
+    /** 選べる色の数 */
+    const val COUNT = 6
+
+    fun coerce(index: Int): Int = ((index % COUNT) + COUNT) % COUNT
 }
 
 /** 記号の見た目。文字だけだと図として読めないので、形でも区別する。 */

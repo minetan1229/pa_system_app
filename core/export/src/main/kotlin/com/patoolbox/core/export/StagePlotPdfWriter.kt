@@ -138,12 +138,25 @@ class StagePlotPdfWriter @Inject constructor() {
         const val CAPTION_ROOM = 18f
         const val MAX_NOTE_LINES = 6
 
+        // 印刷用は白地に映える薄い色調にしてある。フチと文字を黒で統一しているのは、
+        // モノクロ印刷でも記号どうしが判別できるようにするため
+        // （淡色だけで区別する作りだと白黒印刷で全部同じ灰色に潰れる）
+        private val PRINT_ITEM_PALETTE = listOf(
+            Color.rgb(0xDC, 0xE6, 0xF2), // 青
+            Color.rgb(0xDE, 0xEC, 0xE2), // 緑
+            Color.rgb(0xF5, 0xE6, 0xCE), // 橙
+            Color.rgb(0xF3, 0xDC, 0xE4), // 桃
+            Color.rgb(0xE6, 0xDF, 0xF0), // 紫
+            Color.rgb(0xDA, 0xEB, 0xEE), // 水
+        )
+
         val PRINT_COLORS = StagePlotRenderer.Colors(
             stageOutline = Color.BLACK,
             stageFill = Color.WHITE,
-            itemFill = Color.rgb(0xEE, 0xEE, 0xEE),
+            itemPalette = PRINT_ITEM_PALETTE,
+            // 淡色の上なので、どの色も黒文字で足りる
+            itemTextPalette = List(PRINT_ITEM_PALETTE.size) { Color.BLACK },
             itemOutline = Color.BLACK,
-            itemText = Color.BLACK,
             label = Color.DKGRAY,
             selectedOutline = Color.BLACK,
         )

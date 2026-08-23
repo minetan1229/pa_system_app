@@ -100,6 +100,11 @@ class StagePlotViewModel @Inject constructor(
         viewModelScope.launch { repository.renameItem(plotId, item, label) }
     }
 
+    fun recolorSelected(colorIndex: Int) {
+        val itemId = uiState.value.selectedItemId ?: return
+        viewModelScope.launch { repository.recolorItem(plotId, itemId, colorIndex) }
+    }
+
     fun deleteSelected() {
         val itemId = uiState.value.selectedItemId ?: return
         selection.update { null }

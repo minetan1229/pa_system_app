@@ -36,12 +36,14 @@ fun StagePlotCanvas(
     modifier: Modifier = Modifier,
 ) {
     val renderer = remember { StagePlotRenderer() }
+    val itemPalette = stageItemPalette()
+    val itemTextPalette = stageItemTextPalette()
     val colors = StagePlotRenderer.Colors(
         stageOutline = MaterialTheme.colorScheme.outline.toArgb(),
         stageFill = MaterialTheme.colorScheme.surfaceContainerLowest.toArgb(),
-        itemFill = MaterialTheme.colorScheme.secondaryContainer.toArgb(),
+        itemPalette = itemPalette.map { it.toArgb() },
+        itemTextPalette = itemTextPalette.map { it.toArgb() },
         itemOutline = MaterialTheme.colorScheme.outline.toArgb(),
-        itemText = MaterialTheme.colorScheme.onSecondaryContainer.toArgb(),
         label = MaterialTheme.colorScheme.onSurfaceVariant.toArgb(),
         selectedOutline = MaterialTheme.colorScheme.primary.toArgb(),
     )

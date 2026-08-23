@@ -11,6 +11,9 @@
     <string name="gear_all">すべて</string>
     <string name="gear_empty">機材がありません。右下の追加から登録してください</string>
     <string name="gear_summary">現場に出せる %1$d 点 ／ 登録 %2$d 件</string>
+    <string name="gear_add_from_preset">よくある機材から追加</string>
+    <string name="gear_preset_title">よくある機材</string>
+    <string name="gear_preset_hint">選ぶと編集画面が開きます。台帳にはまだ入りません。内容を確認してから保存してください。</string>
     <string name="gear_name">名称</string>
     <string name="gear_maker">メーカー</string>
     <string name="gear_model">型番</string>

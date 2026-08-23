@@ -49,8 +49,14 @@
     <string name="home_level_beginner">初心者</string>
     <string name="home_level_intermediate">中級者</string>
     <string name="home_level_advanced">上級者</string>
-    <string name="home_level_beginner_note">説明を多めに出し、上級の道具には札を付けています。機能は何も隠していません。</string>
-    <string name="home_level_advanced_note">説明を省いて %1$d 個をそのまま並べています。</string>
+    <string name="home_level_change">設定で変える</string>
+
+    <!-- 初回の案内。あとで設定画面からいつでも選び直せる -->
+    <string name="home_onboarding_title">はじめに、いまの慣れ具合を教えてください</string>
+    <string name="home_onboarding_subtitle">ホームの並べ方が変わります。あとで設定からいつでも選び直せます。説明文は、どれを選んでも省きません。</string>
+    <string name="home_level_beginner_note">説明を多めに出し、順番の案内も出します。読み違えやすい道具には「中級」「上級」の札を付けますが、押せなくはなりません。</string>
+    <string name="home_level_intermediate_note">よく使う4つと分類の入口だけを出す、既定の並びです。</string>
+    <string name="home_level_advanced_note">見出しの絵と分類の入口を省き、%1$d 個をそのまま並べます。</string>
 
 
     <!-- 初心者向けの案内 -->

@@ -43,6 +43,7 @@ class HomeViewModel @Inject constructor(
                 .sortedBy { it.ordinal },
             calibration = profiles.toSummary(),
             profile = preferences.profile,
+            hasChosenExperienceLevel = preferences.hasChosenExperienceLevel,
         )
     }.stateIn(
         scope = viewModelScope,

@@ -15,9 +15,16 @@
     <string name="badge_free_limited">無料（制限あり）</string>
     <string name="badge_free">無料</string>
 
-    <!-- 準備中 -->
+    <!-- 難しさの目印。ロックではない（OpenAccessNotice で毎回そう言っている） -->
     <string name="badge_level_intermediate">中級</string>
     <string name="badge_level_advanced">上級</string>
+    <string name="open_access_title">札は目印です。ロックではありません</string>
+    <string name="open_access_body_level">カードの札（中級・上級・PRO）は、難しさと課金区分の目印です。押せなくなる札はありません。</string>
+    <string name="open_access_body_pro">いまは先行版なので、PRO の札が付いた道具もそのまま開けます。</string>
+    <string name="search_empty_image">空の紙と虫めがねの挿絵</string>
+    <string name="open_access_image">つるの外れた、開いた錠前の挿絵</string>
+
+    <!-- 準備中 -->
     <string name="coming_soon">準備中</string>
     <string name="coming_soon_phase">Phase %1$d で実装予定</string>
     <string name="placeholder_note">この画面はまだ実装されていません。プランの Phase %1$d で追加されます。</string>
@@ -123,6 +130,8 @@
     <string name="tool_run_sheet_desc">リハ・本番の時間割、押し巻きの自動再計算</string>
     <string name="tool_show_timer_title">本番タイマー</string>
     <string name="tool_show_timer_desc">カウントダウン・経過・押し表示を巨大表示</string>
+    <string name="tool_show_runner_title">本番進行コントローラー</string>
+    <string name="tool_show_runner_desc">タイトルと持ち時間を並べた進行表を上から順にカウントダウン。SEパッドと同期音源も同じ画面で鳴らせる</string>
     <string name="tool_sfx_pads_title">SE パッド</string>
     <string name="tool_sfx_pads_desc">SEを取り込んでオフライン再生。パッドを押して即発音</string>
     <string name="tool_job_manager_title">案件管理</string>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="showrunner_no_active">まだ何も始まっていません。下の予定から「開始」を押してください。</string>
+    <string name="showrunner_overrun">押しています</string>
+    <string name="showrunner_resume">再開</string>
+    <string name="showrunner_next">次へ（%1$s）</string>
+
+    <string name="showrunner_schedule_title">進行表</string>
+    <string name="showrunner_schedule_subtitle">タイトルと持ち時間を並べて、上から順にカウントダウンします</string>
+    <string name="showrunner_draft_title_hint">例: MCコメント、1曲目、転換</string>
+    <string name="showrunner_minutes">%1$d分</string>
+    <string name="showrunner_add">この内容で追加</string>
+    <string name="showrunner_schedule_empty">まだ予定がありません。上のフォームから追加してください。</string>
+    <string name="showrunner_active">進行中</string>
+    <string name="showrunner_start">開始</string>
+    <string name="showrunner_remove">削除</string>
+
+    <string name="showrunner_pads_title">SEパッド・同期音源</string>
+    <string name="showrunner_pads_subtitle">SEパッド画面と同じ素材です。取り込みはどちらの画面からでも反映されます</string>
+    <string name="showrunner_pads_stop_all">すべて止める</string>
+    <string name="showrunner_pads_limit">無料版のパッド上限に達しています</string>
+    <string name="showrunner_import">音声ファイルを取り込む</string>
+    <string name="showrunner_importing">取り込み中…</string>
+    <string name="showrunner_pads_empty">まだパッドがありません</string>
+    <string name="showrunner_pads_hint">パッドを押すと再生・停止します。長押しで設定（同期音源への切り替え）を開けます。</string>
+    <string name="showrunner_pad_settings_sync">同期音源にする（ループ再生）</string>
+    <string name="showrunner_pad_settings_sync_note">オンにすると鳴らし続けます。バッキング音源など、止めるまで流したい素材向けです。</string>
+</resources>

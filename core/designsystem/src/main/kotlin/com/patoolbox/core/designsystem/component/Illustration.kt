@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.semantics.contentDescription
@@ -69,6 +70,8 @@ fun PaIllustration(
                 PaScene.BUSINESS -> drawBusiness(palette)
                 PaScene.CALIBRATION -> drawCalibration(palette)
                 PaScene.ONE_PHONE -> drawOnePhone(palette)
+                PaScene.OPEN_ACCESS -> drawOpenAccess(palette)
+                PaScene.SEARCH_EMPTY -> drawSearchEmpty(palette)
             }
         }
     }
@@ -96,6 +99,16 @@ enum class PaScene {
 
     /** 端末1台だけの校正。スピーカーと端末の距離 */
     ONE_PHONE,
+
+    /**
+     * 鍵が開いている図。
+     * 「上級」「PRO」の札が鍵ではないこと（今どれも開けること）を、
+     * 文章より先に伝えるために使う。
+     */
+    OPEN_ACCESS,
+
+    /** 検索して何も出なかったとき。虫めがねと空の紙 */
+    SEARCH_EMPTY,
 }
 
 /**
@@ -169,6 +182,50 @@ fun paIllustrationPalette(): PaIllustrationPalette {
                 secondary = PaSoft.sageLight,
                 accent = PaSoft.clayLight,
                 strokeScale = 1f,
+            )
+        }
+    }
+}
+
+/**
+ * アプリの印。上帯とホームの見出しに出す小さな図形。
+ *
+ * 文字だけの上帯は、どのツールを開いていても同じ顔になる。
+ * 印を1つ置くと「このアプリの中にいる」ことが常に見えるので、
+ * 38画面を行き来しても迷子になりにくい。
+ *
+ * 中心の点から広がる弧（＝1点から出る音）で描いてある。
+ * 既製のロゴやアイコンフォントを持ち込まないのは、[PaIllustration] と同じ理由。
+ *
+ * 色は [androidx.compose.material3.ColorScheme.primary] を通すので、
+ * 暗所モードでは赤、屋外モードでは濃紺になる。
+ */
+@Composable
+fun PaAppMark(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
+) {
+    Canvas(modifier = modifier) {
+        val unit = minOf(size.width, size.height)
+        if (unit <= 0f) return@Canvas
+
+        // 左下を原点にして右上へ広がる。中央から同心円にすると的に見えてしまう
+        val origin = Offset(size.width / 2f - unit * 0.34f, size.height / 2f + unit * 0.30f)
+        val stroke = unit * 0.09f
+
+        drawCircle(color = color, radius = unit * 0.11f, center = origin)
+
+        listOf(0.34f, 0.56f, 0.78f).forEachIndexed { index, factor ->
+            val radius = unit * factor
+            drawArc(
+                // 外側ほど薄くする。等しい濃さだと3本の弧が縞模様に見える
+                color = color.copy(alpha = 1f - index * 0.22f),
+                startAngle = -78f,
+                sweepAngle = 66f,
+                useCenter = false,
+                topLeft = Offset(origin.x - radius, origin.y - radius),
+                size = Size(radius * 2f, radius * 2f),
+                style = Stroke(width = stroke, cap = StrokeCap.Round),
             )
         }
     }
@@ -510,6 +567,76 @@ private fun DrawScope.phone(
             )
         }
     }
+}
+
+/**
+ * 鍵が開いている図。
+ *
+ * **閉じた鍵を描かない。** 「制限がある」ことではなく「制限が無い」ことを言う絵なので、
+ * つるを外して持ち上げた形にして、掛け金が本体から離れているのが見えるようにする。
+ */
+private fun DrawScope.drawOpenAccess(palette: PaIllustrationPalette) {
+    // つる。左上に開いた状態。本体の左肩にだけ刺さっていて、右肩からは離れている
+    val shackle = Path().apply {
+        moveTo(62f, 48f)
+        lineTo(62f, 34f)
+        cubicTo(62f, 16f, 92f, 16f, 92f, 34f)
+        lineTo(92f, 40f)
+    }
+    drawPath(
+        shackle,
+        color = palette.line,
+        style = Stroke(width = 5f * palette.strokeScale),
+    )
+
+    // 本体
+    val body = Rect(56f, 48f, 116f, 88f)
+    fillRoundRect(palette.accent, body, 6f)
+    strokeRoundRect(palette.line, body, 6f, palette.strokeScale)
+
+    // 鍵穴。中心を少し上に置くと錠前に見える
+    drawCircle(palette.ground, radius = 5f, center = Offset(86f, 63f))
+    val slot = Rect(83.5f, 63f, 88.5f, 76f)
+    fillRoundRect(palette.ground, slot, 2f)
+
+    // 開いていることの強調。つるの外れた側に短い線を3本
+    listOf(0f, 7f, 14f).forEach { dy ->
+        drawLine(
+            color = palette.muted,
+            start = Offset(104f, 22f + dy),
+            end = Offset(118f, 22f + dy),
+            strokeWidth = 2f * palette.strokeScale,
+        )
+    }
+}
+
+/** 検索して何も出なかったとき。空の紙と虫めがね。 */
+private fun DrawScope.drawSearchEmpty(palette: PaIllustrationPalette) {
+    val paper = Rect(30f, 12f, 118f, 88f)
+    fillRoundRect(palette.ground, paper, 4f)
+    strokeRoundRect(palette.line, paper, 4f, palette.strokeScale)
+
+    // 行。空振りの絵なので薄い1色だけにする（色を足すと「何かある」ように見える）
+    repeat(4) { index ->
+        val y = 26f + index * 13f
+        fillRoundRect(palette.muted, Rect(40f, y, 96f, y + 5f), 1.5f)
+    }
+
+    // 虫めがね。紙の右下に重ねて、紙より手前にあることを示す
+    val center = Offset(108f, 62f)
+    drawCircle(palette.ground, radius = 20f, center = center)
+    drawCircle(
+        color = palette.accent,
+        radius = 20f,
+        center = center,
+        style = Stroke(width = 3.2f * palette.strokeScale),
+    )
+    drawLine(
+        color = palette.accent,
+        start = Offset(122f, 76f),
+        end = Offset(138f, 92f),
+        strokeWidth = 4.5f * palette.strokeScale,
+    )
 }
 
 /** 音の広がり。原点から右向きの弧を [count] 本。 */

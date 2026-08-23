@@ -4,11 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +33,10 @@ import com.patoolbox.core.designsystem.theme.LocalPaDimens
  * 「わずかな明度差 + 髪の毛一本の枠線」で面を分ける作りを全画面で揃えるため。
  * 影は暗所モードでは見えず、屋外モードでは飛ぶので、4つのテーマすべてで
  * 成立するのは線で分ける方だけになる。
+ *
+ * @param rail 左端に出す識別帯の色。null なら出さない。
+ *   [PaPanel] と同じ位置・同じ太さにしてあるので、カードとパネルが混ざって並んでも
+ *   「左の色 = 仲間」という読み方が崩れない
  */
 @Composable
 fun PaCard(
@@ -35,6 +44,7 @@ fun PaCard(
     onClick: (() -> Unit)? = null,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
+    rail: Color? = null,
     corner: Dp = LocalPaDimens.current.cardCorner,
     contentPadding: Dp = LocalPaDimens.current.space,
     verticalArrangement: Arrangement.Vertical =
@@ -43,17 +53,39 @@ fun PaCard(
 ) {
     val dimens = LocalPaDimens.current
     val shape = RoundedCornerShape(corner)
+    val surface = modifier
+        .clip(shape)
+        .background(containerColor)
+        .border(dimens.hairline, borderColor, shape)
+        .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
 
-    Column(
-        modifier = modifier
-            .clip(shape)
-            .background(containerColor)
-            .border(dimens.hairline, borderColor, shape)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(contentPadding),
-        verticalArrangement = verticalArrangement,
-        content = content,
-    )
+    // 帯が無いときは Row を挟まない。帯を出すには中身の高さを先に測る
+    // （IntrinsicSize.Min）必要があり、それを全カードに課すと、
+    // 中身に高さを申告できないもの（Canvas やスクロールする面）を入れた画面が壊れる
+    if (rail == null) {
+        Column(
+            modifier = surface.padding(contentPadding),
+            verticalArrangement = verticalArrangement,
+            content = content,
+        )
+        return
+    }
+
+    Row(modifier = surface.height(IntrinsicSize.Min)) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(dimens.railWidth)
+                .background(rail),
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(contentPadding),
+            verticalArrangement = verticalArrangement,
+            content = content,
+        )
+    }
 }
 
 /**
@@ -79,7 +111,7 @@ fun PaSectionHeader(
             Text(
                 // 見出しは大きさではなく太さと余白で作る。
                 // 情報量の多い画面で見出しだけ大きいと、目が見出しに引っ張られて
-                // 中身が読まれなくなる（Cloudflare のダッシュボードと同じ考え方）
+                // 中身が読まれなくなる。セリフを当てるのは display 系だけ
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,

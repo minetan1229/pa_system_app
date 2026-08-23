@@ -417,14 +417,14 @@ internal fun InstrumentGroup.rail(): Color {
         }
     }
     return when (this) {
-        InstrumentGroup.DRUMS -> Color(0xFFC2410C)
-        InstrumentGroup.BASS -> Color(0xFF1E4FA8)
-        InstrumentGroup.GUITAR -> Color(0xFF0E7A62)
-        InstrumentGroup.VOCAL -> Color(0xFFA0348F)
-        InstrumentGroup.KEYS -> Color(0xFF6D3BC4)
-        InstrumentGroup.WIND_STRINGS -> Color(0xFF9A7100)
-        InstrumentGroup.PERCUSSION -> Color(0xFFB0392F)
-        InstrumentGroup.PLAYBACK -> Color(0xFF55606B)
+        InstrumentGroup.DRUMS -> Color(0xFFB9673E)
+        InstrumentGroup.BASS -> Color(0xFF5F82BF)
+        InstrumentGroup.GUITAR -> Color(0xFF4E9179)
+        InstrumentGroup.VOCAL -> Color(0xFFB76C9E)
+        InstrumentGroup.KEYS -> Color(0xFF8E7BC4)
+        InstrumentGroup.WIND_STRINGS -> Color(0xFF9A8248)
+        InstrumentGroup.PERCUSSION -> Color(0xFFA55145)
+        InstrumentGroup.PLAYBACK -> Color(0xFF6E6C64)
     }
 }
 

@@ -27,13 +27,16 @@ fun padColor(colorIndex: Int): Color {
 
 private const val PALETTE_SIZE = 6
 
+// 彩度は落としてある。純度の高い6色を並べると、
+// 生成りの地の上でパッドだけが別のアプリのように浮く。
+// 色相の間隔は保ってあるので、暗い袖で「青いやつ」と覚える使い方は変わらない。
 private val STANDARD = listOf(
-    Color(0xFF3B82F6), // 青
-    Color(0xFF10B981), // 緑
-    Color(0xFFF59E0B), // 橙
-    Color(0xFFEC4899), // 桃
-    Color(0xFF8B5CF6), // 紫
-    Color(0xFF06B6D4), // 水
+    Color(0xFF5F82BF), // 青
+    Color(0xFF4E9179), // 緑
+    Color(0xFFD9A362), // 橙
+    Color(0xFFC4738F), // 桃
+    Color(0xFF8E7BC4), // 紫
+    Color(0xFF4E96A5), // 水
 )
 
 private val NIGHT_RED = listOf(

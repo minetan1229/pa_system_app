@@ -1,6 +1,5 @@
 package com.patoolbox.feature.home
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +30,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.patoolbox.core.designsystem.component.PaAppMark
 import com.patoolbox.core.designsystem.component.PaCard
-import com.patoolbox.core.designsystem.component.PaFilterChip
 import com.patoolbox.core.designsystem.component.PaIllustration
 import com.patoolbox.core.designsystem.component.PaNotice
 import com.patoolbox.core.designsystem.component.PaPill
@@ -45,6 +43,7 @@ import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ToolCategory
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.accentColor
+import com.patoolbox.core.ui.component.OpenAccessNotice
 import com.patoolbox.core.ui.component.ToolCard
 import com.patoolbox.core.ui.titleRes
 
@@ -120,10 +119,18 @@ internal fun HomeScreen(
             Column {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = stringResource(R.string.home_title),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // 印を題の左に置く。文字だけの上帯はどの画面でも同じ顔になり、
+                            // 38画面を行き来していると自分がどこにいるのか手掛かりが無くなる
+                            PaAppMark(modifier = Modifier.size(dimens.space + dimens.spaceSm))
+                            Text(
+                                text = stringResource(R.string.home_title),
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
                     },
                     actions = {
                         TextButton(onClick = onSettingsClick) {
@@ -157,6 +164,12 @@ internal fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
                     modifier = Modifier.padding(top = dimens.spaceMd),
                 ) {
+                    // 慣れの度合いをまだ選んでいなければ、何より先にこれを聞く。
+                    // 見出しの絵より上に置くのは「まずここを埋めてから中身を出す」と
+                    // 分かるようにするため
+                    if (query.isEmpty() && !uiState.hasChosenExperienceLevel) {
+                        LevelOnboarding(onLevelChange = onLevelChange)
+                    }
                     // 上級者では見出しの絵を出さない。情報を持たない絵に
                     // 一画面の1/3を使われるより、道具が1行でも多く見える方がいい
                     if (query.isEmpty() && uiState.level != ExperienceLevel.ADVANCED) {
@@ -164,7 +177,17 @@ internal fun HomeScreen(
                     }
                     SearchField(query = uiState.query, onQueryChange = onQueryChange)
                     if (query.isEmpty()) {
-                        LevelSelector(level = uiState.level, onLevelChange = onLevelChange)
+                        // 選んだあとは常時のチップ列ではなく、現在値だけの小さい行にする。
+                        // ただし消しはしない——「一応何を選んでいるか」は毎回見えたほうがいい。
+                        // 変えたくなったらここから設定画面へ飛べる
+                        if (uiState.hasChosenExperienceLevel) {
+                            LevelIndicator(level = uiState.level, onOpenSettings = onSettingsClick)
+                        }
+                        // 段の札のすぐ下に置く。「初心者にすると札が増える」ことと
+                        // 「札は増えるが開けなくなるものは無い」ことを続けて読ませたい
+                        if (uiState.level != ExperienceLevel.ADVANCED) {
+                            OpenAccessNotice(proUnlocked = uiState.proStatus.isPro)
+                        }
                     }
                 }
             }
@@ -308,14 +331,7 @@ private fun LazyGridScope.toolSections(
     onToggleFavorite: (ToolId) -> Unit,
 ) {
     if (tools.isEmpty()) {
-        fullSpan {
-            Text(
-                text = stringResource(R.string.home_no_results, uiState.query),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = LocalPaDimens.current.spaceLg),
-            )
-        }
+        fullSpan { EmptyResult(query = uiState.query) }
         return
     }
 
@@ -344,64 +360,123 @@ private fun LazyGridScope.toolSections(
 }
 
 /**
- * 慣れの度合いの札。
+ * 慣れの度合いを最初に一度だけ尋ねる案内。
  *
- * 設定の奥に入れず、ホームに出している。初めて開いた人が
- * 「情報が多すぎる／少なすぎる」と思ったその場で変えられる位置にないと、
- * この設定は無いのと同じになるため。
+ * ホームの一番上、検索欄より前に置く。あとから設定で変えられるとはいえ、
+ * 「何も選んでいない中級扱い」のまま使わせるより、最初に一度だけでも
+ * 自分で選んでもらった方が、以降のホームの並びに納得感が出る。
+ *
+ * 選ぶと [HomeUiState.hasChosenExperienceLevel] が true になり、この案内自体が消えて
+ * [LevelIndicator] に置き換わる（呼び出し側の条件分岐で制御している）。
  */
 @Composable
-private fun LevelSelector(
-    level: ExperienceLevel,
+private fun LevelOnboarding(
     onLevelChange: (ExperienceLevel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dimens = LocalPaDimens.current
-    Column(
+    PaCard(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(dimens.spaceXs),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        contentPadding = dimens.space,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
+            Text(
+                text = stringResource(R.string.home_onboarding_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = stringResource(R.string.home_onboarding_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+            ExperienceLevel.entries.forEach { entry ->
+                LevelOnboardingOption(
+                    label = stringResource(entry.labelRes()),
+                    note = stringResource(entry.onboardingNoteRes(), ToolId.entries.size),
+                    onClick = { onLevelChange(entry) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LevelOnboardingOption(
+    label: String,
+    note: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+    PaCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        contentPadding = dimens.spaceMd,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceXs / 2),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = note,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * 選んだあとの、慣れの度合いの現在値。
+ *
+ * 常時のチップ列（[LevelOnboarding] 相当のもの）に戻さないのは、
+ * 選び終えた人には毎回同じ選択肢が場所を取るだけになるため。
+ * とはいえ完全に隠すと「変えられることに気づけない」ので、
+ * 現在値と設定への導線だけは毎回出しておく。
+ */
+@Composable
+private fun LevelIndicator(
+    level: ExperienceLevel,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = stringResource(R.string.home_level_label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
-        ) {
-            ExperienceLevel.entries.forEach { entry ->
-                PaFilterChip(
-                    text = stringResource(entry.labelRes()),
-                    selected = entry == level,
-                    onClick = { onLevelChange(entry) },
-                )
-            }
-        }
-        when (level) {
-            ExperienceLevel.BEGINNER -> LevelNote(stringResource(R.string.home_level_beginner_note))
-            ExperienceLevel.ADVANCED -> LevelNote(
-                stringResource(R.string.home_level_advanced_note, ToolId.entries.size),
+        PaPill(text = stringResource(level.labelRes()), tone = PaTone.NEUTRAL)
+        TextButton(onClick = onOpenSettings) {
+            Text(
+                text = stringResource(R.string.home_level_change),
+                style = MaterialTheme.typography.labelLarge,
             )
-            // 既定なので補足を出さない。何も変えていない状態の説明は要らない
-            ExperienceLevel.INTERMEDIATE -> Unit
         }
     }
-}
-
-@Composable
-private fun LevelNote(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 private fun ExperienceLevel.labelRes(): Int = when (this) {
     ExperienceLevel.BEGINNER -> R.string.home_level_beginner
     ExperienceLevel.INTERMEDIATE -> R.string.home_level_intermediate
     ExperienceLevel.ADVANCED -> R.string.home_level_advanced
+}
+
+private fun ExperienceLevel.onboardingNoteRes(): Int = when (this) {
+    ExperienceLevel.BEGINNER -> R.string.home_level_beginner_note
+    ExperienceLevel.INTERMEDIATE -> R.string.home_level_intermediate_note
+    ExperienceLevel.ADVANCED -> R.string.home_level_advanced_note
 }
 
 /**
@@ -424,11 +499,14 @@ private fun Hero(modifier: Modifier = Modifier) {
             contentDescription = stringResource(R.string.home_hero_image),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(132.dp),
+                .height(dimens.illustrationHero),
         )
         Text(
+            // ここだけセリフ体（displaySmall）。読み物の題と、操作するUIの文字を
+            // 書体で分けている。同じゴシックで大きさだけ変えると、
+            // 下に続く測定値の見出しと同じ強さに見えてしまう
             text = stringResource(R.string.home_hero_title),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
@@ -474,7 +552,10 @@ private fun CalibrationPanel(
                     } else {
                         PaScene.ONE_PHONE
                     },
-                    modifier = Modifier.size(width = 96.dp, height = 60.dp),
+                    modifier = Modifier.size(
+                        width = dimens.illustrationRow * 1.6f,
+                        height = dimens.illustrationRow,
+                    ),
                 )
             }
             Column(
@@ -541,6 +622,9 @@ private fun CategoryCard(
     PaCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
+        // ツールカードと同じ位置に同じ色の帯を出す。入口とその中身が
+        // 同じ色で繋がっていないと、押した先が同じ分類だと確認できない
+        rail = category.accentColor(),
         contentPadding = dimens.space,
     ) {
         Row(
@@ -549,7 +633,10 @@ private fun CategoryCard(
         ) {
             PaIllustration(
                 scene = category.scene(),
-                modifier = Modifier.size(width = 88.dp, height = 55.dp),
+                modifier = Modifier.size(
+                    width = dimens.illustrationRow * 1.6f,
+                    height = dimens.illustrationRow,
+                ),
             )
             Column(
                 modifier = Modifier.weight(1f),

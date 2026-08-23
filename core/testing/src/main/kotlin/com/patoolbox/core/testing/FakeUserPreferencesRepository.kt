@@ -51,6 +51,7 @@ class FakeUserPreferencesRepository(
     override suspend fun setExperienceLevel(level: ExperienceLevel) {
         state.value = state.value.copy(
             profile = state.value.profile.copy(level = level),
+            hasChosenExperienceLevel = true,
         )
     }
 

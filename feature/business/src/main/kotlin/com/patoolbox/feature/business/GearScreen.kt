@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,6 +51,7 @@ fun GearScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dimens = LocalPaDimens.current
     var editing by remember { mutableStateOf<GearItem?>(null) }
+    var showPresets by remember { mutableStateOf(false) }
 
     BusinessScaffold(
         tool = ToolId.GEAR_INVENTORY,
@@ -91,6 +93,12 @@ fun GearScreen(
                 }
             }
 
+            // 一件ずつ手で打つのがつらい定番の型番は、選ぶだけで編集画面まで進めるようにしてある。
+            // ここで台帳に足してしまわないのは、持ってもいない機材が並ぶと台帳が信用できなくなるため
+            TextButton(onClick = { showPresets = true }) {
+                Text(stringResource(R.string.gear_add_from_preset))
+            }
+
             if (uiState.visible.isEmpty()) {
                 Text(
                     text = stringResource(R.string.gear_empty),
@@ -126,6 +134,73 @@ fun GearScreen(
             },
         )
     }
+
+    if (showPresets) {
+        GearPresetDialog(
+            onDismiss = { showPresets = false },
+            onSelect = { preset ->
+                showPresets = false
+                editing = preset
+            },
+        )
+    }
+}
+
+/**
+ * よくある機材の選択肢。
+ *
+ * 選んだ時点ではまだ何も保存しない。次に開く [GearDialog] で
+ * 台数・シリアル・状態を確認してから保存する、既存の追加フローに合流させている。
+ */
+@Composable
+private fun GearPresetDialog(
+    onDismiss: () -> Unit,
+    onSelect: (GearItem) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.gear_preset_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.gear_preset_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 360.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(GearPresets.ALL) { preset ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(preset) }
+                                .padding(vertical = 10.dp),
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = preset.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = "${preset.category.label} ／ ${preset.name}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.business_cancel))
+            }
+        },
+    )
 }
 
 @Composable

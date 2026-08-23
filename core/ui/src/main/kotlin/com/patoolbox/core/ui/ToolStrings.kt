@@ -42,6 +42,7 @@ val ToolId.titleRes: Int
         ToolId.PDF_EXPORT -> R.string.tool_pdf_export_title
         ToolId.RUN_SHEET -> R.string.tool_run_sheet_title
         ToolId.SHOW_TIMER -> R.string.tool_show_timer_title
+        ToolId.SHOW_RUNNER -> R.string.tool_show_runner_title
         ToolId.SFX_PADS -> R.string.tool_sfx_pads_title
         ToolId.JOB_MANAGER -> R.string.tool_job_manager_title
         ToolId.SNAPSHOT -> R.string.tool_snapshot_title
@@ -85,6 +86,7 @@ val ToolId.descriptionRes: Int
         ToolId.PDF_EXPORT -> R.string.tool_pdf_export_desc
         ToolId.RUN_SHEET -> R.string.tool_run_sheet_desc
         ToolId.SHOW_TIMER -> R.string.tool_show_timer_desc
+        ToolId.SHOW_RUNNER -> R.string.tool_show_runner_desc
         ToolId.SFX_PADS -> R.string.tool_sfx_pads_desc
         ToolId.JOB_MANAGER -> R.string.tool_job_manager_desc
         ToolId.SNAPSHOT -> R.string.tool_snapshot_desc

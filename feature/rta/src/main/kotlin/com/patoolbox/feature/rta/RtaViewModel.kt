@@ -33,6 +33,18 @@ enum class RtaAveraging(val coefficient: Double) {
     SLOW(0.07),
 }
 
+/**
+ * ピークホールドの保持秒数。
+ *
+ * 無期限（ずっと最大値のまま）にしないのは、リハと本番の間に空くと
+ * 数十分前の一発が残ったままになり、いまの音量と見分けが付かなくなるため。
+ * 短すぎると目で追えないので、下限は5秒にしてある。
+ */
+enum class RtaPeakHoldDuration(val seconds: Double) {
+    SHORT(5.0),
+    LONG(10.0),
+}
+
 data class RtaBand(
     val label: String,
     val levelDb: Double,
@@ -48,6 +60,7 @@ data class RtaUiState(
     val weighting: FrequencyWeighting = FrequencyWeighting.Z,
     val averaging: RtaAveraging = RtaAveraging.NORMAL,
     val peakHold: Boolean = true,
+    val peakHoldDuration: RtaPeakHoldDuration = RtaPeakHoldDuration.LONG,
     val calibration: CalibrationProfile = CalibrationProfile.uncalibrated(
         AudioInputDevice.BUILTIN_KEY,
         AudioInputType.BUILTIN_MIC,
@@ -84,6 +97,9 @@ class RtaViewModel @Inject constructor(
 
     private var smoothedPowers = DoubleArray(bandAnalyzer.bands.size)
     private var peakPowers = DoubleArray(bandAnalyzer.bands.size)
+    /** 各帯域のピークを更新した時刻（[elapsedSeconds] 基準） */
+    private var peakSetAtSeconds = DoubleArray(bandAnalyzer.bands.size)
+    private var elapsedSeconds = 0.0
     private var framePowers = DoubleArray(bandAnalyzer.bands.size)
     private var weighted = FloatArray(AudioCaptureEngine.DEFAULT_BLOCK_SIZE)
     private var hasFrame = false
@@ -143,12 +159,18 @@ class RtaViewModel @Inject constructor(
 
     fun togglePeakHold() {
         val enabled = !_uiState.value.peakHold
-        if (!enabled) peakPowers.fill(0.0)
+        if (!enabled) clearPeaks()
         _uiState.update { it.copy(peakHold = enabled) }
+    }
+
+    /** ピークホールドの保持秒数。次に更新されるカラムから効く。 */
+    fun setPeakHoldDuration(duration: RtaPeakHoldDuration) {
+        _uiState.update { it.copy(peakHoldDuration = duration) }
     }
 
     fun clearPeaks() {
         peakPowers.fill(0.0)
+        peakSetAtSeconds.fill(elapsedSeconds)
     }
 
     override fun onCleared() {
@@ -168,13 +190,24 @@ class RtaViewModel @Inject constructor(
             bandAnalyzer.bandPowers(analyzer.powerSpectrum(frame), framePowers)
 
             val alpha = _uiState.value.averaging.coefficient
+            val holdSeconds = _uiState.value.peakHoldDuration.seconds
+            elapsedSeconds += HOP_SECONDS
             for (b in framePowers.indices) {
                 smoothedPowers[b] = if (hasFrame) {
                     smoothedPowers[b] + alpha * (framePowers[b] - smoothedPowers[b])
                 } else {
                     framePowers[b]
                 }
-                if (smoothedPowers[b] > peakPowers[b]) peakPowers[b] = smoothedPowers[b]
+                when {
+                    smoothedPowers[b] > peakPowers[b] -> {
+                        peakPowers[b] = smoothedPowers[b]
+                        peakSetAtSeconds[b] = elapsedSeconds
+                    }
+                    elapsedSeconds - peakSetAtSeconds[b] >= holdSeconds -> {
+                        peakPowers[b] = smoothedPowers[b]
+                        peakSetAtSeconds[b] = elapsedSeconds
+                    }
+                }
             }
             hasFrame = true
             publish()
@@ -208,6 +241,8 @@ class RtaViewModel @Inject constructor(
         accumulator = FrameAccumulator(FFT_SIZE, hopSize = FFT_SIZE / 2)
         smoothedPowers = DoubleArray(bandAnalyzer.bands.size)
         peakPowers = DoubleArray(bandAnalyzer.bands.size)
+        peakSetAtSeconds = DoubleArray(bandAnalyzer.bands.size)
+        elapsedSeconds = 0.0
         framePowers = DoubleArray(bandAnalyzer.bands.size)
         hasFrame = false
     }
@@ -229,5 +264,8 @@ class RtaViewModel @Inject constructor(
     private companion object {
         /** 48kHz でビン幅約5.9Hz。1/3オクターブの最低帯域を拾える下限 */
         const val FFT_SIZE = 8192
+
+        /** FFT_SIZE/2（50%オーバーラップのホップ幅）÷ サンプルレート */
+        const val HOP_SECONDS = (FFT_SIZE / 2).toDouble() / AudioCaptureEngine.DEFAULT_SAMPLE_RATE
     }
 }

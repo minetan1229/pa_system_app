@@ -52,6 +52,7 @@ fun RtaScreen(
         onWeighting = viewModel::setWeighting,
         onAveraging = viewModel::setAveraging,
         onTogglePeakHold = viewModel::togglePeakHold,
+        onPeakHoldDuration = viewModel::setPeakHoldDuration,
         onClearPeaks = viewModel::clearPeaks,
         onBack = onBack,
         modifier = modifier,
@@ -68,6 +69,7 @@ internal fun RtaScreen(
     onWeighting: (FrequencyWeighting) -> Unit,
     onAveraging: (RtaAveraging) -> Unit,
     onTogglePeakHold: () -> Unit,
+    onPeakHoldDuration: (RtaPeakHoldDuration) -> Unit,
     onClearPeaks: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -195,6 +197,19 @@ internal fun RtaScreen(
                         onCheckedChange = { onTogglePeakHold() },
                     )
                 }
+                // 保持時間は「保持している間だけ」意味を持つので、切ってあるときは隠す
+                if (uiState.peakHold) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RtaPeakHoldDuration.entries.forEach { duration ->
+                            ToggleButton(
+                                text = stringResource(duration.labelRes()),
+                                selected = duration == uiState.peakHoldDuration,
+                                onClick = { onPeakHoldDuration(duration) },
+                                minTouch = dimens.minTouch,
+                            )
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier
@@ -260,4 +275,9 @@ private fun RtaAveraging.labelRes(): Int = when (this) {
     RtaAveraging.FAST -> R.string.rta_avg_fast
     RtaAveraging.NORMAL -> R.string.rta_avg_normal
     RtaAveraging.SLOW -> R.string.rta_avg_slow
+}
+
+private fun RtaPeakHoldDuration.labelRes(): Int = when (this) {
+    RtaPeakHoldDuration.SHORT -> R.string.rta_peak_hold_short
+    RtaPeakHoldDuration.LONG -> R.string.rta_peak_hold_long
 }

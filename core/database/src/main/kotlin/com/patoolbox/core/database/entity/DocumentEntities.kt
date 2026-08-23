@@ -1,5 +1,6 @@
 package com.patoolbox.core.database.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -109,6 +110,9 @@ data class StageItemEntity(
     val label: String = "",
     val x: Float,
     val y: Float,
+    // AutoMigration で列を足すときは既存行を埋める既定値が要る
+    @ColumnInfo(defaultValue = "0")
+    val colorIndex: Int = 0,
 )
 
 /** 進行表の1項目。 */

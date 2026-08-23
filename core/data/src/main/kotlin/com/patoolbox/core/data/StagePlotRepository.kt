@@ -4,6 +4,7 @@ import com.patoolbox.core.database.dao.StagePlotDao
 import com.patoolbox.core.database.entity.StageItemEntity
 import com.patoolbox.core.database.entity.StagePlotEntity
 import com.patoolbox.core.model.StageItem
+import com.patoolbox.core.model.StageItemColor
 import com.patoolbox.core.model.StagePlot
 import com.patoolbox.core.model.StageSymbol
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,9 @@ interface StagePlotRepository {
     suspend fun moveItem(plotId: Long, itemId: Long, x: Float, y: Float)
 
     suspend fun renameItem(plotId: Long, item: StageItem, label: String)
+
+    /** 色だけを書く。[moveItem] と同じ理由で他の列には触らない */
+    suspend fun recolorItem(plotId: Long, itemId: Long, colorIndex: Int)
 
     suspend fun deleteItem(plotId: Long, itemId: Long)
 }
@@ -96,6 +100,7 @@ class RoomStagePlotRepository @Inject constructor(
                 label = item.label,
                 x = item.x.coerceIn(0f, 1f),
                 y = item.y.coerceIn(0f, 1f),
+                colorIndex = StageItemColor.coerce(item.colorIndex),
             ),
         )
         dao.touchPlot(plotId, System.currentTimeMillis())
@@ -104,6 +109,11 @@ class RoomStagePlotRepository @Inject constructor(
 
     override suspend fun moveItem(plotId: Long, itemId: Long, x: Float, y: Float) {
         dao.moveItem(itemId, x.coerceIn(0f, 1f), y.coerceIn(0f, 1f))
+        dao.touchPlot(plotId, System.currentTimeMillis())
+    }
+
+    override suspend fun recolorItem(plotId: Long, itemId: Long, colorIndex: Int) {
+        dao.recolorItem(itemId, StageItemColor.coerce(colorIndex))
         dao.touchPlot(plotId, System.currentTimeMillis())
     }
 
@@ -116,6 +126,7 @@ class RoomStagePlotRepository @Inject constructor(
                 label = label,
                 x = item.x,
                 y = item.y,
+                colorIndex = item.colorIndex,
             ),
         )
         dao.touchPlot(plotId, System.currentTimeMillis())
@@ -145,4 +156,5 @@ private fun StageItemEntity.toModel() = StageItem(
     label = label,
     x = x,
     y = y,
+    colorIndex = StageItemColor.coerce(colorIndex),
 )

@@ -4,17 +4,19 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// 配色の考え方（Cloudflare のダッシュボードを参照して組み直したもの）
+// 配色の考え方（Claude をモチーフに組み直したもの）
 //
-// 1. **面はほぼ無彩色**にする。白と灰色の段差だけで構造を作り、
-//    色は「意味があるところ」にしか使わない。38ツールぶんの画面を並べたときに
-//    落ち着いて見えるのは、色数を絞った方だった。
-// 2. **ブランド色（橙）は文字を乗せない**。帯・下線・バッジ・図の線に使う。
-//    橙の上に白文字を置くとコントラストが 3:1 前後しか出ず、屋外で読めない。
-//    文字を乗せる必要があるボタンには、暗く落とした [PaBrand.orangeInk] を使う。
+// 1. **地は白ではなく生成りの紙**。#F0EEE6 を地に、#FAF9F5 をカードに使う。
+//    暗色側も純黒ではなく炭色（#1F1E1D）まで。長時間見る道具なので、
+//    青白い面や純黒より、紙と炭の面の方が目が疲れない。
+// 2. **色は粘土色（clay, #D97757）を1色だけ効かせる**。帯・下線・バッジの地・図の線に使う。
+//    **白文字は乗せない**——コントラストが 3.1 しか出ず、屋外で読めない。
+//    白文字が要るボタンには暗く落とした [PaBrand.clayInk] を使う（白に対して 6.1）。
 // 3. 面の分け方は **影ではなく「明度差 + 1dp の枠線」**。
 //    暗所モードでは影が一切見えず、屋外モードでは影が飛ぶので、
 //    4つのテーマすべてで同じ作りが成立するのは線で分ける方だけ。
+// 4. 意味の色（藍・緑・赤・琥珀）も彩度を落として紙の面に馴染ませる。
+//    ただし文字として使う値はすべて 4.5:1 以上を確認してある。
 //
 // surfaceContainer 系まで明示的に指定しているのは、省くと Material のベースライン
 // （紫がかったグレー）が残り、特に NIGHT_RED でカードだけ灰色に浮くため。
@@ -23,113 +25,115 @@ import androidx.compose.ui.graphics.Color
  * テーマに依存しないブランド色。
  *
  * 色面や図の線に使う。**文字色として使わないこと**
- * （明色テーマの白背景では [orange] のコントラストが足りない）。
+ * （明色テーマの紙の面では [clay] のコントラストが 3.0 しか出ない）。
  */
 object PaBrand {
-    /** ブランドの橙。帯・下線・バッジの地・図の線に使う */
-    val orange = Color(0xFFF6821F)
+    /** 粘土色。帯・下線・バッジの地・図の線に使う。黒文字なら乗せられる（6.7） */
+    val clay = Color(0xFFD97757)
 
-    /** 橙の上に白文字を置く必要があるとき用。白に対して約 5:1 */
-    val orangeInk = Color(0xFFB8500A)
+    /** 白文字を乗せる必要があるとき用。白に対して約 6.1:1 */
+    val clayInk = Color(0xFFA6431E)
 
-    /** 橙の淡い地色。バッジやお知らせの背景 */
-    val orangeTintLight = Color(0xFFFDF0E2)
-    val orangeTintDark = Color(0xFF3A2109)
+    /** 粘土色の淡い地。バッジやお知らせの背景 */
+    val clayTintLight = Color(0xFFF5E4DA)
+    val clayTintDark = Color(0xFF3A211A)
 
-    /** リンクと情報。Cloudflare のドキュメントリンクと同系 */
-    val blue = Color(0xFF0055CC)
-    val blueTintLight = Color(0xFFE4EDFB)
-    val blueTintDark = Color(0xFF10243F)
+    /** リンクと情報。紙の面に合うよう彩度を落とした藍 */
+    val blue = Color(0xFF2C5C8F)
+    val blueTintLight = Color(0xFFE3E9F0)
+    val blueTintDark = Color(0xFF17273A)
 
-    val green = Color(0xFF0F7B4F)
-    val greenTintLight = Color(0xFFE1F3EA)
-    val greenTintDark = Color(0xFF0E2A1E)
+    val green = Color(0xFF2F6B47)
+    val greenTintLight = Color(0xFFE1EDE4)
+    val greenTintDark = Color(0xFF16301F)
 
-    val red = Color(0xFFBE3B34)
-    val redTintLight = Color(0xFFFBE7E5)
-    val redTintDark = Color(0xFF33110F)
+    val red = Color(0xFFB03A2E)
+    val redTintLight = Color(0xFFF7E3DE)
+    val redTintDark = Color(0xFF3A1512)
 
-    val amber = Color(0xFF8A5B00)
-    val amberTintLight = Color(0xFFFBF0DA)
-    val amberTintDark = Color(0xFF2E2206)
+    /** 注意。麻色寄りの琥珀 */
+    val amber = Color(0xFF7A5210)
+    val amberTintLight = Color(0xFFF3E7CE)
+    val amberTintDark = Color(0xFF33280F)
 }
 
 /**
  * 明色。既定。
  *
- * 背景をわずかに温かい灰色（#F5F3EF）にして、カードの白を浮かせている。
- * 背景まで白にすると、枠線だけで面を分ける作りが成立しない。
+ * 地を生成り（#F0EEE6）、カードを紙の白（#FAF9F5）にして、
+ * 明度差 + 枠線だけで面を分けている。地まで純白にすると、この作りが成立しない。
  *
- * 青みの灰色（#F6F6F7）から温色側に振ってあるのは、長時間見る画面で
- * 冷たい灰色が硬く感じられたため。明度はほぼ変えていないので、
- * 文字と枠線のコントラストは元のまま。
+ * 無彩色の灰ではなく黄み寄りの灰を通しているのは、粘土色を1色だけ効かせる配色で
+ * 面が青白いと、差し色だけが浮いて安っぽく見えるため。
  */
 internal val PaLightColors = lightColorScheme(
-    primary = PaBrand.orangeInk,
+    primary = PaBrand.clayInk,
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = PaBrand.orangeTintLight,
-    onPrimaryContainer = Color(0xFF4A2000),
+    primaryContainer = PaBrand.clayTintLight,
+    onPrimaryContainer = Color(0xFF5C2410),
     secondary = PaBrand.blue,
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = PaBrand.blueTintLight,
-    onSecondaryContainer = Color(0xFF00265C),
+    onSecondaryContainer = Color(0xFF123A63),
     tertiary = PaBrand.green,
     onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = PaBrand.greenTintLight,
-    onTertiaryContainer = Color(0xFF04301D),
+    onTertiaryContainer = Color(0xFF143A26),
     error = PaBrand.red,
     onError = Color(0xFFFFFFFF),
     errorContainer = PaBrand.redTintLight,
-    onErrorContainer = Color(0xFF450F0B),
-    background = Color(0xFFF5F3EF),
-    onBackground = Color(0xFF1D1F20),
-    surface = Color(0xFFF5F3EF),
-    onSurface = Color(0xFF1D1F20),
-    surfaceVariant = Color(0xFFEDEAE3),
-    onSurfaceVariant = Color(0xFF5F6469),
+    onErrorContainer = Color(0xFF4E120C),
+    background = Color(0xFFF0EEE6),
+    onBackground = Color(0xFF1F1E1D),
+    surface = Color(0xFFF0EEE6),
+    onSurface = Color(0xFF1F1E1D),
+    surfaceVariant = Color(0xFFE8E6DC),
+    onSurfaceVariant = Color(0xFF63615A),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFFDFCFA),
-    surfaceContainer = Color(0xFFFFFFFF),
-    surfaceContainerHigh = Color(0xFFF1EEE8),
-    surfaceContainerHighest = Color(0xFFE8E4DC),
-    outline = Color(0xFF74797E),
-    outlineVariant = Color(0xFFDFDAD1),
+    surfaceContainerLow = Color(0xFFFDFCF8),
+    surfaceContainer = Color(0xFFFAF9F5),
+    surfaceContainerHigh = Color(0xFFEDEBE1),
+    surfaceContainerHighest = Color(0xFFE3E0D3),
+    outline = Color(0xFF6E6C64),
+    outlineVariant = Color(0xFFDCD9CB),
 )
 
 /**
  * 暗色。FOH の卓まわりで一番長く見る画面なので、ここを基準に作ってある。
- * 背景をほぼ黒に落とし、面は明度をわずかに上げるだけで分ける。
+ *
+ * 純黒ではなく炭色（#1F1E1D）で止めている。純黒に白文字だとコントラストが立ちすぎて、
+ * 薄暗い場所では文字の縁が滲んで見える。面は明度をわずかに上げるだけで分ける。
  */
 internal val PaDarkColors = darkColorScheme(
-    primary = PaBrand.orange,
-    onPrimary = Color(0xFF2B1400),
-    primaryContainer = PaBrand.orangeTintDark,
-    onPrimaryContainer = Color(0xFFFFC894),
-    secondary = Color(0xFF7FAEFF),
-    onSecondary = Color(0xFF002451),
+    primary = PaBrand.clay,
+    onPrimary = Color(0xFF2E1109),
+    primaryContainer = PaBrand.clayTintDark,
+    onPrimaryContainer = Color(0xFFF0B79B),
+    secondary = Color(0xFF8FB3DC),
+    onSecondary = Color(0xFF0C2039),
     secondaryContainer = PaBrand.blueTintDark,
-    onSecondaryContainer = Color(0xFFCEDFFB),
-    tertiary = Color(0xFF57C48D),
-    onTertiary = Color(0xFF00351F),
+    onSecondaryContainer = Color(0xFFC9DCF2),
+    tertiary = Color(0xFF6FC292),
+    onTertiary = Color(0xFF0A2716),
     tertiaryContainer = PaBrand.greenTintDark,
-    onTertiaryContainer = Color(0xFFB8E9CE),
-    error = Color(0xFFFF8F86),
-    onError = Color(0xFF5A0F0A),
+    onTertiaryContainer = Color(0xFFB4E3C7),
+    error = Color(0xFFFF9A8E),
+    onError = Color(0xFF4A0F09),
     errorContainer = PaBrand.redTintDark,
-    onErrorContainer = Color(0xFFFFD6D2),
-    background = Color(0xFF121314),
-    onBackground = Color(0xFFE9EAEB),
-    surface = Color(0xFF121314),
-    onSurface = Color(0xFFE9EAEB),
-    surfaceVariant = Color(0xFF2B2D2F),
-    onSurfaceVariant = Color(0xFFA9AEB3),
-    surfaceContainerLowest = Color(0xFF0C0D0E),
-    surfaceContainerLow = Color(0xFF16181A),
-    surfaceContainer = Color(0xFF1C1E20),
-    surfaceContainerHigh = Color(0xFF24262A),
-    surfaceContainerHighest = Color(0xFF2D3033),
-    outline = Color(0xFF878C92),
-    outlineVariant = Color(0xFF32353A),
+    onErrorContainer = Color(0xFFFFD3CB),
+    background = Color(0xFF1F1E1D),
+    onBackground = Color(0xFFF5F4EF),
+    surface = Color(0xFF1F1E1D),
+    onSurface = Color(0xFFF5F4EF),
+    surfaceVariant = Color(0xFF30302E),
+    onSurfaceVariant = Color(0xFFA8A69C),
+    surfaceContainerLowest = Color(0xFF141413),
+    surfaceContainerLow = Color(0xFF1F1E1D),
+    surfaceContainer = Color(0xFF262624),
+    surfaceContainerHigh = Color(0xFF30302E),
+    surfaceContainerHighest = Color(0xFF3A3A37),
+    outline = Color(0xFF8A887F),
+    outlineVariant = Color(0xFF3D3D3A),
 )
 
 /**
@@ -205,15 +209,28 @@ internal val PaOutdoorColors = lightColorScheme(
  * カテゴリの識別色。
  *
  * アイコンを使わない方針なので、色 + 文字バッジでツールを見分ける。
- * ブランド色（橙）を計測に当てず現場ドキュメントに残しているのは、
- * 橙が「アプリの色」として画面のあちこちに出るため、
+ * ブランド色（粘土色）を計測に当てず現場ドキュメントに残しているのは、
+ * 粘土色が「アプリの色」として画面のあちこちに出るため、
  * カテゴリの識別としては別の色相に散らした方が見分けやすいから。
+ *
+ * **明色用と暗色用で別の値を持つ。** バッジは色面の上に文字を置くので、
+ * 明色テーマ向けの濃い色をそのまま暗色テーマの炭色のカードに置くと、
+ * カードとの明度差が 2.5 まで落ちてバッジの輪郭が消える。
+ *
+ * 呼び出し側はこの object を直接使わず、`ToolCategory.accentColor()` を通すこと。
  */
 object PaCategoryColors {
-    val measure = Color(0xFF2C7683)
-    val calc = Color(0xFF4A6FB5)
-    val document = PaBrand.orange
-    val business = Color(0xFF7565AC)
+    // 明色用。白文字が乗る前提（いずれも白に対して 5.5 以上）
+    val measure = Color(0xFF35646E)
+    val calc = Color(0xFF515EA0)
+    val document = PaBrand.clayInk
+    val business = Color(0xFF6B5E8E)
+
+    // 暗色用。黒文字が乗る前提（いずれも黒に対して 8.5 以上）
+    val measureDark = Color(0xFF6FB3C0)
+    val calcDark = Color(0xFF97A2E2)
+    val documentDark = PaBrand.clay
+    val businessDark = Color(0xFFB3A3D6)
 }
 
 /**
@@ -223,24 +240,27 @@ object PaCategoryColors {
  * 彩度を落として面だけで見せる。ここを強い色で塗ると、
  * 隣に並ぶ実測値のグラフより挿絵の方が目立ってしまう。
  *
+ * 地を紙・麻・生成りで揃えているのは、挿絵だけ別のアプリから
+ * 持ってきたように見えないようにするため。
+ *
  * **呼び出し側でこの object を直接使わないこと。**
  * 暗所モード（赤以外の光を出せない）と屋外モード（淡色が飛ぶ）では別の値が要るので、
  * 必ず `paIllustrationPalette()` を通す。
  */
 internal object PaSoft {
-    // 明色。温かい砂色を地にして、水色と若草色を面に置く
-    val lineLight = Color(0xFF7A7264)
-    val sandLight = Color(0xFFF0EBE1)
-    val mutedLight = Color(0xFFE1DACC)
-    val skyLight = Color(0xFFBFCFDD)
-    val sageLight = Color(0xFFC3D2C4)
-    val clayLight = Color(0xFFE3A672)
+    // 明色。麻色を地にして、鈍い藍と苔色を面に置く
+    val lineLight = Color(0xFF7C7568)
+    val sandLight = Color(0xFFEDE7D9)
+    val mutedLight = Color(0xFFDCD3C0)
+    val skyLight = Color(0xFFBECBD8)
+    val sageLight = Color(0xFFC6CDB2)
+    val clayLight = Color(0xFFD97757)
 
     // 暗色。同じ色相のまま明度を落とす（色相を変えると別のアプリに見える）
-    val lineDark = Color(0xFF9BA0A6)
-    val sandDark = Color(0xFF1E2022)
-    val mutedDark = Color(0xFF2B2E31)
-    val skyDark = Color(0xFF3A4C5F)
-    val sageDark = Color(0xFF3D4E44)
-    val clayDark = Color(0xFFB9803F)
+    val lineDark = Color(0xFF9C978C)
+    val sandDark = Color(0xFF262624)
+    val mutedDark = Color(0xFF35342F)
+    val skyDark = Color(0xFF3E4B58)
+    val sageDark = Color(0xFF454A3A)
+    val clayDark = Color(0xFFB35F41)
 }

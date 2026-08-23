@@ -29,7 +29,11 @@ interface UserPreferencesRepository {
     /** 本番モードで何を止めるか。 */
     suspend fun setShowMode(settings: ShowModeSettings)
 
-    /** 慣れの度合い。ホームの並べ方と説明の量が変わる。 */
+    /**
+     * 慣れの度合い。ホームの並べ方と説明の量が変わる。
+     * 呼ぶと [UserPreferences.hasChosenExperienceLevel] も true になる
+     * （設定画面から呼んでも、初回案内から呼んでも同じ扱いでよい）。
+     */
     suspend fun setExperienceLevel(level: ExperienceLevel)
 
     /** よく使う卓の種類。ホームに最初に出す道具が変わる。 */

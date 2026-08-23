@@ -197,6 +197,17 @@ fun FftScreen(
                         label = { Text(stringResource(R.string.analyzer_harmonics)) },
                     )
                 }
+                if (uiState.peakHold) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AnalyzerPeakHoldDuration.entries.forEach { duration ->
+                            FilterChip(
+                                selected = duration == uiState.peakHoldDuration,
+                                onClick = { viewModel.setPeakHoldDuration(duration) },
+                                label = { Text(duration.label) },
+                            )
+                        }
+                    }
+                }
 
                 CursorCard(
                     cursorHz = uiState.cursorHz,

@@ -3,6 +3,7 @@ package com.patoolbox.feature.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import com.patoolbox.core.designsystem.component.PaIllustration
+import com.patoolbox.core.designsystem.component.PaScene
 import com.patoolbox.core.designsystem.component.PaSectionHeader
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ProSource
@@ -31,6 +35,7 @@ import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.reference.HelpTopics
 import com.patoolbox.core.ui.descriptionRes
 import com.patoolbox.core.ui.titleRes
+import com.patoolbox.core.ui.R as CoreUiR
 
 /**
  * ホームと道具一覧で共通の部品。
@@ -143,6 +148,39 @@ internal fun SectionHeader(
             )
         }
         PaSectionHeader(title = title, subtitle = subtitle)
+    }
+}
+
+/**
+ * 検索して何も出なかったときの表示。
+ *
+ * 文字だけだと「読み込み中なのか、無いのか」が分かりにくい。
+ * 絵を1枚置くと、止まっているのではなく空振りだと一目で分かる。
+ * ホームと道具一覧の両方から出すのでここに置いてある。
+ */
+@Composable
+internal fun EmptyResult(
+    query: String,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = dimens.spaceXl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+    ) {
+        PaIllustration(
+            scene = PaScene.SEARCH_EMPTY,
+            contentDescription = stringResource(CoreUiR.string.search_empty_image),
+            modifier = Modifier.size(width = 128.dp, height = 80.dp),
+        )
+        Text(
+            text = stringResource(R.string.home_no_results, query),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

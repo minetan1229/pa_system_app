@@ -36,6 +36,7 @@ import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ToolCategory
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.accentColor
+import com.patoolbox.core.ui.component.OpenAccessNotice
 import com.patoolbox.core.ui.component.ToolCard
 import com.patoolbox.core.ui.titleRes
 import com.patoolbox.core.ui.R as CoreUiR
@@ -144,18 +145,16 @@ internal fun ToolListScreen(
                 ) {
                     SearchField(query = uiState.query, onQueryChange = onQueryChange)
                     CategoryFilters(selected = selected, onSelect = { selectedName = it?.name })
+                    // 38個が札付きで並ぶ画面なので、ホームより先にここで
+                    // 「札はロックではない」を言っておく必要がある
+                    if (uiState.level != ExperienceLevel.ADVANCED) {
+                        OpenAccessNotice(proUnlocked = uiState.proStatus.isPro)
+                    }
                 }
             }
 
             if (visible.isEmpty()) {
-                fullSpan {
-                    Text(
-                        text = stringResource(R.string.home_no_results, uiState.query),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = dimens.spaceLg),
-                    )
-                }
+                fullSpan { EmptyResult(query = uiState.query) }
                 return@LazyVerticalGrid
             }
 

@@ -62,6 +62,7 @@ enum class ToolId(
     PDF_EXPORT(ToolCategory.DOCUMENT, ToolAccess.PRO, "PDF", level = ToolLevel.BASIC, phase = 3, implemented = true),
     RUN_SHEET(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "進行", level = ToolLevel.BASIC, phase = 3, implemented = true),
     SHOW_TIMER(ToolCategory.DOCUMENT, ToolAccess.FREE, "TMR", level = ToolLevel.BASIC, phase = 3, implemented = true),
+    SHOW_RUNNER(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "本番", level = ToolLevel.BASIC, phase = 3, implemented = true),
     SFX_PADS(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "SE", level = ToolLevel.BASIC, phase = 6, implemented = true),
     JOB_MANAGER(ToolCategory.DOCUMENT, ToolAccess.FREE_LIMITED, "案件", level = ToolLevel.BASIC, phase = 3, implemented = true),
     SNAPSHOT(ToolCategory.DOCUMENT, ToolAccess.PRO, "再現", level = ToolLevel.INTERMEDIATE, phase = 6, implemented = true),

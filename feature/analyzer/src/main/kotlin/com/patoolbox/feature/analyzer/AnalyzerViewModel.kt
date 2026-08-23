@@ -40,6 +40,12 @@ enum class AnalyzerAveraging(val coefficient: Double, val label: String) {
     SLOW(0.08, "遅い"),
 }
 
+/** ピークホールドの保持秒数。無期限にしないのは [feature.rta.RtaPeakHoldDuration] と同じ理由。 */
+enum class AnalyzerPeakHoldDuration(val seconds: Double, val label: String) {
+    SHORT(5.0, "5秒"),
+    LONG(10.0, "10秒"),
+}
+
 /**
  * 縦軸の幅。上端はレベルに追従させるので、利用者が決めるのは「何dB分を見るか」だけ。
  *
@@ -108,6 +114,7 @@ data class AnalyzerUiState(
     val averaging: AnalyzerAveraging = AnalyzerAveraging.NORMAL,
     val span: AnalyzerSpan = AnalyzerSpan.NORMAL,
     val peakHold: Boolean = false,
+    val peakHoldDuration: AnalyzerPeakHoldDuration = AnalyzerPeakHoldDuration.LONG,
     /** カーソルの倍音を重ねるか。ハムや共振の次数を追うときに使う */
     val showHarmonics: Boolean = false,
     val calibration: CalibrationProfile = CalibrationProfile.uncalibrated(
@@ -274,6 +281,11 @@ class AnalyzerViewModel @Inject constructor(
         _uiState.update { it.copy(peakHold = enabled) }
     }
 
+    /** ピークホールドの保持秒数。次のフレームから効く。 */
+    fun setPeakHoldDuration(duration: AnalyzerPeakHoldDuration) {
+        _uiState.update { it.copy(peakHoldDuration = duration) }
+    }
+
     fun toggleHarmonics() {
         _uiState.update { it.copy(showHarmonics = !it.showHarmonics) }
     }
@@ -311,6 +323,7 @@ class AnalyzerViewModel @Inject constructor(
             averagingCoefficient = state.averaging.coefficient,
             offsetDb = state.calibration.offsetDb,
             peakHold = state.peakHold,
+            peakHoldSeconds = state.peakHoldDuration.seconds,
         )
 
         spectrogram.push(snapshot.columnsDb)
