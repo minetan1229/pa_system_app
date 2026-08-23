@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
+import com.patoolbox.core.model.ConsoleType
+import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.reference.HelpTopics
 import com.patoolbox.core.ui.component.HelpAction
@@ -45,6 +47,8 @@ fun SettingsScreen(
     SettingsScreen(
         uiState = uiState,
         onThemeModeChange = viewModel::onThemeModeChange,
+        onExperienceLevelChange = viewModel::onExperienceLevelChange,
+        onConsoleTypeChange = viewModel::onConsoleTypeChange,
         onKeepScreenOnChange = viewModel::onKeepScreenOnChange,
         onDebugProOverrideChange = viewModel::onDebugProOverrideChange,
         onBack = onBack,
@@ -57,6 +61,8 @@ fun SettingsScreen(
 internal fun SettingsScreen(
     uiState: SettingsUiState,
     onThemeModeChange: (ThemeMode) -> Unit,
+    onExperienceLevelChange: (ExperienceLevel) -> Unit,
+    onConsoleTypeChange: (ConsoleType) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
     onDebugProOverrideChange: (Boolean) -> Unit,
     onBack: () -> Unit,
@@ -108,10 +114,51 @@ internal fun SettingsScreen(
 
             SectionTitle(stringResource(R.string.settings_section_display))
             ThemeMode.entries.forEach { mode ->
-                ThemeModeRow(
-                    mode = mode,
+                ChoiceRow(
+                    title = stringResource(mode.labelRes()),
+                    description = mode.descriptionRes()?.let { stringResource(it) },
                     selected = uiState.themeMode == mode,
                     onSelect = { onThemeModeChange(mode) },
+                    minTouch = dimens.minTouch,
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // 機能を消す設定ではないので、ここに置いても「制限」に見えないよう
+            // 説明を先に出す。ホームの札からも同じ値を変えられる
+            SectionTitle(stringResource(R.string.settings_section_profile))
+            SubTitle(stringResource(R.string.settings_level))
+            Text(
+                text = stringResource(R.string.settings_level_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ExperienceLevel.entries.forEach { level ->
+                ChoiceRow(
+                    title = stringResource(level.labelRes()),
+                    description = stringResource(level.descriptionRes()),
+                    selected = uiState.profile.level == level,
+                    onSelect = { onExperienceLevelChange(level) },
+                    minTouch = dimens.minTouch,
+                )
+            }
+
+            SubTitle(
+                text = stringResource(R.string.settings_console),
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Text(
+                text = stringResource(R.string.settings_console_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ConsoleType.entries.forEach { console ->
+                ChoiceRow(
+                    title = stringResource(console.labelRes()),
+                    description = console.descriptionRes()?.let { stringResource(it) },
+                    selected = uiState.profile.console == console,
+                    onSelect = { onConsoleTypeChange(console) },
                     minTouch = dimens.minTouch,
                 )
             }
@@ -189,9 +236,25 @@ private fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * 択一の1行。テーマ・慣れの度合い・卓の3か所で同じ形にしている。
+ * 選択肢の見た目が節ごとに違うと、どれが択一でどれが複数選択なのかが読み取れなくなる。
+ */
+/** 節の中の小見出し。1つの節に択一の組が2つ並ぶときに、どこで切れるかを示す。 */
 @Composable
-private fun ThemeModeRow(
-    mode: ThemeMode,
+private fun SubTitle(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.padding(bottom = 2.dp),
+    )
+}
+
+@Composable
+private fun ChoiceRow(
+    title: String,
+    description: String?,
     selected: Boolean,
     onSelect: () -> Unit,
     minTouch: Dp,
@@ -211,13 +274,13 @@ private fun ThemeModeRow(
         )
         Column(modifier = Modifier.padding(start = 4.dp)) {
             Text(
-                text = stringResource(mode.labelRes()),
+                text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            mode.descriptionRes()?.let { descRes ->
+            if (description != null) {
                 Text(
-                    text = stringResource(descRes),
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -273,4 +336,29 @@ private fun ThemeMode.descriptionRes(): Int? = when (this) {
     ThemeMode.NIGHT_RED -> R.string.settings_theme_night_red_desc
     ThemeMode.OUTDOOR -> R.string.settings_theme_outdoor_desc
     else -> null
+}
+
+private fun ExperienceLevel.labelRes(): Int = when (this) {
+    ExperienceLevel.BEGINNER -> R.string.settings_level_beginner
+    ExperienceLevel.INTERMEDIATE -> R.string.settings_level_intermediate
+    ExperienceLevel.ADVANCED -> R.string.settings_level_advanced
+}
+
+private fun ExperienceLevel.descriptionRes(): Int = when (this) {
+    ExperienceLevel.BEGINNER -> R.string.settings_level_beginner_desc
+    ExperienceLevel.INTERMEDIATE -> R.string.settings_level_intermediate_desc
+    ExperienceLevel.ADVANCED -> R.string.settings_level_advanced_desc
+}
+
+private fun ConsoleType.labelRes(): Int = when (this) {
+    ConsoleType.UNSET -> R.string.settings_console_unset
+    ConsoleType.ANALOG -> R.string.settings_console_analog
+    ConsoleType.DIGITAL -> R.string.settings_console_digital
+}
+
+private fun ConsoleType.descriptionRes(): Int? = when (this) {
+    // 指定なしが既定。説明を付けると「何かを選ばされている」ように見える
+    ConsoleType.UNSET -> null
+    ConsoleType.ANALOG -> R.string.settings_console_analog_desc
+    ConsoleType.DIGITAL -> R.string.settings_console_digital_desc
 }

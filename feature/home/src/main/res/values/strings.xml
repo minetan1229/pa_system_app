@@ -8,4 +8,56 @@
     <string name="home_pro_active">Pro 有効（%1$s）</string>
     <string name="home_pro_inactive">Pro は Phase 5 で購入できるようになります</string>
     <string name="home_tool_count">%1$d ツール</string>
+
+    <!-- 見出し -->
+    <string name="home_hero_title">現場の道具を、この1台に</string>
+    <string name="home_hero_body">測る・計算する・書類を出す。使うものだけを上に出して、残りは一覧にしまってあります。</string>
+    <string name="home_hero_image">スピーカーとマイクスタンドの挿絵</string>
+
+    <!-- はじめに -->
+    <string name="home_section_start">はじめに</string>
+    <string name="home_start_subtitle">最初に一度だけやっておくこと</string>
+    <string name="home_calibration_todo_title">マイクの校正がまだです</string>
+    <string name="home_calibration_todo_body">校正しなくても使えますが、dB の絶対値は目安のままです。端末が1台だけでもできる手順を用意しました。</string>
+    <string name="home_calibration_done_title">マイクは校正済みです</string>
+    <string name="home_calibration_done_body">%1$s。入力機器を替えたときは取り直してください。</string>
+    <string name="home_calibration_guide">合わせ方を見る</string>
+    <string name="home_calibration_open">校正する</string>
+    <string name="home_calibration_confidence_fair">手動校正（内蔵マイク）</string>
+    <string name="home_calibration_confidence_good">校正器または外部マイクで校正済み</string>
+
+    <!-- よく使う -->
+    <string name="home_starters">まず開く4つ</string>
+    <string name="home_starters_subtitle">★を押すと、ここが自分のよく使う道具に変わります</string>
+    <string name="home_favorites_subtitle">★を付けた道具</string>
+
+    <!-- 分類 -->
+    <string name="home_section_categories">分類から探す</string>
+    <string name="home_section_categories_subtitle">押すとその分類の一覧が開きます</string>
+    <string name="home_category_measure_body">マイクとスピーカーを使って、いま鳴っている音を測る</string>
+    <string name="home_category_calc_body">現場で使う計算と、結線・帯域・用語の早見表</string>
+    <string name="home_category_document_body">パッチ表・進行表・本番タイマーなど、当日の紙まわり</string>
+    <string name="home_category_business_body">見積と請求、稼働の記録、データの持ち出し</string>
+    <string name="home_all_tools">すべての道具を見る（%1$d）</string>
+
+    <!-- 一覧画面 -->
+    <string name="tools_title">道具一覧</string>
+    <string name="tools_filter_all">すべて</string>
+
+    <!-- 慣れの度合い -->
+    <string name="home_level_label">表示のしかた</string>
+    <string name="home_level_beginner">初心者</string>
+    <string name="home_level_intermediate">中級者</string>
+    <string name="home_level_advanced">上級者</string>
+    <string name="home_level_beginner_note">説明を多めに出し、上級の道具には札を付けています。機能は何も隠していません。</string>
+    <string name="home_level_advanced_note">説明を省いて %1$d 個をそのまま並べています。</string>
+
+
+    <!-- 初心者向けの案内 -->
+    <string name="home_beginner_guide_title">迷ったらこの順番で</string>
+    <string name="home_beginner_guide_body">1. 音がおかしいときは「トラブルシュート」から症状で探す
+2. 結線で迷ったら「結線図」でピン配置を見る
+3. 音量を数字で残したいときは「SPLメーター」
+
+道具の右上の★を押すと、ここが自分の4つに変わります。</string>
 </resources>

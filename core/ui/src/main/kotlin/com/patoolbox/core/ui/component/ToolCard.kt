@@ -30,6 +30,7 @@ import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.component.contrastingInk
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.ToolId
+import com.patoolbox.core.model.ToolLevel
 import com.patoolbox.core.ui.R
 import com.patoolbox.core.ui.accentColor
 import com.patoolbox.core.ui.descriptionRes
@@ -42,8 +43,12 @@ import com.patoolbox.core.ui.titleRes
  * 暗いFOHでも屋外でも読めることを優先した結果で、material-icons-extended（約30MB）を
  * 抱え込まずに済むという副作用もある。★も同じ理由でグリフを直接使っている。
  *
- * バッジは色面で塗る。36枚が並ぶ画面では、文字を読む前に色と位置で当たりを
+ * バッジは色面で塗る。38枚が並ぶ画面では、文字を読む前に色と位置で当たりを
  * 付けられることの方が速さに効く。
+ *
+ * @param compact 説明文を省く。上級者の表示で、同じ面積により多く並べるために使う
+ * @param showLevelBadge 前提知識の要る道具に札を付ける。初心者の表示で使う。
+ *   **札を付けても押せなくはしない**（隠すと「入っていない」と思われる）
  */
 @Composable
 fun ToolCard(
@@ -52,6 +57,8 @@ fun ToolCard(
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
+    showLevelBadge: Boolean = false,
 ) {
     val dimens = LocalPaDimens.current
     val accent = tool.category.accentColor()
@@ -59,7 +66,13 @@ fun ToolCard(
     PaCard(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = dimens.toolCardMinHeight),
+            .defaultMinSize(
+                minHeight = if (compact) {
+                    dimens.toolCardCompactMinHeight
+                } else {
+                    dimens.toolCardMinHeight
+                },
+            ),
         onClick = onClick,
         corner = dimens.cardCorner,
         contentPadding = dimens.spaceMd,
@@ -86,17 +99,22 @@ fun ToolCard(
             overflow = TextOverflow.Ellipsis,
         )
 
-        Text(
-            text = stringResource(tool.descriptionRes),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
-        )
+        if (!compact) {
+            Text(
+                text = stringResource(tool.descriptionRes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.alpha(if (tool.implemented) 1f else 0.75f),
+            )
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
             AccessChip(access = tool.access)
+            if (showLevelBadge && tool.level != ToolLevel.BASIC) {
+                LevelChip(level = tool.level)
+            }
             if (!tool.implemented) {
                 ComingSoonChip()
             }

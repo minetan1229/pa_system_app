@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.BuildInfo
 import com.patoolbox.core.data.UserPreferencesRepository
+import com.patoolbox.core.model.ConsoleType
+import com.patoolbox.core.model.ExperienceLevel
+import com.patoolbox.core.model.FieldProfile
 import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +20,7 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val profile: FieldProfile = FieldProfile.Default,
     val keepScreenOnWhileMeasuring: Boolean = true,
     val debugProOverride: Boolean = false,
     val isDebugBuild: Boolean = false,
@@ -36,6 +40,7 @@ class SettingsViewModel @Inject constructor(
     ) { preferences, proStatus ->
         SettingsUiState(
             themeMode = preferences.themeMode,
+            profile = preferences.profile,
             keepScreenOnWhileMeasuring = preferences.keepScreenOnWhileMeasuring,
             debugProOverride = preferences.debugProOverride,
             isDebugBuild = buildInfo.isDebuggable,
@@ -49,6 +54,15 @@ class SettingsViewModel @Inject constructor(
 
     fun onThemeModeChange(mode: ThemeMode) {
         viewModelScope.launch { userPreferencesRepository.setThemeMode(mode) }
+    }
+
+    /** ホームの札と同じ値を書く。入口が2つあるだけで、状態は1つ。 */
+    fun onExperienceLevelChange(level: ExperienceLevel) {
+        viewModelScope.launch { userPreferencesRepository.setExperienceLevel(level) }
+    }
+
+    fun onConsoleTypeChange(console: ConsoleType) {
+        viewModelScope.launch { userPreferencesRepository.setConsoleType(console) }
     }
 
     fun onKeepScreenOnChange(enabled: Boolean) {

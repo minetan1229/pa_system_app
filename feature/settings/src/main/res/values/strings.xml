@@ -14,6 +14,24 @@
     <string name="settings_theme_outdoor">屋外（高コントラスト）</string>
     <string name="settings_theme_outdoor_desc">直射日光下で読めるよう白背景・最大コントラスト</string>
 
+    <string name="settings_section_profile">慣れの度合いと卓</string>
+    <string name="settings_level">表示のしかた</string>
+    <string name="settings_level_desc">機能は隠しません。並べ方と説明の量だけが変わります。</string>
+    <string name="settings_level_beginner">初心者</string>
+    <string name="settings_level_beginner_desc">説明を多めに出し、上級の道具には札を付ける</string>
+    <string name="settings_level_intermediate">中級者</string>
+    <string name="settings_level_intermediate_desc">よく使う4つと分類の入口だけをホームに出す（既定）</string>
+    <string name="settings_level_advanced">上級者</string>
+    <string name="settings_level_advanced_desc">説明を省き、道具をすべてホームにそのまま並べる</string>
+
+    <string name="settings_console">よく使う卓</string>
+    <string name="settings_console_desc">ホームに最初に出す4つが変わります。解説の中身の出し分けは今後追加します。</string>
+    <string name="settings_console_unset">指定なし</string>
+    <string name="settings_console_analog">アナログミキサー</string>
+    <string name="settings_console_analog_desc">帯域チャートを最初の4つに入れる</string>
+    <string name="settings_console_digital">デジタルミキサー</string>
+    <string name="settings_console_digital_desc">パッチ表を最初の4つに入れる</string>
+
     <string name="settings_section_measure">計測</string>
     <string name="settings_keep_screen_on">計測中は画面を消さない</string>
     <string name="settings_keep_screen_on_desc">長時間のSPLログ中に画面が落ちるのを防ぐ</string>

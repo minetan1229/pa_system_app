@@ -15,6 +15,7 @@
 
     <string name="calibration_calibrator_title">方法2: 音響校正器を使う</string>
     <string name="calibration_calibrator_desc">校正器をマイクに装着し、出力レベルのボタンを押してください。こちらの方が精度が出ます。</string>
+    <string name="calibration_calibrator_note">校正器の筒は測定マイク（1/2インチ・1インチ）用です。スマホの内蔵マイクには装着できないので、この方法は USB の測定マイクを繋いでいるときに使ってください。</string>
     <string name="calibration_apply_94">94 dB で校正</string>
     <string name="calibration_apply_114">114 dB で校正</string>
 
@@ -23,4 +24,105 @@
     <string name="calibration_need_measure">先に測定を開始してレベルを安定させてください</string>
     <string name="calibration_invalid_input">数値を入力してください</string>
     <string name="calibration_device">対象: %1$s</string>
+    <string name="calibration_open_guide">合わせ方を読む（端末1台のときを含む）</string>
+
+    <!-- 校正ガイド -->
+    <string name="guide_title">マイク校正の合わせ方</string>
+    <string name="guide_role">何を合わせる作業なのか、機材が無いときはどうするか</string>
+
+    <string name="guide_what_title">合わせているのは1つの数字だけ</string>
+    <string name="guide_what_body">校正で決めるのは「0 dBFS が何 dB SPL に当たるか」というオフセット1個です。測定値 = 入力の dBFS + オフセット、という足し算をするだけなので、
+
+・音圧の絶対値（例: 96.3 dB）は合うようになる
+・マイクの周波数特性の癖（低音が出ない、8kHz が持ち上がる等）は直らない
+
+という分かれ方をします。RTA の形を厳密に合わせたい場合は、オフセットではなく測定用マイクが必要です。</string>
+
+    <string name="guide_ways_title">合わせ方は3通り</string>
+    <string name="guide_ways_subtitle">上ほど正確。下に行くほど手元の機材が要らない</string>
+
+    <string name="guide_way_calibrator_title">1. 音響校正器を当てる</string>
+    <string name="guide_way_calibrator_body">1kHz を 94 dB または 114 dB で出す校正器をマイクに装着し、その値で合わせます。誤差は校正器の精度そのもの（おおむね ±0.5 dB 以内）。
+
+注意: 校正器の筒は 1/2 インチや 1 インチの測定マイク用です。スマホの内蔵マイクには物理的に装着できません。この方法が使えるのは USB の測定マイクを繋いでいるときです。</string>
+
+    <string name="guide_way_meter_title">2. 騒音計と並べて合わせる</string>
+    <string name="guide_way_meter_body">基準になる騒音計（クラス2以上）を端末のマイクのすぐ隣、同じ高さ・同じ向きに置き、同じ音を同時に測って騒音計の読みを入力します。
+
+・音は定常なものを使う（ピンクノイズが最適。音楽や話し声は動きすぎて合わない）
+・レベルは 80〜90 dB あたり。静かすぎると暗騒音、大きすぎるとマイクが飽和する
+・数秒待って両方の表示が落ち着いてから読む
+
+誤差はおおむね ±1〜2 dB。借りられるなら、この方法で十分に実用になります。</string>
+
+    <string name="guide_way_alone_title">3. 端末が1台しかないとき</string>
+    <string name="guide_way_alone_body">先に結論を書きます。参照になる機材が無い以上、絶対値を正しくする方法はありません。 数字を当てずっぽうで入れて「校正済み」にすると、目盛りの無い定規を作ることになります。
+
+代わりにできるのは、次の2つです。
+
+・条件を固定して「同じ現場なら同じ数字が出る」状態にする
+・この端末で測れる上限と下限を知って、信用してよい範囲を決める
+
+下の手順はそのためのものです。所要 10分ほど。</string>
+    <string name="guide_alone_image">スピーカーと端末を一定の距離に置いた挿絵</string>
+
+    <string name="guide_alone_steps_title">1台だけでやる手順</string>
+    <string name="guide_alone_steps_subtitle">絶対値は作れない。作るのは「再現できる測定」</string>
+
+    <string name="guide_step1_title">1. マイクを塞がない持ち方を決める</string>
+    <string name="guide_step1_body">スマホのマイク穴は下端にあることがほとんどで、上端やカメラの近くにもう1つあります。ケース・指・机の面で塞ぐと数dBから十数dB落ちます。
+
+「下端を音源に向けて、手で覆わず、腕を伸ばして持つ」といった持ち方を1つ決めて、以後それだけを使ってください。</string>
+
+    <string name="guide_step2_title">2. 邪魔になる経路を切る</string>
+    <string name="guide_step2_body">・Bluetooth のイヤホンやマイクを切る（圧縮と自動ゲインが入るため測定に使えません）
+・通話アプリ・録音アプリ・音声アシスタントを終了する
+
+このアプリは端末が対応していれば UNPROCESSED という加工なしの入力を使います。非対応の端末では VOICE_RECOGNITION に落ちるので、その場合は端末側の音声処理が少し残ります。どちらを使っているかは SPLメーターの画面に入力の札として出ます。</string>
+
+    <string name="guide_step3_title">3. 上限（飽和する点）を見つける</string>
+    <string name="guide_step3_body">定常的な音（ピンクノイズが最適、無ければ音楽でも可）を鳴らしてもらい、SPLメーターを見ながら少しずつ音量を上げます。音量を上げても読みが伸びなくなった点が、この端末のマイクの上限です。
+
+多くのスマホは 100〜120 dB SPL のどこかで頭打ちになります。どこで止まるかは機種差が大きく、事前には分かりません。上限を知らないまま「今日は 105 dB でした」と記録すると、実際はもっと出ていた、ということが起こります。
+
+※ 端末1台だけのときは、このアプリのシグナルジェネレータを鳴らしながら SPLメーターを見ることはできません（画面を移ると音が止まります）。卓や別のプレーヤーから音を出すか、リハのついでに確かめてください。
+※ スピーカーから音が出ます。PA に繋いだ状態でいきなり上げないでください。</string>
+
+    <string name="guide_step4_title">4. 下限（暗騒音）を測る</string>
+    <string name="guide_step4_body">できるだけ静かな部屋で30秒測り、いくつで止まるかを見ます。その値より下は、この端末では測れません。空調の効いたホールの暗騒音を測ろうとしても、端末自身のノイズを読んでいるだけ、ということがあります。</string>
+
+    <string name="guide_step5_title">5. 同じ測定を3回して、ばらつきを見る</string>
+    <string name="guide_step5_body">スピーカーの正面 1m・床から 1.2m など、位置を決めて3回測ります。3回が ±1 dB に収まれば、条件を再現できています。ばらつくときは、持ち方・風・反射面（壁や机）のどれかが毎回違っています。
+
+ここまでで「絶対値は不明だが、繰り返せる測定」になりました。EQ の前後比較、客席位置ごとの差、リハと本番の差は、この状態で十分に読めます。</string>
+
+    <string name="guide_step6_title">6. オフセットは入れず、未校正のまま使う</string>
+    <string name="guide_step6_body">参照が無いときに手動オフセットを入れてはいけません。校正済みバッジが付いてしまい、後から見た自分や他人が、根拠のない数字を根拠のある数字として扱います。
+
+未校正のままなら、計測画面には常に未校正バッジが出ます。それが正しい状態です。</string>
+
+    <string name="guide_step7_title">7. 測定の条件をメモに残す</string>
+    <string name="guide_step7_body">案件メモや進行表に、端末名・持ち方・測定位置・未校正であることを書いておきます。数字だけ残すと、次の現場で比較できません。</string>
+
+    <string name="guide_dontdo_title">やっても校正にならないこと</string>
+    <string name="guide_dontdo_body">・別のスマホの騒音計アプリに合わせる（未校正どうしを合わせても、誤差が増えるだけです）
+・「会話はだいたい 60 dB」のような一般的な目安に合わせる（目の前の音が実際に何 dB かは誰も知りません）
+・音楽を鳴らして「このくらいで 100 dB のはず」と決める（同じ理由です）
+
+どれも数字は動きますが、正しさは1ミリも増えません。</string>
+
+    <string name="guide_usable_title">校正しなくても使える測定</string>
+    <string name="guide_usable_subtitle">絶対値の dB を必要としないもの</string>
+    <string name="guide_usable_body">・ハウリング検出（何 Hz で起きたか）
+・ディレイ実測と極性チェック（時間差と向きなので、レベルの絶対値と無関係）
+・残響測定 RT60（減衰の傾きから出すので、絶対値と無関係）
+・EQ 前後・客席位置ごとの相対比較
+・チューナー、メトロノーム
+
+RTA の帯域バランスは「概ね読めるが、マイクの周波数特性の癖が乗ったまま」です。オフセットの校正では直りません。</string>
+
+    <string name="guide_legal_title">できないこと</string>
+    <string name="guide_legal_body">校正しても、このアプリは計量法上の「取引・証明」には使えません。条例の規制値の証明や、行政に提出する測定には、検定を受けた騒音計が必要です。</string>
+
+    <string name="guide_open_calibration">校正の画面を開く</string>
 </resources>

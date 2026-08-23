@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patoolbox.core.designsystem.component.BigReadout
+import com.patoolbox.core.designsystem.component.PaNotice
+import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.CalibrationMethod
 import com.patoolbox.core.model.ToolId
@@ -41,6 +43,7 @@ import com.patoolbox.core.ui.R as CoreUiR
 @Composable
 fun CalibrationScreen(
     onBack: () -> Unit,
+    onOpenGuide: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CalibrationViewModel = hiltViewModel(),
 ) {
@@ -48,6 +51,7 @@ fun CalibrationScreen(
 
     CalibrationScreen(
         uiState = uiState,
+        onOpenGuide = onOpenGuide,
         onStart = viewModel::start,
         onStop = viewModel::stop,
         onReferenceChange = viewModel::onReferenceChange,
@@ -63,6 +67,7 @@ fun CalibrationScreen(
 @Composable
 internal fun CalibrationScreen(
     uiState: CalibrationUiState,
+    onOpenGuide: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onReferenceChange: (String) -> Unit,
@@ -97,6 +102,15 @@ internal fun CalibrationScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = dimens.gutterSmall),
                 )
+
+                // 「どう合わせるか」で詰まる人はここで止まる。
+                // 手順は別画面に分けてあるので、操作の前に入口を出す
+                OutlinedButton(
+                    onClick = onOpenGuide,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.calibration_open_guide))
+                }
 
                 CalibrationBadge(profile = uiState.profile)
 
@@ -208,6 +222,12 @@ internal fun CalibrationScreen(
                     text = stringResource(R.string.calibration_calibrator_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // 内蔵マイクに校正器は物理的に当てられない。
+                // ボタンだけ出しておくと、当てられない人が困って適当な値を入れる
+                PaNotice(
+                    title = stringResource(R.string.calibration_calibrator_note),
+                    tone = PaTone.INFO,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(

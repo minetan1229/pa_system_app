@@ -6,6 +6,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.patoolbox.core.model.ConsoleType
+import com.patoolbox.core.model.ExperienceLevel
+import com.patoolbox.core.model.FieldProfile
 import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
@@ -38,6 +41,16 @@ class DataStoreUserPreferencesRepository @Inject constructor(
                 allowOtherAppAudio = prefs[Keys.SHOW_MODE_OTHER_AUDIO]
                     ?: ShowModeSettings.Default.allowOtherAppAudio,
             ),
+            profile = FieldProfile(
+                // 知らない名前が入っていたら既定に戻す。enum を消したり
+                // 名前を変えたりしたときに、古い端末で落とさないため
+                level = prefs[Keys.EXPERIENCE_LEVEL]
+                    ?.let { stored -> ExperienceLevel.entries.firstOrNull { it.name == stored } }
+                    ?: FieldProfile.Default.level,
+                console = prefs[Keys.CONSOLE_TYPE]
+                    ?.let { stored -> ConsoleType.entries.firstOrNull { it.name == stored } }
+                    ?: FieldProfile.Default.console,
+            ),
         )
     }
 
@@ -48,6 +61,14 @@ class DataStoreUserPreferencesRepository @Inject constructor(
             prefs[Keys.SHOW_MODE_SCREEN_ON] = settings.keepScreenOn
             prefs[Keys.SHOW_MODE_OTHER_AUDIO] = settings.allowOtherAppAudio
         }
+    }
+
+    override suspend fun setExperienceLevel(level: ExperienceLevel) {
+        dataStore.edit { it[Keys.EXPERIENCE_LEVEL] = level.name }
+    }
+
+    override suspend fun setConsoleType(console: ConsoleType) {
+        dataStore.edit { it[Keys.CONSOLE_TYPE] = console.name }
     }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
@@ -82,5 +103,7 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         val SHOW_MODE_ALARMS = booleanPreferencesKey("show_mode_allow_alarms")
         val SHOW_MODE_SCREEN_ON = booleanPreferencesKey("show_mode_keep_screen_on")
         val SHOW_MODE_OTHER_AUDIO = booleanPreferencesKey("show_mode_allow_other_audio")
+        val EXPERIENCE_LEVEL = stringPreferencesKey("experience_level")
+        val CONSOLE_TYPE = stringPreferencesKey("console_type")
     }
 }

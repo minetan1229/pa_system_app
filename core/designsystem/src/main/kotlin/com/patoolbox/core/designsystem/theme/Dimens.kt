@@ -45,6 +45,9 @@ data class PaDimens(
     val cornerPill: Dp = 999.dp,
 
     val toolCardMinHeight: Dp = 116.dp,
+
+    /** 説明文を省いたカード（上級者の表示）。バッジ・名前・札の3段ぶん */
+    val toolCardCompactMinHeight: Dp = 92.dp,
     val badgeSize: Dp = 36.dp,
 
     /** 枠線。影ではなく線で面を分けるので、太らせないこと */

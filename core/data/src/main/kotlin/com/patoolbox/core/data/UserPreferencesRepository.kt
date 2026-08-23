@@ -1,5 +1,7 @@
 package com.patoolbox.core.data
 
+import com.patoolbox.core.model.ConsoleType
+import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
@@ -26,4 +28,10 @@ interface UserPreferencesRepository {
 
     /** 本番モードで何を止めるか。 */
     suspend fun setShowMode(settings: ShowModeSettings)
+
+    /** 慣れの度合い。ホームの並べ方と説明の量が変わる。 */
+    suspend fun setExperienceLevel(level: ExperienceLevel)
+
+    /** よく使う卓の種類。ホームに最初に出す道具が変わる。 */
+    suspend fun setConsoleType(console: ConsoleType)
 }

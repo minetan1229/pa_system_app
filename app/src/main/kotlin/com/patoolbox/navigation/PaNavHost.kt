@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.patoolbox.core.model.ToolCategory
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.PlaceholderScreen
 import com.patoolbox.feature.analyzer.FftScreen
@@ -20,9 +21,11 @@ import com.patoolbox.feature.business.SnapshotListScreen
 import com.patoolbox.feature.business.WorkLogScreen
 import com.patoolbox.feature.calc.CalcScreen
 import com.patoolbox.feature.calc.toCalcTabOrNull
+import com.patoolbox.feature.calibration.CalibrationGuideScreen
 import com.patoolbox.feature.calibration.CalibrationScreen
 import com.patoolbox.feature.feedback.FeedbackScreen
 import com.patoolbox.feature.home.HomeScreen
+import com.patoolbox.feature.home.ToolListScreen
 import com.patoolbox.feature.job.JobDetailScreen
 import com.patoolbox.feature.job.JobListScreen
 import com.patoolbox.feature.measure.DelayFinderScreen
@@ -59,12 +62,25 @@ data object HomeRoute
 @Serializable
 data class ToolRoute(val toolId: String)
 
+/**
+ * 道具の一覧。
+ * ホームには全部を並べないので、38個を見る画面をここに分けている。
+ *
+ * @param category 分類で絞った状態で開く。null なら全部
+ */
+@Serializable
+data class ToolListRoute(val category: String? = null)
+
 @Serializable
 data object SettingsRoute
 
-/** マイク校正。ツール一覧には出さず、計測画面と設定から入る。 */
+/** マイク校正。道具一覧には出さず、ホームと計測画面から入る。 */
 @Serializable
 data object CalibrationRoute
+
+/** 校正の手順。基準の機材が無いときにどうするかを読む画面。 */
+@Serializable
+data object CalibrationGuideRoute
 
 /**
  * パッチ表の編集。
@@ -105,6 +121,11 @@ fun PaNavHost(
         composable<HomeRoute> {
             HomeScreen(
                 onToolClick = { tool -> navController.navigate(ToolRoute(tool.name)) },
+                onCategoryClick = { category ->
+                    navController.navigate(ToolListRoute(category?.name))
+                },
+                onCalibrationClick = { navController.navigate(CalibrationRoute) },
+                onCalibrationGuideClick = { navController.navigate(CalibrationGuideRoute) },
                 onSettingsClick = { navController.navigate(SettingsRoute) },
             )
         }
@@ -134,12 +155,33 @@ fun PaNavHost(
             }
         }
 
+        composable<ToolListRoute> { backStackEntry ->
+            val route: ToolListRoute = backStackEntry.toRoute()
+            ToolListScreen(
+                initialCategory = route.category?.let { name ->
+                    ToolCategory.entries.firstOrNull { it.name == name }
+                },
+                onToolClick = { tool -> navController.navigate(ToolRoute(tool.name)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
         composable<SettingsRoute> {
             SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable<CalibrationRoute> {
-            CalibrationScreen(onBack = { navController.popBackStack() })
+            CalibrationScreen(
+                onBack = { navController.popBackStack() },
+                onOpenGuide = { navController.navigate(CalibrationGuideRoute) },
+            )
+        }
+
+        composable<CalibrationGuideRoute> {
+            CalibrationGuideScreen(
+                onBack = { navController.popBackStack() },
+                onOpenCalibration = { navController.navigate(CalibrationRoute) },
+            )
         }
 
         composable<PatchSheetRoute> {

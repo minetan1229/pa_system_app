@@ -16,6 +16,8 @@
     <string name="badge_free">無料</string>
 
     <!-- 準備中 -->
+    <string name="badge_level_intermediate">中級</string>
+    <string name="badge_level_advanced">上級</string>
     <string name="coming_soon">準備中</string>
     <string name="coming_soon_phase">Phase %1$d で実装予定</string>
     <string name="placeholder_note">この画面はまだ実装されていません。プランの Phase %1$d で追加されます。</string>

@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 // 配色の考え方（Cloudflare のダッシュボードを参照して組み直したもの）
 //
 // 1. **面はほぼ無彩色**にする。白と灰色の段差だけで構造を作り、
-//    色は「意味があるところ」にしか使わない。36ツールぶんの画面を並べたときに
+//    色は「意味があるところ」にしか使わない。38ツールぶんの画面を並べたときに
 //    落ち着いて見えるのは、色数を絞った方だった。
 // 2. **ブランド色（橙）は文字を乗せない**。帯・下線・バッジ・図の線に使う。
 //    橙の上に白文字を置くとコントラストが 3:1 前後しか出ず、屋外で読めない。
@@ -57,8 +57,12 @@ object PaBrand {
 /**
  * 明色。既定。
  *
- * 背景をわずかに灰色（#F6F6F7）にして、カードの白を浮かせている。
+ * 背景をわずかに温かい灰色（#F5F3EF）にして、カードの白を浮かせている。
  * 背景まで白にすると、枠線だけで面を分ける作りが成立しない。
+ *
+ * 青みの灰色（#F6F6F7）から温色側に振ってあるのは、長時間見る画面で
+ * 冷たい灰色が硬く感じられたため。明度はほぼ変えていないので、
+ * 文字と枠線のコントラストは元のまま。
  */
 internal val PaLightColors = lightColorScheme(
     primary = PaBrand.orangeInk,
@@ -77,19 +81,19 @@ internal val PaLightColors = lightColorScheme(
     onError = Color(0xFFFFFFFF),
     errorContainer = PaBrand.redTintLight,
     onErrorContainer = Color(0xFF450F0B),
-    background = Color(0xFFF6F6F7),
+    background = Color(0xFFF5F3EF),
     onBackground = Color(0xFF1D1F20),
-    surface = Color(0xFFF6F6F7),
+    surface = Color(0xFFF5F3EF),
     onSurface = Color(0xFF1D1F20),
-    surfaceVariant = Color(0xFFECEDEE),
+    surfaceVariant = Color(0xFFEDEAE3),
     onSurfaceVariant = Color(0xFF5F6469),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFFCFCFC),
+    surfaceContainerLow = Color(0xFFFDFCFA),
     surfaceContainer = Color(0xFFFFFFFF),
-    surfaceContainerHigh = Color(0xFFF1F1F2),
-    surfaceContainerHighest = Color(0xFFE8E9EA),
+    surfaceContainerHigh = Color(0xFFF1EEE8),
+    surfaceContainerHighest = Color(0xFFE8E4DC),
     outline = Color(0xFF74797E),
-    outlineVariant = Color(0xFFDDDFE1),
+    outlineVariant = Color(0xFFDFDAD1),
 )
 
 /**
@@ -206,8 +210,37 @@ internal val PaOutdoorColors = lightColorScheme(
  * カテゴリの識別としては別の色相に散らした方が見分けやすいから。
  */
 object PaCategoryColors {
-    val measure = Color(0xFF127C8C)
-    val calc = Color(0xFF3C6DD1)
+    val measure = Color(0xFF2C7683)
+    val calc = Color(0xFF4A6FB5)
     val document = PaBrand.orange
-    val business = Color(0xFF7A5BC7)
+    val business = Color(0xFF7565AC)
+}
+
+/**
+ * 挿絵（[com.patoolbox.core.designsystem.component.PaIllustration]）の色。
+ *
+ * 計測画面の色は「値の意味」を持つので強い。挿絵は意味を持たないので、
+ * 彩度を落として面だけで見せる。ここを強い色で塗ると、
+ * 隣に並ぶ実測値のグラフより挿絵の方が目立ってしまう。
+ *
+ * **呼び出し側でこの object を直接使わないこと。**
+ * 暗所モード（赤以外の光を出せない）と屋外モード（淡色が飛ぶ）では別の値が要るので、
+ * 必ず `paIllustrationPalette()` を通す。
+ */
+internal object PaSoft {
+    // 明色。温かい砂色を地にして、水色と若草色を面に置く
+    val lineLight = Color(0xFF7A7264)
+    val sandLight = Color(0xFFF0EBE1)
+    val mutedLight = Color(0xFFE1DACC)
+    val skyLight = Color(0xFFBFCFDD)
+    val sageLight = Color(0xFFC3D2C4)
+    val clayLight = Color(0xFFE3A672)
+
+    // 暗色。同じ色相のまま明度を落とす（色相を変えると別のアプリに見える）
+    val lineDark = Color(0xFF9BA0A6)
+    val sandDark = Color(0xFF1E2022)
+    val mutedDark = Color(0xFF2B2E31)
+    val skyDark = Color(0xFF3A4C5F)
+    val sageDark = Color(0xFF3D4E44)
+    val clayDark = Color(0xFFB9803F)
 }

@@ -11,6 +11,8 @@ data class UserPreferences(
     val debugProOverride: Boolean = false,
     /** 本番モードで何を止めるか */
     val showMode: ShowModeSettings = ShowModeSettings.Default,
+    /** 慣れの度合いと卓の種類。ホームの並べ方と説明の量を決める */
+    val profile: FieldProfile = FieldProfile.Default,
 ) {
     companion object {
         val Default = UserPreferences()

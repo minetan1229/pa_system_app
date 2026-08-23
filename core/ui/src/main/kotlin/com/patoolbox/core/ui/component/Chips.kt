@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.patoolbox.core.designsystem.component.PaPill
 import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.model.ToolAccess
+import com.patoolbox.core.model.ToolLevel
 import com.patoolbox.core.ui.R
 
 /**
@@ -43,6 +44,36 @@ fun AccessChip(
 
         // 無料は既定なのでバッジを出さない（画面のノイズを減らす）
         ToolAccess.FREE -> Unit
+    }
+}
+
+/**
+ * 前提知識の要る道具に付ける札。
+ *
+ * 初心者の表示のときだけ出す。**押せなくはしない**——
+ * 「上級」と書いてあるだけで、開けば同じように使える。
+ * 使わせないための札ではなく、数字を読み違えやすいことを先に言うための札。
+ */
+@Composable
+fun LevelChip(
+    level: ToolLevel,
+    modifier: Modifier = Modifier,
+) {
+    when (level) {
+        // 前提知識が要らないものは既定なので出さない
+        ToolLevel.BASIC -> Unit
+
+        ToolLevel.INTERMEDIATE -> PaPill(
+            text = stringResource(R.string.badge_level_intermediate),
+            tone = PaTone.NEUTRAL,
+            modifier = modifier,
+        )
+
+        ToolLevel.ADVANCED -> PaPill(
+            text = stringResource(R.string.badge_level_advanced),
+            tone = PaTone.INFO,
+            modifier = modifier,
+        )
     }
 }
 

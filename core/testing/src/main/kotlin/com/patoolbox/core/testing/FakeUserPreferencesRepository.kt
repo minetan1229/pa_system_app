@@ -1,6 +1,8 @@
 package com.patoolbox.core.testing
 
 import com.patoolbox.core.data.UserPreferencesRepository
+import com.patoolbox.core.model.ConsoleType
+import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.model.ToolId
@@ -44,5 +46,17 @@ class FakeUserPreferencesRepository(
 
     override suspend fun setShowMode(settings: ShowModeSettings) {
         state.value = state.value.copy(showMode = settings)
+    }
+
+    override suspend fun setExperienceLevel(level: ExperienceLevel) {
+        state.value = state.value.copy(
+            profile = state.value.profile.copy(level = level),
+        )
+    }
+
+    override suspend fun setConsoleType(console: ConsoleType) {
+        state.value = state.value.copy(
+            profile = state.value.profile.copy(console = console),
+        )
     }
 }
