@@ -173,7 +173,20 @@ internal object ConceptHelp {
                         ・+10dB … 力が10倍。人には「だいたい2倍の大きさ」に聞こえる
                         ・−6dB … 距離が2倍になったときの落ち方（点音源）
                         ・1dB … ぎりぎり気づく差
+
+                        棒の高さが電圧比（下の数字は倍率）。+10dBで3.16倍、+20dBで
+                        ようやく10倍になる感覚をつかんでおくと、卓のフェーダーを
+                        大きく動かした「つもり」と実際の変化量のズレが減る。
                     """.trimIndent(),
+                    diagram = HelpDiagram.BarSeries(
+                        unit = "倍",
+                        bars = listOf(
+                            HelpDiagram.BarSeries.Bar("+3dB", 1.41f, "電力2倍"),
+                            HelpDiagram.BarSeries.Bar("+6dB", 2.00f, "電圧2倍"),
+                            HelpDiagram.BarSeries.Bar("+10dB", 3.16f, "体感2倍"),
+                            HelpDiagram.BarSeries.Bar("+20dB", 10.00f, "電力100倍"),
+                        ),
+                    ),
                 ),
                 HelpSection(
                     heading = "基準が違えば別の目盛り",
@@ -292,6 +305,28 @@ internal object ConceptHelp {
                         6dB 下げた位置を上限にしておくとよい。
                     """.trimIndent(),
                 ),
+                HelpSection(
+                    heading = "マイク本数とハウリングマージン（NOM）",
+                    body = """
+                        同時に開いているマイクの本数（NOM: Number of Open Mics）が
+                        倍になるごとに、ハウリングまでの余裕（GBF: Gain Before Feedback）は
+                        およそ3dBずつ減る。会議や合唱のように複数マイクが常に開いている
+                        現場ほど、1本あたりのゲインを絞る必要が出てくる理由がこれ。
+
+                        対策は「使っていないマイクを閉じる」か、
+                        話していないマイクを自動で下げるゲインシェアリング
+                        （オートミキサー）を入れること。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.BarSeries(
+                        unit = "dB",
+                        bars = listOf(
+                            HelpDiagram.BarSeries.Bar("1本", 0f),
+                            HelpDiagram.BarSeries.Bar("2本", -3f),
+                            HelpDiagram.BarSeries.Bar("4本", -6f),
+                            HelpDiagram.BarSeries.Bar("8本", -9f),
+                        ),
+                    ),
+                ),
             ),
         ),
         HelpTopic(
@@ -328,6 +363,120 @@ internal object ConceptHelp {
 
                         面倒でも、フェーダーを下げる → ファンタムを切る → 抜く、の順で。
                     """.trimIndent(),
+                ),
+            ),
+        ),
+        HelpTopic(
+            id = "concept_compressor",
+            title = "コンプレッサーの動き方",
+            summary = "スレッショルドを境に、超えた分だけレシオで圧縮する。曲線で見ると仕組みが分かる",
+            keywords = listOf(
+                "コンプレッサー", "スレッショルド", "レシオ", "アタック", "リリース",
+                "ニー", "ゲインリダクション", "圧縮比", "compressor",
+            ),
+            sections = listOf(
+                HelpSection(
+                    heading = "入力と出力の関係を線で見る",
+                    body = """
+                        コンプは「入力レベル→出力レベル」の変換をしている装置、
+                        と考えると分かりやすい。何もしなければ入力と出力は
+                        45度の直線（点線）で一致するが、コンプはスレッショルドを
+                        超えたところから傾きを寝かせる。
+
+                        下の図はスレッショルド -20dBFS・レシオ4:1の例。
+                        入力が 0dBFS まで振れても、出力は -15dBFS までしか
+                        上がらない（5dB ぶん圧縮された）のが線の折れ方で見える。
+                        レシオを上げるほど、この折れたあとの線はより水平に近づく。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.LineCurve(
+                        xLabel = "入力(dBFS)",
+                        yLabel = "出力(dBFS)",
+                        series = listOf(
+                            HelpDiagram.LineCurve.Series(
+                                label = "無圧縮(1:1)",
+                                points = listOf(-40f to -40f, 0f to 0f),
+                            ),
+                            HelpDiagram.LineCurve.Series(
+                                label = "Thr-20dB Ratio4:1",
+                                points = listOf(-40f to -40f, -20f to -20f, 0f to -15f),
+                            ),
+                        ),
+                    ),
+                ),
+                HelpSection(
+                    heading = "アタック・リリースは「いつ」の話",
+                    body = """
+                        上の曲線は「どれだけ」圧縮するかの話で、
+                        アタックとリリースは「いつ」圧縮が効くかの話になる。
+
+                        アタックが遅ければ、折れ線に乗るまでに一瞬の間があり、
+                        アタック音（キックの打撃、歌の子音）はそのまま通り抜ける。
+                        リリースが遅ければ、音が小さくなったあとも
+                        しばらく圧縮が残り続ける。
+                    """.trimIndent(),
+                ),
+                HelpSection(
+                    heading = "ニーとメイクアップゲイン",
+                    body = """
+                        ハードニーは図の折れ目が角ばったまま、
+                        ソフトニーは折れ目の手前から曲線でなだらかに移行する。
+                        同じスレッショルド・レシオでも、ソフトニーの方が
+                        かかり始めが自然に聞こえやすい。
+
+                        圧縮すると出力全体が下がるので、メイクアップゲインで
+                        持ち上げて元の音量感に戻す。上げすぎるとハウリング
+                        マージンを削っていることに気づきにくいので、
+                        必要最小限にとどめる。
+                    """.trimIndent(),
+                ),
+            ),
+        ),
+        HelpTopic(
+            id = "concept_polar_pattern",
+            title = "マイクの指向性（ポーラーパターン）",
+            summary = "正面と背面をどれだけ拾うかの形。ハウリングとかぶりの対策はここから決まる",
+            keywords = listOf(
+                "指向性", "ポーラーパターン", "カーディオイド", "スーパーカーディオイド",
+                "ハイパーカーディオイド", "無指向性", "オムニ", "双指向性", "figure8", "polar",
+            ),
+            sections = listOf(
+                HelpSection(
+                    heading = "カーディオイド",
+                    body = """
+                        正面をよく拾い、背面をほとんど拾わない単一指向性。
+                        SM58 をはじめライブの標準パターンで、
+                        真後ろにモニタースピーカーを置くのがハウリング対策の基本形になる。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.PolarPattern(HelpDiagram.PolarPattern.Pattern.CARDIOID),
+                ),
+                HelpSection(
+                    heading = "スーパーカーディオイド / ハイパーカーディオイド",
+                    body = """
+                        カーディオイドより正面の指向性が鋭い代わりに、
+                        真後ろではなく後方斜め約125°の方向に小さな感度の山ができる
+                        （図の背面側にできている小さなふくらみがそれ）。
+
+                        モニターを真後ろに置くと、この山にちょうど当たって
+                        ハウリングしやすくなる。真後ろを避けてやや斜めに置くとよい。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.PolarPattern(HelpDiagram.PolarPattern.Pattern.SUPERCARDIOID),
+                ),
+                HelpSection(
+                    heading = "無指向性（オムニ）",
+                    body = """
+                        全方向をほぼ均等に拾う。図が真円に近いほど無指向性に近い。
+                        自然な音でハウリングには弱く、ラベリアマイクに多く使われる。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.PolarPattern(HelpDiagram.PolarPattern.Pattern.OMNI),
+                ),
+                HelpSection(
+                    heading = "双指向性（フィギュア8）",
+                    body = """
+                        正面と背面を同じだけ拾い、側面をほとんど拾わない。
+                        リボンマイクや MS 方式のステレオ収音で使う。
+                        図が8の字（両側にふくらみ、左右がくびれた形）になる。
+                    """.trimIndent(),
+                    diagram = HelpDiagram.PolarPattern(HelpDiagram.PolarPattern.Pattern.FIGURE_8),
                 ),
             ),
         ),

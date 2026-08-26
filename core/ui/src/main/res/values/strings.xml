@@ -50,6 +50,9 @@
     <string name="measure_start">測定開始</string>
     <string name="measure_stop">停止</string>
     <string name="measure_reset">リセット</string>
+
+    <string name="landscape_fullscreen_enter">横画面で全画面表示</string>
+    <string name="landscape_fullscreen_exit">元の画面に戻す</string>
     <string name="measure_clipping">過大入力（クリップ）</string>
     <string name="measure_elapsed">経過 %1$s</string>
 

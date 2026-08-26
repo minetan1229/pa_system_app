@@ -240,6 +240,15 @@ private fun LazyGridScope.landingSections(
             onOpenCalibration = onCalibrationClick,
         )
     }
+    // 用語集と本番進行(ShowRunner)は、分類を掘ったり検索したりせず
+    // ここから一発で開けるようにする。前者は現場で言葉が飛んできた瞬間に、
+    // 後者は本番が始まる直前に、探す時間なしで開きたい道具
+    fullSpan {
+        QuickLinksPanel(
+            onOpenGlossary = { onToolClick(ToolId.GLOSSARY) },
+            onOpenShowRunner = { onToolClick(ToolId.SHOW_RUNNER) },
+        )
+    }
 
     // 初心者にだけ「何から開くか」を置く。中級以上には邪魔になるので出さない
     if (level == ExperienceLevel.BEGINNER) {
@@ -596,6 +605,42 @@ private fun CalibrationPanel(
             }
             OutlinedButton(onClick = onOpenCalibration, modifier = Modifier.weight(1f)) {
                 Text(stringResource(R.string.home_calibration_open))
+            }
+        }
+    }
+}
+
+/**
+ * 用語集と本番進行(ShowRunner)への近道。
+ *
+ * どちらも38枚の中から探すには向かない場面で使う道具——
+ * 用語集は言葉が飛んできた瞬間、ShowRunner は本番の直前。
+ * 分類を掘る・検索するという1手間を挟まず、ホームから一発で開けるようにする。
+ */
+@Composable
+private fun QuickLinksPanel(
+    onOpenGlossary: () -> Unit,
+    onOpenShowRunner: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+
+    PaCard(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = dimens.space,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+    ) {
+        Text(
+            text = stringResource(R.string.home_quicklinks_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+            OutlinedButton(onClick = onOpenGlossary, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.home_quicklink_glossary))
+            }
+            OutlinedButton(onClick = onOpenShowRunner, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.home_quicklink_showrunner))
             }
         }
     }

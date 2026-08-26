@@ -32,8 +32,8 @@
     <string name="analyzer_legend_cursor">カーソル</string>
 
     <string name="fft_title">スペクトラムアナライザ</string>
-    <string name="fft_level_label">一番出ている成分のレベル</string>
-    <string name="fft_peak_caption">%1$s Hz%2$s ← その成分の周波数</string>
+    <string name="fft_level_label">全帯域の平均レベル</string>
+    <string name="fft_peak_caption">一番出ているのは %1$s Hz%2$s（%3$s dB）</string>
     <string name="fft_axis">横軸 20Hz〜20kHz（対数）／ 縦軸 %3$s 幅・上端は自動（単位 %2$s）／ 分解能 %1$s</string>
     <string name="fft_note">RTA が「帯域ごとの量」を見るのに対し、こちらは「その山が何Hzか」を特定する道具です。ハウリングの芽、電源ハムの次数、共振の中心を当てるのに使います。生の表示は音楽を入れると読めないので、通常は 1/6 でならしてください。縦軸の上端は入っている音に追従するので、絶対値ではなく「どこが飛び出しているか」を見てください。</string>
 

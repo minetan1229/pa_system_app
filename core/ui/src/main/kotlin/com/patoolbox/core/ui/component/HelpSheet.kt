@@ -116,6 +116,14 @@ fun HelpSheet(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                    section.diagram?.let { diagram ->
+                        HelpDiagramView(
+                            diagram = diagram,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = dimens.spaceXs),
+                        )
+                    }
                 }
             }
 

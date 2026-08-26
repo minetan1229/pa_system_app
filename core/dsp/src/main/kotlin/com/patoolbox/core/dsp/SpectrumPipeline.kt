@@ -26,6 +26,15 @@ class SpectrumSnapshot(
     /** 一番出ている成分の周波数。カラムではなく生のビンから読むので 1Hz 単位で当たる */
     val peakFrequencyHz: Double,
     val peakLevelDb: Double,
+    /**
+     * 全帯域の平均レベル（ブロードバンド）。
+     *
+     * 生のビンパワーの合計（Parseval で信号の平均二乗値と一致）を dB にしたもので、
+     * 表示カラムの重なりに影響されない。大表示はこちらを主役にする——
+     * 1本だけ飛び出た山を大きく見せると、実際にはさほど出ていない部屋でも
+     * 「かなり出ている」と誤読されるため。
+     */
+    val overallLevelDb: Double,
     /** 上位の山。ハウリング対策で「どこを削るか」を決めるのに使う */
     val topPeaks: List<SpectrumPeak>,
 )
@@ -100,6 +109,9 @@ class SpectrumPipeline(
         val peakBin = analyzer.peakBin(spectrum)
         val peakHz = analyzer.interpolatedPeakHz(spectrum, peakBin)
         val peakPower = analyzer.toneMeanSquareAround(spectrum, peakBin)
+        // 全ビンの合計 = 信号の平均二乗値（SpectrumAnalyzer の正規化による）。
+        // カラムに畳む前の生スペクトラムから取るので、対数カラムの重なりで水増しされない
+        val overallPower = spectrum.sum()
 
         mapper.map(spectrum, smoothing, scratch)
 
@@ -138,6 +150,7 @@ class SpectrumPipeline(
             },
             peakFrequencyHz = peakHz,
             peakLevelDb = powerToDb(peakPower) + offsetDb,
+            overallLevelDb = powerToDb(overallPower) + offsetDb,
             topPeaks = findTopPeaks(columnsDb),
         )
     }

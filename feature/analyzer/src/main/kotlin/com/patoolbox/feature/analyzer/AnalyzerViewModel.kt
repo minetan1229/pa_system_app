@@ -102,6 +102,7 @@ data class AnalyzerUiState(
     val frequencies: DoubleArray = DoubleArray(0),
     val peakFrequencyHz: Double = 0.0,
     val peakLevelDb: Double = 0.0,
+    val overallLevelDb: Double = 0.0,
     val topPeaks: List<AnalyzerPeak> = emptyList(),
     /** 「ピーク保存」で控えた読み。新しいものが先頭 */
     val savedPeaks: List<SavedPeakSet> = emptyList(),
@@ -337,6 +338,7 @@ class AnalyzerViewModel @Inject constructor(
                 frequencies = pipeline.frequencies,
                 peakFrequencyHz = snapshot.peakFrequencyHz,
                 peakLevelDb = snapshot.peakLevelDb,
+                overallLevelDb = snapshot.overallLevelDb,
                 topPeaks = snapshot.topPeaks.map(::toAnalyzerPeak),
                 cursorLevelDb = it.cursorHz?.let { hz -> levelAt(hz, snapshot.columnsDb) }
                     ?: Double.NEGATIVE_INFINITY,

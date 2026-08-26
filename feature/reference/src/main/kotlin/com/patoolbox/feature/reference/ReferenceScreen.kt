@@ -27,7 +27,8 @@ enum class ReferenceTab(@param:StringRes val titleRes: Int, val tool: ToolId) {
     DEGRADATION(R.string.reference_tab_degradation, ToolId.SIGNAL_QUALITY),
     SIGNAL(R.string.reference_tab_signal, ToolId.TEST_SIGNALS),
     TROUBLESHOOT(R.string.reference_tab_troubleshoot, ToolId.TROUBLESHOOT),
-    GLOSSARY(R.string.reference_tab_glossary, ToolId.GLOSSARY),
+    // 用語集（GLOSSARY）はここに含めない。単語を引く場面と結線図を見る場面は
+    // 別の道具として開くほうが探しやすいので、GlossaryScreen へ切り出した
 }
 
 fun ToolId.toReferenceTabOrNull(): ReferenceTab? = when (this) {
@@ -36,7 +37,6 @@ fun ToolId.toReferenceTabOrNull(): ReferenceTab? = when (this) {
     ToolId.SIGNAL_QUALITY -> ReferenceTab.DEGRADATION
     ToolId.TEST_SIGNALS -> ReferenceTab.SIGNAL
     ToolId.TROUBLESHOOT -> ReferenceTab.TROUBLESHOOT
-    ToolId.GLOSSARY -> ReferenceTab.GLOSSARY
     else -> null
 }
 
@@ -81,7 +81,6 @@ fun ReferenceScreen(
                     gutter = dimens.gutter,
                     minTouch = dimens.minTouch,
                 )
-                ReferenceTab.GLOSSARY -> GlossaryTab(gutter = dimens.gutter)
             }
         }
     }

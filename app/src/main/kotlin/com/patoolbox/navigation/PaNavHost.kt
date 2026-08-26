@@ -34,6 +34,7 @@ import com.patoolbox.feature.measure.RoomMeasureScreen
 import com.patoolbox.feature.metronome.MetronomeScreen
 import com.patoolbox.feature.patch.PatchListScreen
 import com.patoolbox.feature.recorder.RecorderScreen
+import com.patoolbox.feature.reference.GlossaryScreen
 import com.patoolbox.feature.reference.ReferenceScreen
 import com.patoolbox.feature.reference.toReferenceTabOrNull
 import com.patoolbox.feature.patch.PatchSheetScreen
@@ -291,6 +292,8 @@ private fun ToolDestination(
         ToolId.SHOW_RUNNER -> ShowRunnerScreen(onBack = onBack)
 
         ToolId.SFX_PADS -> SfxScreen(onBack = onBack)
+
+        ToolId.GLOSSARY -> GlossaryScreen(onBack = onBack)
 
         ToolId.JOB_MANAGER, ToolId.RUN_SHEET -> JobListScreen(
             // 進行表は案件に紐づくので、どちらから来ても案件一覧を経由する

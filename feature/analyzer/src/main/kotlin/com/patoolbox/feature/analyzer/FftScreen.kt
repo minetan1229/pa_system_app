@@ -1,6 +1,8 @@
 package com.patoolbox.feature.analyzer
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
@@ -19,7 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,6 +39,7 @@ import com.patoolbox.core.dsp.OctaveSmoothing
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.CalibrationBadge
 import com.patoolbox.core.ui.component.ChartLegend
+import com.patoolbox.core.ui.component.FullscreenLandscapeEffect
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
 import com.patoolbox.core.ui.component.PaToolScaffold
@@ -84,6 +90,32 @@ fun FftScreen(
                 SpectrumRange.auto(uiState.columnsDb, uiState.span.db)
             }
 
+            var fullscreenLandscape by rememberSaveable { mutableStateOf(false) }
+            FullscreenLandscapeEffect(active = fullscreenLandscape)
+
+            if (fullscreenLandscape) {
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    SpectrumChart(
+                        columnsDb = uiState.columnsDb,
+                        frequencies = uiState.frequencies,
+                        range = range,
+                        peakHoldDb = uiState.peakHoldDb,
+                        cursorHz = uiState.cursorHz,
+                        onCursorChange = { hz -> hz?.let(viewModel::setCursor) },
+                        harmonics = if (uiState.showHarmonics) HARMONIC_ORDERS else 0,
+                        height = maxHeight,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    TextButton(
+                        onClick = { fullscreenLandscape = false },
+                        modifier = Modifier.align(Alignment.TopEnd),
+                    ) {
+                        Text(stringResource(CoreUiR.string.landscape_fullscreen_exit))
+                    }
+                }
+                return@MicPermissionGate
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -91,11 +123,12 @@ fun FftScreen(
                     .padding(horizontal = dimens.gutter),
                 verticalArrangement = Arrangement.spacedBy(dimens.gutterSmall),
             ) {
-                // 大きいのはレベル。周波数はその下に添える。
-                // 「何dB出ているか」→「それは何Hzか」の順で読めるようにしてある
+                // 大きいのは全帯域の平均レベル。1本だけ飛び出た山を大きく見せると
+                // 実際にはさほど出ていない部屋でも「かなり出ている」と誤読される。
+                // どこが一番出ているかはその下に添える
                 BigReadout(
                     value = if (uiState.hasReading) {
-                        "%.1f".format(uiState.peakLevelDb)
+                        "%.1f".format(uiState.overallLevelDb)
                     } else {
                         "--.-"
                     },
@@ -106,6 +139,7 @@ fun FftScreen(
                             R.string.fft_peak_caption,
                             formatHz(uiState.peakFrequencyHz),
                             uiState.peakNote?.let { "（$it）" }.orEmpty(),
+                            "%.1f".format(uiState.peakLevelDb),
                         )
                     } else {
                         null
@@ -173,6 +207,14 @@ fun FftScreen(
                     ) {
                         Text(stringResource(R.string.analyzer_save_peaks))
                     }
+                }
+
+                // 卓の脇に立てかけて図だけ見る使い方を想定した、横画面の全画面表示
+                OutlinedButton(
+                    onClick = { fullscreenLandscape = true },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = dimens.minTouch),
+                ) {
+                    Text(stringResource(CoreUiR.string.landscape_fullscreen_enter))
                 }
 
                 // ピーク保持は「押しっぱなしで残す」表示なので、

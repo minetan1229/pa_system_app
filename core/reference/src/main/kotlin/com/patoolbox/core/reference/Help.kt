@@ -3,12 +3,56 @@ package com.patoolbox.core.reference
 import com.patoolbox.core.model.ToolId
 
 /**
+ * 解説につける簡易図。
+ *
+ * 「図にした方が速く伝わるもの」だけを対象にしている
+ * （写真や機材のイラストのような、作り込みが要るものは対象外）。
+ * どれも数値の配列だけで組み立てられるものに絞ってあり、
+ * 実際の描画は core/ui の HelpDiagramView が担当する。
+ */
+sealed interface HelpDiagram {
+
+    /**
+     * 棒グラフ。項目ごとの量を比べるもの（dBと比率の対応など）に使う。
+     */
+    data class BarSeries(
+        val bars: List<Bar>,
+        val unit: String = "",
+    ) : HelpDiagram {
+        data class Bar(val label: String, val value: Float, val note: String = "")
+    }
+
+    /**
+     * 折れ線グラフ。距離減衰やコンプの入出力カーブのように、
+     * 「変化の形」そのものが説明になるものに使う。
+     */
+    data class LineCurve(
+        val series: List<Series>,
+        val xLabel: String,
+        val yLabel: String,
+        val logX: Boolean = false,
+    ) : HelpDiagram {
+        data class Series(val label: String, val points: List<Pair<Float, Float>>)
+    }
+
+    /**
+     * マイクの指向性（ポーラーパターン）。1本の式で形が決まるので図にしやすい。
+     */
+    data class PolarPattern(val pattern: Pattern) : HelpDiagram {
+        enum class Pattern { CARDIOID, SUPERCARDIOID, OMNI, FIGURE_8 }
+    }
+}
+
+/**
  * 解説の1節。
  *
  * 見出しを必ず付けるのは、現場で全部読む人がいないため。
  * 「いま知りたいのはどれか」を見出しだけで選べる粒度に割ってある。
+ *
+ * [diagram] は任意。文章だけで足りる節の方が多いので、
+ * 図にする価値がある節にだけ付ける。
  */
-data class HelpSection(val heading: String, val body: String)
+data class HelpSection(val heading: String, val body: String, val diagram: HelpDiagram? = null)
 
 /**
  * 1画面ぶんの解説。

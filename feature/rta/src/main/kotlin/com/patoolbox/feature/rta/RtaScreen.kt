@@ -1,6 +1,7 @@
 package com.patoolbox.feature.rta
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +35,7 @@ import com.patoolbox.core.dsp.BandResolution
 import com.patoolbox.core.dsp.FrequencyWeighting
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.component.CalibrationBadge
+import com.patoolbox.core.ui.component.FullscreenLandscapeEffect
 import com.patoolbox.core.ui.component.KeepScreenOn
 import com.patoolbox.core.ui.component.MicPermissionGate
 import com.patoolbox.core.ui.component.PaToolScaffold
@@ -84,6 +89,27 @@ internal fun RtaScreen(
     ) { innerPadding ->
         MicPermissionGate(modifier = Modifier.padding(innerPadding)) {
             KeepScreenOn(enabled = uiState.isMeasuring)
+
+            var fullscreenLandscape by rememberSaveable { mutableStateOf(false) }
+            FullscreenLandscapeEffect(active = fullscreenLandscape)
+
+            if (fullscreenLandscape) {
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    RtaChart(
+                        bands = uiState.bands,
+                        showPeaks = uiState.peakHold,
+                        height = maxHeight,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    TextButton(
+                        onClick = { fullscreenLandscape = false },
+                        modifier = Modifier.align(Alignment.TopEnd),
+                    ) {
+                        Text(stringResource(CoreUiR.string.landscape_fullscreen_exit))
+                    }
+                }
+                return@MicPermissionGate
+            }
 
             Column(
                 modifier = Modifier
@@ -241,6 +267,17 @@ internal fun RtaScreen(
                     ) {
                         Text(stringResource(CoreUiR.string.measure_reset))
                     }
+                }
+
+                // 卓の脇に立てかけて図だけ見る使い方を想定した、横画面の全画面表示
+                OutlinedButton(
+                    onClick = { fullscreenLandscape = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = dimens.minTouch)
+                        .padding(bottom = dimens.gutter),
+                ) {
+                    Text(stringResource(CoreUiR.string.landscape_fullscreen_enter))
                 }
             }
         }
