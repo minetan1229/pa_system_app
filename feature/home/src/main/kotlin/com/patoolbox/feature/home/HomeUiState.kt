@@ -49,9 +49,14 @@ data class CalibrationSummary(
  * どの段でも「音を測る」を先頭に置き、残り3つを慣れの度合いで入れ替える。
  * 選ぶ基準は「その段の人が、その日いちばん最初に開くもの」。
  *
- * - [ExperienceLevel.BEGINNER] — 困ってから開く道具（症状で引く・ピン配置・仕込みの表）
+ * - [ExperienceLevel.BEGINNER] — 分からないことを調べる道具（用語・ピン配置・仕込みの表）
  * - [ExperienceLevel.INTERMEDIATE] — 音を出して測る一式
  * - [ExperienceLevel.ADVANCED] — 追い込みに使う道具
+ *
+ * トラブルシュート（症状から原因を切り分ける道具）はここに固定で置かない。
+ * ホームの重要な位置に常駐させると、使わない現場では場所を取るだけの邪魔になるため。
+ * 初心者向けの案内文（[R.string.home_beginner_guide_body]）から導線を張るのと、
+ * CALC 分類からはいつでも開ける。
  *
  * 初心者・中級者の4つは Pro 無しで開けるものだけにしてある
  * （何も分からない段階で、開いた先が「買え」になる導線を最初の画面に置かない）。
@@ -66,7 +71,7 @@ fun starterTools(profile: FieldProfile): List<ToolId> {
     val base = when (profile.level) {
         ExperienceLevel.BEGINNER -> listOf(
             ToolId.SPL_METER,
-            ToolId.TROUBLESHOOT,
+            ToolId.GLOSSARY,
             ToolId.CONNECTOR_REF,
             ToolId.PATCH_SHEET,
         )

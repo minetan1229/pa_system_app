@@ -26,11 +26,6 @@
 
     <string name="settings_console">よく使う卓</string>
     <string name="settings_console_desc">ホームに最初に出す4つが変わります。解説の中身の出し分けは今後追加します。</string>
-    <string name="settings_console_unset">指定なし</string>
-    <string name="settings_console_analog">アナログミキサー</string>
-    <string name="settings_console_analog_desc">帯域チャートを最初の4つに入れる</string>
-    <string name="settings_console_digital">デジタルミキサー</string>
-    <string name="settings_console_digital_desc">パッチ表を最初の4つに入れる</string>
 
     <string name="settings_section_measure">計測</string>
     <string name="settings_keep_screen_on">計測中は画面を消さない</string>

@@ -7,6 +7,7 @@ import com.patoolbox.core.data.CalibrationRepository
 import com.patoolbox.core.data.UserPreferencesRepository
 import com.patoolbox.core.model.CalibrationConfidence
 import com.patoolbox.core.model.CalibrationProfile
+import com.patoolbox.core.model.ConsoleType
 import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ToolId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -65,6 +66,13 @@ class HomeViewModel @Inject constructor(
     fun onLevelChange(level: ExperienceLevel) {
         viewModelScope.launch {
             userPreferencesRepository.setExperienceLevel(level)
+        }
+    }
+
+    /** 初回オンボーディングの2問目。設定画面からも同じ値を書く。 */
+    fun onConsoleTypeChange(console: ConsoleType) {
+        viewModelScope.launch {
+            userPreferencesRepository.setConsoleType(console)
         }
     }
 

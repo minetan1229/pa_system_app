@@ -91,4 +91,6 @@ val ToolId.usesMicrophone: Boolean
         this == ToolId.POLARITY_CHECK ||
         this == ToolId.ROOM_MEASURE ||
         this == ToolId.TUNER ||
-        this == ToolId.RECORDER
+        this == ToolId.RECORDER ||
+        this == ToolId.SHOW_RUNNER ||
+        this == ToolId.SHOW_TIMER

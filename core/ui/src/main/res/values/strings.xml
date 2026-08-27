@@ -133,8 +133,8 @@
     <string name="tool_run_sheet_desc">リハ・本番の時間割、押し巻きの自動再計算</string>
     <string name="tool_show_timer_title">本番タイマー</string>
     <string name="tool_show_timer_desc">カウントダウン・経過・押し表示を巨大表示</string>
-    <string name="tool_show_runner_title">本番進行コントローラー</string>
-    <string name="tool_show_runner_desc">タイトルと持ち時間を並べた進行表を上から順にカウントダウン。SEパッドと同期音源も同じ画面で鳴らせる</string>
+    <string name="tool_show_runner_title">本番万能コントローラー</string>
+    <string name="tool_show_runner_desc">進行表のカウントダウンとSE連動、ハウリング測定、スペクトラムアナライザを1画面にまとめた本番用コントローラー</string>
     <string name="tool_sfx_pads_title">SE パッド</string>
     <string name="tool_sfx_pads_desc">SEを取り込んでオフライン再生。パッドを押して即発音</string>
     <string name="tool_job_manager_title">案件管理</string>
@@ -151,4 +151,20 @@
     <string name="tool_work_log_desc">現場ごとの稼働時間・移動費・収支を集計</string>
     <string name="tool_cloud_backup_title">クラウドバックアップ</string>
     <string name="tool_cloud_backup_desc">端末故障に備えた任意のバックアップ</string>
+
+    <!-- ハウリング監視パネル（本番タイマー・本番万能コントローラーで共有） -->
+    <string name="feedback_now">ハウリング</string>
+    <string name="feedback_value">%1$s Hz</string>
+    <string name="feedback_detail">%1$s ／ %2$s 帯域 ／ 周囲より +%3$s dB</string>
+    <string name="feedback_action">まずゲインを下げる。続くならこの帯域を狭く削る</string>
+    <string name="feedback_last">直前に出た: %1$s Hz（%2$s ／ %3$s 帯域）</string>
+    <string name="feedback_clear">消す</string>
+    <string name="feedback_idle">ハウリングは検出されていません</string>
+
+    <!-- 卓の種類（設定画面・ホームのオンボーディングで共有） -->
+    <string name="console_unset">指定なし</string>
+    <string name="console_analog">アナログミキサー</string>
+    <string name="console_analog_desc">帯域チャートを最初の4つに入れる</string>
+    <string name="console_digital">デジタルミキサー</string>
+    <string name="console_digital_desc">パッチ表を最初の4つに入れる</string>
 </resources>

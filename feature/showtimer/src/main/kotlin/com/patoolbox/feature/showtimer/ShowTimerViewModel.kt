@@ -16,6 +16,7 @@ import com.patoolbox.core.dsp.rms
 import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
 import com.patoolbox.core.model.ShowModeSettings
+import com.patoolbox.core.ui.component.FeedbackAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.abs
@@ -29,21 +30,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 enum class TimerMode { COUNTDOWN, ELAPSED }
-
-/**
- * 本番中に見つけたハウリング。
- *
- * 周波数だけでなく音名と 1/3 オクターブ帯域を持つのは、
- * 打つ手が「卓のどのつまみを触るか」だから。
- * 「1.02kHz」より「1k の帯域」の方が、グライコの前では速い。
- */
-data class FeedbackAlert(
-    val frequencyHz: Double,
-    val noteName: String,
-    val bandLabel: String,
-    /** 周囲より何dB突出しているか。値そのものより「どれだけ危ないか」の目安 */
-    val prominenceDb: Double,
-)
 
 data class ShowTimerUiState(
     val mode: TimerMode = TimerMode.COUNTDOWN,

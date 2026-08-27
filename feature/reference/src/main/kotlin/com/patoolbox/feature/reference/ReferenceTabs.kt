@@ -39,6 +39,8 @@ import com.patoolbox.core.reference.Connector
 import com.patoolbox.core.reference.ConnectorCategory
 import com.patoolbox.core.reference.Connectors
 import com.patoolbox.core.reference.Glossary
+import com.patoolbox.core.reference.GlossaryCategory
+import com.patoolbox.core.reference.GlossaryTerm
 import com.patoolbox.core.reference.TroubleshootFlow
 import com.patoolbox.core.reference.TroubleshootQuestion
 import com.patoolbox.core.reference.TroubleshootResolution
@@ -317,11 +319,19 @@ internal fun TroubleshootTab(gutter: Dp, minTouch: Dp) {
     }
 }
 
+/**
+ * PA用語辞典。
+ *
+ * 検索していないときはカテゴリで畳んで出す（[ConnectorTab] と同じ構成）。
+ * 検索したときはカテゴリを跨いで一覧のまま出す——「ハウリング」のように、
+ * どのカテゴリにあるか分からない引き方が多いため。
+ */
 @Composable
 internal fun GlossaryTab(gutter: Dp) {
     val dimens = LocalPaDimens.current
     var query by rememberSaveable { mutableStateOf("") }
     val results = remember(query) { Glossary.search(query) }
+    val searching = query.isNotBlank()
 
     Column(modifier = Modifier.fillMaxSize()) {
         OutlinedTextField(
@@ -333,14 +343,17 @@ internal fun GlossaryTab(gutter: Dp) {
                 .fillMaxWidth()
                 .padding(horizontal = gutter, vertical = dimens.spaceSm),
         )
-        Text(
-            text = stringResource(R.string.reference_term_count, results.size),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = gutter),
-        )
 
-        if (results.isEmpty()) {
+        if (searching) {
+            Text(
+                text = stringResource(R.string.reference_term_count, results.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = gutter),
+            )
+        }
+
+        if (searching && results.isEmpty()) {
             Text(
                 text = stringResource(R.string.reference_no_result),
                 style = MaterialTheme.typography.bodyLarge,
@@ -359,20 +372,44 @@ internal fun GlossaryTab(gutter: Dp) {
             ),
             verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
         ) {
-            items(results, key = { it.term }) { term ->
-                PaPanel(
-                    title = term.term,
-                    subtitle = term.english,
-                    trailing = null,
-                ) {
-                    Text(
-                        text = term.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            if (searching) {
+                items(results, key = { it.term }) { term ->
+                    GlossaryTermCard(term, showCategory = true)
+                }
+                return@LazyColumn
+            }
+
+            GlossaryCategory.entries.forEach { category ->
+                item(key = "cat_${category.name}") {
+                    PaSectionHeader(
+                        title = category.label,
+                        modifier = Modifier.padding(top = dimens.spaceSm),
                     )
+                }
+                items(Glossary.byCategory(category), key = { it.term }) { term ->
+                    GlossaryTermCard(term, showCategory = false)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun GlossaryTermCard(term: GlossaryTerm, showCategory: Boolean) {
+    PaPanel(
+        title = term.term,
+        subtitle = term.english,
+        trailing = if (showCategory) {
+            { PaPill(text = term.category.label) }
+        } else {
+            null
+        },
+    ) {
+        Text(
+            text = term.description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

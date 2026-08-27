@@ -34,6 +34,8 @@ import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ThemeMode
 import com.patoolbox.core.reference.HelpTopics
 import com.patoolbox.core.ui.component.HelpAction
+import com.patoolbox.core.ui.descriptionResOrNull
+import com.patoolbox.core.ui.labelRes
 import com.patoolbox.core.ui.R as CoreUiR
 
 @Composable
@@ -156,7 +158,7 @@ internal fun SettingsScreen(
             ConsoleType.entries.forEach { console ->
                 ChoiceRow(
                     title = stringResource(console.labelRes()),
-                    description = console.descriptionRes()?.let { stringResource(it) },
+                    description = console.descriptionResOrNull()?.let { stringResource(it) },
                     selected = uiState.profile.console == console,
                     onSelect = { onConsoleTypeChange(console) },
                     minTouch = dimens.minTouch,
@@ -350,15 +352,3 @@ private fun ExperienceLevel.descriptionRes(): Int = when (this) {
     ExperienceLevel.ADVANCED -> R.string.settings_level_advanced_desc
 }
 
-private fun ConsoleType.labelRes(): Int = when (this) {
-    ConsoleType.UNSET -> R.string.settings_console_unset
-    ConsoleType.ANALOG -> R.string.settings_console_analog
-    ConsoleType.DIGITAL -> R.string.settings_console_digital
-}
-
-private fun ConsoleType.descriptionRes(): Int? = when (this) {
-    // 指定なしが既定。説明を付けると「何かを選ばされている」ように見える
-    ConsoleType.UNSET -> null
-    ConsoleType.ANALOG -> R.string.settings_console_analog_desc
-    ConsoleType.DIGITAL -> R.string.settings_console_digital_desc
-}

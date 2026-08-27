@@ -19,6 +19,6 @@
     <string name="stageplot_notes">備考</string>
     <string name="stageplot_label">名前</string>
     <string name="stageplot_delete_item">この記号を削除</string>
-    <string name="stageplot_hint">下から記号を追加し、図の上でドラッグして配置してください。タップで選ぶと名前を変えられます</string>
+    <string name="stageplot_hint">下の「記号を追加」から置き、図の上でドラッグして配置してください。記号をタップすると編集シートが開きます</string>
     <string name="stageplot_palette">記号を追加</string>
 </resources>

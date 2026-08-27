@@ -22,16 +22,19 @@ import com.patoolbox.core.ui.identityColor
  * 計算機と同じく、ホームの各ツールから該当タブを開いた状態で入る。
  */
 enum class ReferenceTab(@param:StringRes val titleRes: Int, val tool: ToolId) {
+    // 単語を引く場面が一番多いので先頭に置く。以前は別画面（GlossaryScreen）に
+    // 切り出していたが、帯域チャートなどと同じ「リファレンス」の括りにまとめてほしい、
+    // というフィードバックを受けてタブに戻した
+    GLOSSARY(R.string.reference_tab_glossary, ToolId.GLOSSARY),
     CONNECTOR(R.string.reference_tab_connector, ToolId.CONNECTOR_REF),
     FREQUENCY(R.string.reference_tab_frequency, ToolId.FREQ_CHART),
     DEGRADATION(R.string.reference_tab_degradation, ToolId.SIGNAL_QUALITY),
     SIGNAL(R.string.reference_tab_signal, ToolId.TEST_SIGNALS),
     TROUBLESHOOT(R.string.reference_tab_troubleshoot, ToolId.TROUBLESHOOT),
-    // 用語集（GLOSSARY）はここに含めない。単語を引く場面と結線図を見る場面は
-    // 別の道具として開くほうが探しやすいので、GlossaryScreen へ切り出した
 }
 
 fun ToolId.toReferenceTabOrNull(): ReferenceTab? = when (this) {
+    ToolId.GLOSSARY -> ReferenceTab.GLOSSARY
     ToolId.CONNECTOR_REF -> ReferenceTab.CONNECTOR
     ToolId.FREQ_CHART -> ReferenceTab.FREQUENCY
     ToolId.SIGNAL_QUALITY -> ReferenceTab.DEGRADATION
@@ -73,6 +76,7 @@ fun ReferenceScreen(
             )
 
             when (selectedTab) {
+                ReferenceTab.GLOSSARY -> GlossaryTab(gutter = dimens.gutter)
                 ReferenceTab.CONNECTOR -> ConnectorTab(gutter = dimens.gutter)
                 ReferenceTab.FREQUENCY -> FrequencyTab(gutter = dimens.gutter)
                 ReferenceTab.DEGRADATION -> DegradationTab(gutter = dimens.gutter)

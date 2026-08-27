@@ -29,7 +29,7 @@
     <!-- 近道 -->
     <string name="home_quicklinks_title">探さずに開く</string>
     <string name="home_quicklink_glossary">用語集</string>
-    <string name="home_quicklink_showrunner">本番進行</string>
+    <string name="home_quicklink_showrunner">本番万能コントローラー</string>
 
     <!-- よく使う -->
     <string name="home_starters">まず開く4つ</string>
@@ -59,6 +59,9 @@
     <!-- 初回の案内。あとで設定画面からいつでも選び直せる -->
     <string name="home_onboarding_title">はじめに、いまの慣れ具合を教えてください</string>
     <string name="home_onboarding_subtitle">ホームの並べ方が変わります。あとで設定からいつでも選び直せます。説明文は、どれを選んでも省きません。</string>
+    <string name="home_onboarding_console_title">使っている卓の種類を教えてください</string>
+    <string name="home_onboarding_console_subtitle">ホームに最初に出す4つが変わります。あとで設定からいつでも選び直せます。</string>
+    <string name="home_onboarding_back">戻る</string>
     <string name="home_level_beginner_note">説明を多めに出し、順番の案内も出します。読み違えやすい道具には「中級」「上級」の札を付けますが、押せなくはなりません。</string>
     <string name="home_level_intermediate_note">よく使う4つと分類の入口だけを出す、既定の並びです。</string>
     <string name="home_level_advanced_note">見出しの絵と分類の入口を省き、%1$d 個をそのまま並べます。</string>

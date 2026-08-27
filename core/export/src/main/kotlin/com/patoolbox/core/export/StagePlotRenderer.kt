@@ -49,9 +49,28 @@ object StageGeometry {
     /**
      * 座標にある記号を探す。手前に描いたもの（＝リストの後ろ）を優先する。
      * 重なっている場合、上に見えている方を掴めないと操作できない。
+     *
+     * @param minHitSize 記号の見た目のサイズに関わらず、最低これだけの正方形を
+     *   当たり判定にする（px）。ステージ全体に対して小さく描かれる記号（[com.patoolbox.core.model.StageSymbol.widthRatio]
+     *   が小さいもの）は、見た目どおりの矩形だけだと指では拾えないサイズになる
      */
-    fun itemAt(plot: StagePlot, stage: RectF, x: Float, y: Float): StageItem? =
-        plot.items.lastOrNull { itemBounds(it, stage).contains(x, y) }
+    fun itemAt(plot: StagePlot, stage: RectF, x: Float, y: Float, minHitSize: Float = 0f): StageItem? =
+        plot.items.lastOrNull { hitBounds(it, stage, minHitSize).contains(x, y) }
+
+    private fun hitBounds(item: StageItem, stage: RectF, minHitSize: Float): RectF {
+        val bounds = itemBounds(item, stage)
+        if (minHitSize <= 0f) return bounds
+        val width = bounds.width().coerceAtLeast(minHitSize)
+        val height = bounds.height().coerceAtLeast(minHitSize)
+        val centerX = bounds.centerX()
+        val centerY = bounds.centerY()
+        return RectF(
+            centerX - width / 2f,
+            centerY - height / 2f,
+            centerX + width / 2f,
+            centerY + height / 2f,
+        )
+    }
 
     private const val MIN_ASPECT = 0.1f
 }

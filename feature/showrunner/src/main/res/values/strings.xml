@@ -1,19 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="showrunner_tab_progress">進行</string>
+    <string name="showrunner_tab_monitor">モニター</string>
+    <string name="showrunner_tab_pads">SEパッド</string>
+
     <string name="showrunner_no_active">まだ何も始まっていません。下の予定から「開始」を押してください。</string>
     <string name="showrunner_overrun">押しています</string>
     <string name="showrunner_resume">再開</string>
     <string name="showrunner_next">次へ（%1$s）</string>
 
+    <string name="showrunner_extend_title">延長</string>
+    <string name="showrunner_extend_apply">%1$d分延長する</string>
+
     <string name="showrunner_schedule_title">進行表</string>
     <string name="showrunner_schedule_subtitle">タイトルと持ち時間を並べて、上から順にカウントダウンします</string>
     <string name="showrunner_draft_title_hint">例: MCコメント、1曲目、転換</string>
     <string name="showrunner_minutes">%1$d分</string>
+    <string name="showrunner_time_range">%1$s–%2$s</string>
     <string name="showrunner_add">この内容で追加</string>
     <string name="showrunner_schedule_empty">まだ予定がありません。上のフォームから追加してください。</string>
     <string name="showrunner_active">進行中</string>
     <string name="showrunner_start">開始</string>
     <string name="showrunner_remove">削除</string>
+
+    <string name="showrunner_anchor_label">開始予定時刻</string>
+    <string name="showrunner_anchor_hint">例: 19:00</string>
+    <string name="showrunner_anchor_clear">時刻表示をやめる</string>
+
+    <string name="showrunner_item_settings_short">設定</string>
+    <string name="showrunner_item_cue_badge">SE連動あり</string>
+    <string name="showrunner_item_fixed_time">この項目の固定開始時刻（任意）</string>
+    <string name="showrunner_item_cue_label">開始時に鳴らすSE</string>
+    <string name="showrunner_item_cue_none">なし</string>
+    <string name="showrunner_item_cue_delay">遅延</string>
+    <string name="showrunner_item_cue_delay_seconds">%1$.1f秒</string>
+
+    <string name="showrunner_monitor_title">モニター</string>
+    <string name="showrunner_monitor_hint">本番中に画面を離れず、ハウリングとスペクトラムを見ます</string>
+    <string name="showrunner_monitor_start">モニタ開始</string>
+    <string name="showrunner_monitor_stop">モニタ停止</string>
+    <string name="showrunner_monitor_waiting">計測待ち…</string>
+    <string name="showrunner_monitor_level">%1$s / 最大 %2$s %3$s</string>
+    <string name="showrunner_monitor_reset_max">最大値を消去</string>
 
     <string name="showrunner_pads_title">SEパッド・同期音源</string>
     <string name="showrunner_pads_subtitle">SEパッド画面と同じ素材です。取り込みはどちらの画面からでも反映されます</string>

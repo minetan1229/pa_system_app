@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.export.StageGeometry
 import com.patoolbox.core.export.StagePlotRenderer
 import com.patoolbox.core.model.StagePlot
@@ -56,13 +58,18 @@ fun StagePlotCanvas(
     val currentMove by rememberUpdatedState(onMove)
     var draggingId by remember { mutableStateOf<Long?>(null) }
 
+    // 記号の見た目が小さいステージでも、指で拾える最低サイズを確保する。
+    // 見た目どおりの矩形だけを当たり判定にすると、48dp を大きく下回ることがあり
+    // 「記号が選べない・動かせない」の直接の原因になる
+    val minHitSizePx = with(LocalDensity.current) { LocalPaDimens.current.minTouch.toPx() }
+
     Canvas(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
                     val stage = stageRect(currentPlot, size.width, size.height)
-                    val hit = StageGeometry.itemAt(currentPlot, stage, offset.x, offset.y)
+                    val hit = StageGeometry.itemAt(currentPlot, stage, offset.x, offset.y, minHitSizePx)
                     currentSelect(hit?.id)
                 }
             }
@@ -70,7 +77,7 @@ fun StagePlotCanvas(
                 detectDragGestures(
                     onDragStart = { offset ->
                         val stage = stageRect(currentPlot, size.width, size.height)
-                        val hit = StageGeometry.itemAt(currentPlot, stage, offset.x, offset.y)
+                        val hit = StageGeometry.itemAt(currentPlot, stage, offset.x, offset.y, minHitSizePx)
                         draggingId = hit?.id
                         if (hit != null) currentSelect(hit.id)
                     },

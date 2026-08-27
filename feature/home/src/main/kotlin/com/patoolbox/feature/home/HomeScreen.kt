@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +26,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,12 +44,15 @@ import com.patoolbox.core.designsystem.component.PaScene
 import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
 import com.patoolbox.core.model.CalibrationConfidence
+import com.patoolbox.core.model.ConsoleType
 import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.ToolCategory
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.accentColor
 import com.patoolbox.core.ui.component.OpenAccessNotice
 import com.patoolbox.core.ui.component.ToolCard
+import com.patoolbox.core.ui.descriptionResOrNull
+import com.patoolbox.core.ui.labelRes
 import com.patoolbox.core.ui.titleRes
 
 /**
@@ -83,6 +91,7 @@ fun HomeScreen(
         onQueryChange = viewModel::onQueryChange,
         onToggleFavorite = viewModel::onToggleFavorite,
         onLevelChange = viewModel::onLevelChange,
+        onConsoleTypeChange = viewModel::onConsoleTypeChange,
         onToolClick = onToolClick,
         onCategoryClick = onCategoryClick,
         onCalibrationClick = onCalibrationClick,
@@ -99,6 +108,7 @@ internal fun HomeScreen(
     onQueryChange: (String) -> Unit,
     onToggleFavorite: (ToolId) -> Unit,
     onLevelChange: (ExperienceLevel) -> Unit,
+    onConsoleTypeChange: (ConsoleType) -> Unit,
     onToolClick: (ToolId) -> Unit,
     onCategoryClick: (ToolCategory?) -> Unit,
     onCalibrationClick: () -> Unit,
@@ -145,70 +155,94 @@ internal fun HomeScreen(
             }
         },
     ) { innerPadding ->
-        LazyVerticalGrid(
-            // タブレット横持ちでは3〜4列に増える
-            columns = GridCells.Adaptive(minSize = 168.dp),
+        // 慣れの度合いをまだ選んでいなければ、検索も分類もヒーローも出さず
+        // 大画面のオンボーディングだけに専念させる。埋め込みカードだと
+        // 一覧の中に紛れて見落とされるうえ、他の操作ができてしまい迷う
+        if (!uiState.hasChosenExperienceLevel) {
+            OnboardingFlow(
+                onComplete = { level, console ->
+                    onLevelChange(level)
+                    onConsoleTypeChange(console)
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+            )
+            return@Scaffold
+        }
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(
-                start = dimens.gutter,
-                end = dimens.gutter,
-                bottom = dimens.spaceXl,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(dimens.spaceMd),
-            verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
         ) {
-            fullSpan {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
-                    modifier = Modifier.padding(top = dimens.spaceMd),
-                ) {
-                    // 慣れの度合いをまだ選んでいなければ、何より先にこれを聞く。
-                    // 見出しの絵より上に置くのは「まずここを埋めてから中身を出す」と
-                    // 分かるようにするため
-                    if (query.isEmpty() && !uiState.hasChosenExperienceLevel) {
-                        LevelOnboarding(onLevelChange = onLevelChange)
-                    }
-                    // 上級者では見出しの絵を出さない。情報を持たない絵に
-                    // 一画面の1/3を使われるより、道具が1行でも多く見える方がいい
-                    if (query.isEmpty() && uiState.level != ExperienceLevel.ADVANCED) {
-                        Hero()
-                    }
-                    SearchField(query = uiState.query, onQueryChange = onQueryChange)
-                    if (query.isEmpty()) {
-                        // 選んだあとは常時のチップ列ではなく、現在値だけの小さい行にする。
-                        // ただし消しはしない——「一応何を選んでいるか」は毎回見えたほうがいい。
-                        // 変えたくなったらここから設定画面へ飛べる
-                        if (uiState.hasChosenExperienceLevel) {
-                            LevelIndicator(level = uiState.level, onOpenSettings = onSettingsClick)
+            // スクロールに追従させず、常に同じ場所に固定する。分類を掘って下まで
+            // スクロールしたあとも、一番上まで戻らずにその場で検索し直せるようにするため
+            // （検索欄が一覧の中に埋もれると、道具の在り処が分からず「迷路」に感じる原因になる）
+            SearchField(
+                query = uiState.query,
+                onQueryChange = onQueryChange,
+                modifier = Modifier.padding(
+                    horizontal = dimens.gutter,
+                    vertical = dimens.spaceSm,
+                ),
+            )
+
+            LazyVerticalGrid(
+                // タブレット横持ちでは3〜4列に増える
+                columns = GridCells.Adaptive(minSize = 168.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                contentPadding = PaddingValues(
+                    start = dimens.gutter,
+                    end = dimens.gutter,
+                    bottom = dimens.spaceXl,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+                verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+            ) {
+                fullSpan {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+                        modifier = Modifier.padding(top = dimens.spaceMd),
+                    ) {
+                        // 上級者では見出しの絵を出さない。情報を持たない絵に
+                        // 一画面の1/3を使われるより、道具が1行でも多く見える方がいい
+                        if (query.isEmpty() && uiState.level != ExperienceLevel.ADVANCED) {
+                            Hero()
                         }
-                        // 段の札のすぐ下に置く。「初心者にすると札が増える」ことと
-                        // 「札は増えるが開けなくなるものは無い」ことを続けて読ませたい
-                        if (uiState.level != ExperienceLevel.ADVANCED) {
-                            OpenAccessNotice(proUnlocked = uiState.proStatus.isPro)
+                        if (query.isEmpty()) {
+                            // オンボーディングは完了済み（ここに来る時点で hasChosenExperienceLevel）。
+                            // 現在値だけの小さい行にして、変えたくなったら設定画面へ飛べるようにする
+                            LevelIndicator(level = uiState.level, onOpenSettings = onSettingsClick)
+                            // 段の札のすぐ下に置く。「初心者にすると札が増える」ことと
+                            // 「札は増えるが開けなくなるものは無い」ことを続けて読ませたい
+                            if (uiState.level != ExperienceLevel.ADVANCED) {
+                                OpenAccessNotice(proUnlocked = uiState.proStatus.isPro)
+                            }
                         }
                     }
                 }
-            }
 
-            if (query.isEmpty()) {
-                landingSections(
-                    uiState = uiState,
-                    onToolClick = onToolClick,
-                    onToggleFavorite = onToggleFavorite,
-                    onCategoryClick = onCategoryClick,
-                    onCalibrationClick = onCalibrationClick,
-                    onCalibrationGuideClick = onCalibrationGuideClick,
-                )
-            } else {
-                toolSections(
-                    tools = matched,
-                    uiState = uiState,
-                    keyPrefix = "result",
-                    onToolClick = onToolClick,
-                    onToggleFavorite = onToggleFavorite,
-                )
+                if (query.isEmpty()) {
+                    landingSections(
+                        uiState = uiState,
+                        onToolClick = onToolClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onCategoryClick = onCategoryClick,
+                        onCalibrationClick = onCalibrationClick,
+                        onCalibrationGuideClick = onCalibrationGuideClick,
+                    )
+                } else {
+                    toolSections(
+                        tools = matched,
+                        uiState = uiState,
+                        keyPrefix = "result",
+                        onToolClick = onToolClick,
+                        onToggleFavorite = onToggleFavorite,
+                    )
+                }
             }
         }
     }
@@ -240,7 +274,7 @@ private fun LazyGridScope.landingSections(
             onOpenCalibration = onCalibrationClick,
         )
     }
-    // 用語集と本番進行(ShowRunner)は、分類を掘ったり検索したりせず
+    // 用語集と本番万能コントローラー(ShowRunner)は、分類を掘ったり検索したりせず
     // ここから一発で開けるようにする。前者は現場で言葉が飛んできた瞬間に、
     // 後者は本番が始まる直前に、探す時間なしで開きたい道具
     fullSpan {
@@ -369,45 +403,71 @@ private fun LazyGridScope.toolSections(
 }
 
 /**
- * 慣れの度合いを最初に一度だけ尋ねる案内。
+ * 初回オンボーディング。
  *
- * ホームの一番上、検索欄より前に置く。あとから設定で変えられるとはいえ、
- * 「何も選んでいない中級扱い」のまま使わせるより、最初に一度だけでも
- * 自分で選んでもらった方が、以降のホームの並びに納得感が出る。
+ * 「慣れの度合い」→「卓の種類」の2問だけを、大画面で1問ずつ尋ねる。
+ * 埋め込みカードにしないのは、一覧の中に紛れて見落とされるのと、
+ * 選び終わるまで他の操作ができてしまうのを防ぐため——
+ * 選び終わるまでは検索も分類も出さず、この画面に専念させる。
  *
- * 選ぶと [HomeUiState.hasChosenExperienceLevel] が true になり、この案内自体が消えて
- * [LevelIndicator] に置き換わる（呼び出し側の条件分岐で制御している）。
+ * 両方選び終えてはじめて [onComplete] を呼ぶ。呼ぶと
+ * [HomeUiState.hasChosenExperienceLevel] が true になり、この画面自体が消えて
+ * 通常のホームに置き換わる（呼び出し側の条件分岐で制御している）。
+ * 以降、慣れの度合いと卓の種類を変えられるのは設定画面からだけにする——
+ * ホームに常時の切り替えを置くと、選び終えた人には毎回場所を取るだけになる。
  */
 @Composable
-private fun LevelOnboarding(
-    onLevelChange: (ExperienceLevel) -> Unit,
+private fun OnboardingFlow(
+    onComplete: (ExperienceLevel, ConsoleType) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var selectedLevel by rememberSaveable { mutableStateOf<ExperienceLevel?>(null) }
+    val level = selectedLevel
+
+    if (level == null) {
+        LevelOnboardingScreen(
+            onSelect = { selectedLevel = it },
+            modifier = modifier,
+        )
+    } else {
+        ConsoleOnboardingScreen(
+            onSelect = { console -> onComplete(level, console) },
+            onBack = { selectedLevel = null },
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun LevelOnboardingScreen(
+    onSelect: (ExperienceLevel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dimens = LocalPaDimens.current
-    PaCard(
-        modifier = modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        contentPadding = dimens.space,
-        verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = dimens.gutter, vertical = dimens.spaceXl),
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceLg, Alignment.CenterVertically),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
             Text(
                 text = stringResource(R.string.home_onboarding_title),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = stringResource(R.string.home_onboarding_subtitle),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceMd)) {
             ExperienceLevel.entries.forEach { entry ->
-                LevelOnboardingOption(
+                OnboardingOption(
                     label = stringResource(entry.labelRes()),
                     note = stringResource(entry.onboardingNoteRes(), ToolId.entries.size),
-                    onClick = { onLevelChange(entry) },
+                    onClick = { onSelect(entry) },
                 )
             }
         }
@@ -415,9 +475,49 @@ private fun LevelOnboarding(
 }
 
 @Composable
-private fun LevelOnboardingOption(
+private fun ConsoleOnboardingScreen(
+    onSelect: (ConsoleType) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = dimens.gutter, vertical = dimens.spaceXl),
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceLg, Alignment.CenterVertically),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceXs)) {
+            Text(
+                text = stringResource(R.string.home_onboarding_console_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = stringResource(R.string.home_onboarding_console_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceMd)) {
+            ConsoleType.entries.forEach { entry ->
+                OnboardingOption(
+                    label = stringResource(entry.labelRes()),
+                    note = entry.descriptionResOrNull()?.let { stringResource(it) },
+                    onClick = { onSelect(entry) },
+                )
+            }
+        }
+        TextButton(onClick = onBack) {
+            Text(stringResource(R.string.home_onboarding_back))
+        }
+    }
+}
+
+@Composable
+private fun OnboardingOption(
     label: String,
-    note: String,
+    note: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -425,19 +525,21 @@ private fun LevelOnboardingOption(
     PaCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        contentPadding = dimens.spaceMd,
-        verticalArrangement = Arrangement.spacedBy(dimens.spaceXs / 2),
+        contentPadding = dimens.space,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceXs),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Text(
-            text = note,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (note != null) {
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -611,7 +713,7 @@ private fun CalibrationPanel(
 }
 
 /**
- * 用語集と本番進行(ShowRunner)への近道。
+ * 用語集と本番万能コントローラー(ShowRunner)への近道。
  *
  * どちらも38枚の中から探すには向かない場面で使う道具——
  * 用語集は言葉が飛んできた瞬間、ShowRunner は本番の直前。
