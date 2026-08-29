@@ -16,6 +16,8 @@
     <string name="timer_elapsed_label">経過</string>
     <string name="timer_preset">%1$d 分</string>
     <string name="timer_note">画面は自動で消えません。ステージから見えるように置いて使えます</string>
+    <string name="timer_extend_label">延長</string>
+    <string name="timer_estimated_end">終了予定 %1$s</string>
 
     <string name="timer_monitor_title">音のモニター</string>
     <string name="timer_monitor_start">開始</string>

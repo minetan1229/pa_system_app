@@ -2,8 +2,13 @@
 <resources>
     <string name="stageplot_title">ステージプロット</string>
     <string name="stageplot_empty">配置図がありません。右下の追加から作成してください</string>
+    <string name="stageplot_empty_hint">イベント名を付けるとグループ分けして表示されます</string>
     <string name="stageplot_add">配置図を追加</string>
-    <string name="stageplot_name">名前</string>
+    <string name="stageplot_event_name">イベント名（任意）</string>
+    <string name="stageplot_event_name_hint">例: 文化祭2025、春ライブ</string>
+    <string name="stageplot_event_name_note">同じイベント名を付けるとグループにまとめられます</string>
+    <string name="stageplot_name">配置図の名前</string>
+    <string name="stageplot_name_hint">例: メインステージ、バンドA</string>
     <string name="stageplot_create">作成</string>
     <string name="stageplot_cancel">キャンセル</string>
     <string name="stageplot_save">保存</string>

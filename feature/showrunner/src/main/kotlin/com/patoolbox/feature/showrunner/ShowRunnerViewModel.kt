@@ -8,8 +8,12 @@ import com.patoolbox.core.audio.AudioInputDevice
 import com.patoolbox.core.audio.SoundCuePlayer
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
+import com.patoolbox.core.data.JobRepository
+import com.patoolbox.core.data.ScheduleRepository
+import com.patoolbox.core.data.ShowModeController
 import com.patoolbox.core.data.SoundCueRepository
 import com.patoolbox.core.data.UserPreferencesRepository
+import com.patoolbox.core.model.Job
 import com.patoolbox.core.dsp.FeedbackDetector
 import com.patoolbox.core.dsp.OctaveSmoothing
 import com.patoolbox.core.dsp.SpectrumPipeline
@@ -19,18 +23,20 @@ import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
 import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.ScheduleTimeline
+import com.patoolbox.core.model.ShowModeSettings
 import com.patoolbox.core.model.SoundCue
 import com.patoolbox.core.model.TimelineEntry
 import com.patoolbox.core.ui.component.FeedbackAlert
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.abs
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Job as CoroutineJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -87,6 +93,11 @@ data class ShowRunnerUiState(
     val proStatus: ProStatus = ProStatus.Free,
     val error: String? = null,
 
+    // --- 本番モード ---
+    val showModeActive: Boolean = false,
+    val showMode: ShowModeSettings = ShowModeSettings.Default,
+    val hasNotificationPolicy: Boolean = false,
+
     // --- モニター（ハウリング測定・スペクトラムアナライザ） ---
     val monitoring: Boolean = false,
     /** 更新のたびに増える。配列の中身が変わっても等値と見なされないようにする */
@@ -103,6 +114,9 @@ data class ShowRunnerUiState(
         AudioInputType.BUILTIN_MIC,
     ),
     val monitorError: String? = null,
+
+    /** 「案件から取り込む」ダイアログ用の案件一覧 */
+    val availableJobs: List<Job> = emptyList(),
 ) {
     /** 無料版でこれ以上パッドを増やせるか。SE パッド画面と同じ上限を共有する */
     val canAddMorePads: Boolean
@@ -134,6 +148,13 @@ data class ShowRunnerUiState(
 
     /** 単位。未校正でもオフセット（既定 120dB）は乗っているので dBFS とは書けない */
     val unitLabel: String get() = if (calibration.isCalibrated) "dB SPL" else "dB(目安)"
+
+    /** 通知を止める設定なのに許可が無い状態 */
+    val needsNotificationPolicyGrant: Boolean
+        get() = showMode.needsNotificationPolicy && !hasNotificationPolicy
+
+    /** 全項目の合計時間（分）。進行表が空のときは 0 */
+    val totalScheduleMinutes: Int get() = schedule.sumOf { it.totalMinutes }
 
     /**
      * 進行表に時刻を付けたもの。[anchorEpochMs] が無ければ空（分表示だけにする）。
@@ -205,7 +226,10 @@ class ShowRunnerViewModel @Inject constructor(
     private val player: SoundCuePlayer,
     private val captureEngine: AudioCaptureEngine,
     private val calibrationRepository: CalibrationRepository,
-    preferencesRepository: UserPreferencesRepository,
+    private val preferencesRepository: UserPreferencesRepository,
+    private val showModeController: ShowModeController,
+    private val jobRepository: JobRepository,
+    private val scheduleRepository: ScheduleRepository,
     proGate: ProGate,
 ) : ViewModel() {
 
@@ -223,13 +247,13 @@ class ShowRunnerViewModel @Inject constructor(
         initialValue = ShowRunnerUiState(),
     )
 
-    private var ticker: Job? = null
+    private var ticker: CoroutineJob? = null
     private var runStartNanos = 0L
     private var accumulatedMillis = 0L
     private var nextId = 1L
 
     /** 開始した項目に紐付いた SE を、遅延ぶん待ってから鳴らすジョブ。項目切り替えで必ずキャンセルする */
-    private var pendingCueJob: Job? = null
+    private var pendingCueJob: CoroutineJob? = null
 
     private val pipeline = SpectrumPipeline(sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE)
     private val feedbackDetector = FeedbackDetector(
@@ -253,9 +277,17 @@ class ShowRunnerViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesRepository.preferences.collect { prefs ->
                 player.interruptOtherApps = !prefs.showMode.allowOtherAppAudio
+                local.update { it.copy(showMode = prefs.showMode) }
             }
         }
         local.update { it.copy(frequencies = pipeline.frequencies) }
+        refreshNotificationPolicy()
+
+        viewModelScope.launch {
+            jobRepository.observeAll().collect { jobs ->
+                local.update { it.copy(availableJobs = jobs) }
+            }
+        }
     }
 
     // --- 進行表 ---
@@ -265,7 +297,27 @@ class ShowRunnerViewModel @Inject constructor(
     }
 
     fun setDraftMinutes(minutes: Int) {
-        local.update { it.copy(draftMinutes = minutes.coerceIn(1, 600)) }
+        local.update { it.copy(draftMinutes = minutes.coerceIn(0, 600)) }
+    }
+
+    /**
+     * 案件管理の進行表をまとめて取り込む。
+     * 既存の項目はそのまま残し、末尾に追加する。
+     */
+    fun importFromJob(jobId: Long) {
+        viewModelScope.launch {
+            val items = scheduleRepository.observeForJob(jobId).first()
+            if (items.isEmpty()) return@launch
+            val newItems = items.map { coreItem ->
+                ScheduleItem(
+                    id = nextId++,
+                    title = coreItem.title,
+                    plannedMinutes = coreItem.durationMinutes,
+                    fixedStartEpochMs = coreItem.startAtEpochMs,
+                )
+            }
+            local.update { it.copy(schedule = it.schedule + newItems) }
+        }
     }
 
     fun addScheduleItem() {
@@ -326,6 +378,15 @@ class ShowRunnerViewModel @Inject constructor(
 
     fun setCueDelayMs(itemId: Long, delayMs: Long) {
         updateItem(itemId) { it.copy(cueDelayMs = delayMs.coerceIn(0, MAX_CUE_DELAY_MS)) }
+    }
+
+    fun renameItem(itemId: Long, title: String) {
+        if (title.isBlank()) return
+        updateItem(itemId) { it.copy(title = title.trim()) }
+    }
+
+    fun setItemDuration(itemId: Long, minutes: Int) {
+        updateItem(itemId) { it.copy(plannedMinutes = minutes.coerceIn(0, 600)) }
     }
 
     private fun updateItem(itemId: Long, transform: (ScheduleItem) -> ScheduleItem) {
@@ -393,6 +454,29 @@ class ShowRunnerViewModel @Inject constructor(
         cancelPendingCue()
         local.update { it.copy(activeItemId = null, running = false, elapsedMillis = 0) }
     }
+
+    // --- 本番モード ---
+
+    fun toggleShowMode() {
+        val current = local.value
+        if (current.showModeActive) {
+            showModeController.exit()
+            local.update { it.copy(showModeActive = false) }
+        } else {
+            showModeController.enter(current.showMode)
+            local.update { it.copy(showModeActive = true) }
+        }
+    }
+
+    fun setShowMode(settings: ShowModeSettings) {
+        viewModelScope.launch { preferencesRepository.setShowMode(settings) }
+    }
+
+    fun refreshNotificationPolicy() {
+        local.update { it.copy(hasNotificationPolicy = showModeController.hasNotificationPolicyAccess()) }
+    }
+
+    fun notificationPolicySettingsIntent() = showModeController.notificationPolicySettingsIntent()
 
     private fun startTicker() {
         ticker = viewModelScope.launch {
@@ -595,6 +679,7 @@ class ShowRunnerViewModel @Inject constructor(
         cancelPendingCue()
         player.releaseAll()
         captureEngine.stop()
+        if (local.value.showModeActive) showModeController.exit()
     }
 
     private companion object {

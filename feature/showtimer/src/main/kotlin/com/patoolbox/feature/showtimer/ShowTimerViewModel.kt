@@ -83,6 +83,16 @@ data class ShowTimerUiState(
      */
     val unitLabel: String get() = if (calibration.isCalibrated) "dB SPL" else "dB(目安)"
 
+    /**
+     * カウントダウン中に「いまの残り時間を足した終了予定時刻」を出す。
+     * 一時停止中でも押し中でも出さない（意味がないので）。
+     * Ticker が 100ms ごとに elapsedMillis を更新するたびに再計算される。
+     */
+    val estimatedEndEpochMs: Long?
+        get() = if (mode == TimerMode.COUNTDOWN && running && remainingMillis > 0) {
+            System.currentTimeMillis() + remainingMillis
+        } else null
+
     /** 通知を止める設定なのに許可が無い状態。本番モードに入る前に案内する */
     val needsNotificationPolicyGrant: Boolean
         get() = showMode.needsNotificationPolicy && !hasNotificationPolicy

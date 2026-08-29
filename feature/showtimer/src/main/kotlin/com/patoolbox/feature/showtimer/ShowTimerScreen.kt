@@ -119,6 +119,14 @@ fun ShowTimerScreen(
 
             ModeSection(uiState = uiState, viewModel = viewModel)
 
+            // カウントダウン中は延長操作を出す
+            if (uiState.mode == TimerMode.COUNTDOWN && uiState.running) {
+                ExtendSection(
+                    targetMinutes = uiState.targetMinutes,
+                    onAdd = { viewModel.setTargetMinutes(uiState.targetMinutes + it) },
+                )
+            }
+
             ShowModeSection(
                 uiState = uiState,
                 onToggle = viewModel::toggleShowMode,
@@ -182,6 +190,14 @@ private fun TimerReadout(uiState: ShowTimerUiState) {
             valueColor = valueColor,
             modifier = Modifier.padding(vertical = dimens.space),
         )
+        uiState.estimatedEndEpochMs?.let { endMs ->
+            Text(
+                text = stringResource(R.string.timer_estimated_end, formatTime(endMs)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = dimens.spaceSm),
+            )
+        }
     }
 }
 
@@ -223,6 +239,35 @@ private fun ModeSection(uiState: ShowTimerUiState, viewModel: ShowTimerViewModel
                         minTouch = dimens.minTouch,
                     )
                 }
+            }
+        }
+    }
+}
+
+/** 実行中に時間を積み増しする操作。ShowRunner の ExtendControl と同じ考え方。 */
+@Composable
+private fun ExtendSection(
+    targetMinutes: Int,
+    onAdd: (Int) -> Unit,
+) {
+    val dimens = LocalPaDimens.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.timer_extend_label),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        listOf(1, 3, 5, 10).forEach { mins ->
+            OutlinedButton(
+                onClick = { onAdd(mins) },
+                modifier = Modifier.heightIn(min = dimens.minTouch),
+            ) {
+                Text("+${mins}分")
             }
         }
     }
@@ -459,6 +504,12 @@ private fun ModeButton(
             modifier = Modifier.heightIn(min = minTouch),
         ) { Text(text) }
     }
+}
+
+/** epoch ms → "HH:mm" 形式の時刻文字列 */
+private fun formatTime(epochMs: Long): String {
+    val cal = java.util.Calendar.getInstance().also { it.timeInMillis = epochMs }
+    return "%02d:%02d".format(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
 }
 
 /** 1時間を超えたら h:mm:ss、それ未満は mm:ss。 */

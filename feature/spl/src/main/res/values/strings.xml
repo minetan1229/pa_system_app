@@ -43,4 +43,9 @@
     <string name="spl_record_saved">保存しました</string>
     <string name="spl_record_save">保存</string>
     <string name="spl_record_cancel">キャンセル</string>
+
+    <!-- スイープ音 -->
+    <string name="spl_sweep_start">スイープ音を出す（20Hz→20kHz）</string>
+    <string name="spl_sweep_stop">スイープ音を止める</string>
+    <string name="spl_sweep_note">スイープ再生中。マイクで受けて左の数値を見てください</string>
 </resources>

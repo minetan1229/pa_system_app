@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,36 @@ import com.patoolbox.core.model.StagePlot
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.ui.DateTimeText
 import com.patoolbox.core.ui.component.PaToolScaffold
+
+/**
+ * イベント名プレフィックスの区切り文字。"イベント / 配置図名" の形式で保存する。
+ * 区切り文字が無ければグループなし扱い。
+ */
+private const val EVENT_SEPARATOR = " / "
+
+private data class PlotGroup(val eventName: String?, val plots: List<StagePlot>)
+
+/** name から "(イベント名) / (配置図名)" を分解する */
+private fun StagePlot.eventName(): String? {
+    val idx = name.indexOf(EVENT_SEPARATOR)
+    return if (idx > 0) name.substring(0, idx) else null
+}
+
+private fun StagePlot.displayName(): String {
+    val idx = name.indexOf(EVENT_SEPARATOR)
+    return if (idx > 0) name.substring(idx + EVENT_SEPARATOR.length) else name
+}
+
+/** イベント名でグループ化する。イベント名なしはまとめて末尾に置く */
+private fun List<StagePlot>.groupedByEvent(): List<PlotGroup> {
+    val withEvent = groupBy { it.eventName() }
+    val sortedKeys = withEvent.keys
+        .filterNotNull()
+        .sorted()
+    val noEvent = withEvent[null].orEmpty()
+    return sortedKeys.map { key -> PlotGroup(key, withEvent[key]!!) } +
+        if (noEvent.isNotEmpty()) listOf(PlotGroup(null, noEvent)) else emptyList()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,25 +109,61 @@ fun StagePlotListScreen(
             }
 
             if (uiState.plots.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.stageplot_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = dimens.gutter),
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = dimens.gutter),
+                    verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+                ) {
+                    Text(
+                        text = stringResource(R.string.stageplot_empty),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = stringResource(R.string.stageplot_empty_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 return@Column
             }
+
+            val groups = uiState.plots.groupedByEvent()
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(dimens.gutterSmall),
                 modifier = Modifier.padding(vertical = dimens.gutterSmall),
             ) {
-                items(uiState.plots, key = { it.id }) { plot ->
-                    PlotCard(
-                        plot = plot,
-                        onOpen = { onOpenPlot(plot.id) },
-                        onDelete = { pendingDelete = plot.id },
-                    )
+                groups.forEach { group ->
+                    if (group.eventName != null) {
+                        item(key = "header_${group.eventName}") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = dimens.spaceMd, bottom = dimens.spaceXs),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+                            ) {
+                                Text(
+                                    text = group.eventName,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.weight(1f),
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                )
+                            }
+                        }
+                    }
+                    items(group.plots, key = { it.id }) { plot ->
+                        PlotCard(
+                            plot = plot,
+                            onOpen = { onOpenPlot(plot.id) },
+                            onDelete = { pendingDelete = plot.id },
+                        )
+                    }
                 }
             }
         }
@@ -103,9 +171,14 @@ fun StagePlotListScreen(
         if (showCreate) {
             CreateDialog(
                 onDismiss = { showCreate = false },
-                onCreate = { name ->
+                onCreate = { eventName, plotName ->
                     showCreate = false
-                    viewModel.create(name, onOpenPlot)
+                    val fullName = if (eventName.isNotBlank()) {
+                        "$eventName$EVENT_SEPARATOR$plotName"
+                    } else {
+                        plotName
+                    }
+                    viewModel.create(fullName, onOpenPlot)
                 },
             )
         }
@@ -156,7 +229,7 @@ private fun PlotCard(plot: StagePlot, onOpen: () -> Unit, onDelete: () -> Unit) 
         Row(modifier = Modifier.padding(12.dp)) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = plot.name,
+                    text = plot.displayName(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -182,22 +255,37 @@ private fun PlotCard(plot: StagePlot, onOpen: () -> Unit, onDelete: () -> Unit) 
 }
 
 @Composable
-private fun CreateDialog(onDismiss: () -> Unit, onCreate: (String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
+private fun CreateDialog(onDismiss: () -> Unit, onCreate: (eventName: String, plotName: String) -> Unit) {
+    var eventName by rememberSaveable { mutableStateOf("") }
+    var plotName by rememberSaveable { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.stageplot_add)) },
         text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text(stringResource(R.string.stageplot_name)) },
-                singleLine = true,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = eventName,
+                    onValueChange = { eventName = it },
+                    label = { Text(stringResource(R.string.stageplot_event_name)) },
+                    placeholder = { Text(stringResource(R.string.stageplot_event_name_hint)) },
+                    supportingText = { Text(stringResource(R.string.stageplot_event_name_note)) },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = plotName,
+                    onValueChange = { plotName = it },
+                    label = { Text(stringResource(R.string.stageplot_name)) },
+                    placeholder = { Text(stringResource(R.string.stageplot_name_hint)) },
+                    singleLine = true,
+                )
+            }
         },
         confirmButton = {
-            TextButton(onClick = { onCreate(name) }) {
+            TextButton(
+                onClick = { onCreate(eventName.trim(), plotName.trim()) },
+                enabled = plotName.isNotBlank(),
+            ) {
                 Text(stringResource(R.string.stageplot_create))
             }
         },

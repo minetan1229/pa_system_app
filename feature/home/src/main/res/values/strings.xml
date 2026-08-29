@@ -27,9 +27,10 @@
     <string name="home_calibration_confidence_good">校正器または外部マイクで校正済み</string>
 
     <!-- 近道 -->
-    <string name="home_quicklinks_title">探さずに開く</string>
+    <string name="home_quicklinks_title">本番が始まる前に開く</string>
+    <string name="home_quicklinks_body">進行表・SE・ハウリング監視をこれ1つで。本番中に画面を切り替えません。</string>
     <string name="home_quicklink_glossary">用語集</string>
-    <string name="home_quicklink_showrunner">本番万能コントローラー</string>
+    <string name="home_quicklink_showrunner">本番万能コントローラーを開く →</string>
 
     <!-- よく使う -->
     <string name="home_starters">まず開く4つ</string>

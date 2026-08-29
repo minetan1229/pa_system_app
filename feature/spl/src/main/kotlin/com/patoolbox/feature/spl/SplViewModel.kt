@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patoolbox.core.audio.AudioCaptureEngine
 import com.patoolbox.core.audio.AudioInputDevice
+import com.patoolbox.core.audio.AudioPlaybackEngine
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
 import com.patoolbox.core.data.MeasurementRepository
 import com.patoolbox.core.dsp.FrequencyWeighting
+import com.patoolbox.core.dsp.LogSweepSource
 import com.patoolbox.core.dsp.SoundLevelMeter
 import com.patoolbox.core.dsp.TimeWeighting
 import com.patoolbox.core.model.AudioInputType
@@ -42,6 +44,7 @@ enum class ReadoutAveraging(val windowSeconds: Double, val label: String) {
 
 data class SplUiState(
     val isMeasuring: Boolean = false,
+    val sweepPlaying: Boolean = false,
     val hasReading: Boolean = false,
     val instantDb: Double = 0.0,
     /** 大表示に出す値。[readoutAveraging] に従って平均済み */
@@ -84,6 +87,7 @@ data class SplUiState(
 @HiltViewModel
 class SplViewModel @Inject constructor(
     private val captureEngine: AudioCaptureEngine,
+    private val playbackEngine: AudioPlaybackEngine,
     private val calibrationRepository: CalibrationRepository,
     private val measurementRepository: MeasurementRepository,
     proGate: ProGate,
@@ -94,6 +98,7 @@ class SplViewModel @Inject constructor(
 
     private var meter: SoundLevelMeter? = null
     private var blockCounter = 0
+    private val sweepSource = LogSweepSource(AudioCaptureEngine.DEFAULT_SAMPLE_RATE, loop = true)
 
     // 記録はオーディオスレッドからのみ触る。UI へは件数だけを流す
     private val loggedSamples = mutableListOf<MeasurementSample>()
@@ -213,8 +218,24 @@ class SplViewModel @Inject constructor(
         }
     }
 
+    /** スイープ音のオン/オフ切り替え。SPL 測定とマイク入力は別チャンネルなので同時動作する。 */
+    fun toggleSweep() {
+        if (_uiState.value.sweepPlaying) {
+            playbackEngine.stop()
+            _uiState.update { it.copy(sweepPlaying = false) }
+        } else {
+            sweepSource.levelDbFs = -20.0
+            runCatching { playbackEngine.start(sweepSource) }.onSuccess {
+                _uiState.update { it.copy(sweepPlaying = true) }
+            }.onFailure { throwable ->
+                _uiState.update { it.copy(error = throwable.message) }
+            }
+        }
+    }
+
     override fun onCleared() {
         captureEngine.stop()
+        if (_uiState.value.sweepPlaying) playbackEngine.stop()
         super.onCleared()
     }
 

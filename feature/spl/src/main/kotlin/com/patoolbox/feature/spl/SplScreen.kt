@@ -65,6 +65,7 @@ fun SplScreen(
         onToggleLogging = {
             if (uiState.isLogging) showSaveDialog = true else viewModel.startLogging()
         },
+        onToggleSweep = viewModel::toggleSweep,
         onBack = onBack,
         onOpenCalibration = onOpenCalibration,
         modifier = modifier,
@@ -110,6 +111,7 @@ internal fun SplScreen(
     onTimeWeighting: (TimeWeighting) -> Unit,
     onReadoutAveraging: (ReadoutAveraging) -> Unit,
     onToggleLogging: () -> Unit,
+    onToggleSweep: () -> Unit = {},
     onBack: () -> Unit,
     onOpenCalibration: () -> Unit,
     modifier: Modifier = Modifier,
@@ -224,6 +226,25 @@ internal fun SplScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+
+                // スイープ音ボタン（測定前に出しておくと、測定しながらリアルタイムで確認できる）
+                OutlinedButton(
+                    onClick = onToggleSweep,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        stringResource(
+                            if (uiState.sweepPlaying) R.string.spl_sweep_stop else R.string.spl_sweep_start,
+                        ),
+                    )
+                }
+                if (uiState.sweepPlaying) {
+                    Text(
+                        text = stringResource(R.string.spl_sweep_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
 
                 Row(
                     modifier = Modifier

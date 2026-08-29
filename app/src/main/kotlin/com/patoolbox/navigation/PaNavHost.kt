@@ -152,6 +152,7 @@ fun PaNavHost(
                     },
                     onOpenSnapshot = { id -> navController.navigate(SnapshotRoute(id)) },
                     onOpenInvoice = { id -> navController.navigate(InvoiceRoute(id)) },
+                    onOpenFeedback = { navController.navigate(ToolRoute(ToolId.FEEDBACK_FINDER.name)) },
                 )
             }
         }
@@ -228,6 +229,7 @@ private fun ToolDestination(
     onOpenStagePlot: (Long) -> Unit,
     onOpenSnapshot: (Long) -> Unit,
     onOpenInvoice: (Long) -> Unit,
+    onOpenFeedback: () -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -288,7 +290,10 @@ private fun ToolDestination(
 
         ToolId.SHOW_TIMER -> ShowTimerScreen(onBack = onBack)
 
-        ToolId.SHOW_RUNNER -> ShowRunnerScreen(onBack = onBack)
+        ToolId.SHOW_RUNNER -> ShowRunnerScreen(
+            onBack = onBack,
+            onOpenFeedback = onOpenFeedback,
+        )
 
         ToolId.SFX_PADS -> SfxScreen(onBack = onBack)
 

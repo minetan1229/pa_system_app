@@ -162,10 +162,11 @@ class SfxViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        // 画面を離れたら鳴らしっぱなしにしない。
-        // フェードを待たずに切るのは、ここに来た時点で画面がもう無いため
+        // onFinished のコールバックだけ外す。
+        // SoundCuePlayer は @Singleton で ShowRunnerViewModel とも共有している。
+        // ここで releaseAll() を呼ぶと「SE パッドは別ページでも流し続ける」要件を壊すので、
+        // 音の管理は ShowRunnerViewModel.onCleared() に委ねる。
         player.onFinished = null
-        player.releaseAll()
     }
 
     private companion object {

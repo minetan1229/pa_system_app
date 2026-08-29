@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -713,11 +714,10 @@ private fun CalibrationPanel(
 }
 
 /**
- * 用語集と本番万能コントローラー(ShowRunner)への近道。
+ * 本番万能コントローラーへの近道。
  *
- * どちらも38枚の中から探すには向かない場面で使う道具——
- * 用語集は言葉が飛んできた瞬間、ShowRunner は本番の直前。
- * 分類を掘る・検索するという1手間を挟まず、ホームから一発で開けるようにする。
+ * 本番開始直前に探す時間なしで開きたい道具なので、ホームから一発で開けるように
+ * 他のカードより目立つ扱いにしてある。
  */
 @Composable
 private fun QuickLinksPanel(
@@ -729,21 +729,33 @@ private fun QuickLinksPanel(
 
     PaCard(
         modifier = modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        borderColor = MaterialTheme.colorScheme.primary,
         contentPadding = dimens.space,
         verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
     ) {
         Text(
             text = stringResource(R.string.home_quicklinks_title),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
-            OutlinedButton(onClick = onOpenGlossary, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.home_quicklink_glossary))
-            }
-            OutlinedButton(onClick = onOpenShowRunner, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.home_quicklink_showrunner))
-            }
+        Text(
+            text = stringResource(R.string.home_quicklinks_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+        )
+        // 本番万能コントローラーを最優先で大きく出す
+        Button(
+            onClick = onOpenShowRunner,
+            modifier = Modifier.fillMaxWidth().height(dimens.minTouch * 1.3f),
+        ) {
+            Text(
+                text = stringResource(R.string.home_quicklink_showrunner),
+                style = MaterialTheme.typography.titleSmall,
+            )
+        }
+        OutlinedButton(onClick = onOpenGlossary, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.home_quicklink_glossary))
         }
     }
 }
