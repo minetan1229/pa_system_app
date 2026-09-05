@@ -4,6 +4,7 @@ import com.patoolbox.core.model.CalibrationConfidence
 import com.patoolbox.core.model.ConsoleType
 import com.patoolbox.core.model.ExperienceLevel
 import com.patoolbox.core.model.FieldProfile
+import com.patoolbox.core.model.PlannedShow
 import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.ToolId
 
@@ -22,8 +23,18 @@ data class HomeUiState(
     val profile: FieldProfile = FieldProfile.Default,
     /** false なら、慣れの度合いをまだ自分で選んでいない。ホームの最初の案内を出す */
     val hasChosenExperienceLevel: Boolean = false,
+    /**
+     * 今日の日付が入っている進行表。本番万能コントローラーが自動で読み込むのと同じもの。
+     *
+     * 「いま始まっているか」はここでは判定しない（時計が進んでも状態は流れてこない）。
+     * 判定は画面側で今の時刻を見ながら [PlannedShow.isRunningAt] などで行う。
+     */
+    val todayShows: List<PlannedShow> = emptyList(),
 ) {
     val level: ExperienceLevel get() = profile.level
+
+    /** いま出すべき今日の1本。進行中のもの → 次に始まるもの の順 */
+    fun showForNow(nowEpochMs: Long): PlannedShow? = PlannedShow.pick(todayShows, nowEpochMs)
 }
 
 /**

@@ -37,6 +37,7 @@ import com.patoolbox.core.designsystem.component.PaPill
 import com.patoolbox.core.designsystem.component.PaTone
 import com.patoolbox.core.designsystem.component.content
 import com.patoolbox.core.designsystem.theme.LocalPaDimens
+import com.patoolbox.core.dsp.FeedbackSensitivity
 import com.patoolbox.core.dsp.FeedbackTracker
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.reference.BandDictionary

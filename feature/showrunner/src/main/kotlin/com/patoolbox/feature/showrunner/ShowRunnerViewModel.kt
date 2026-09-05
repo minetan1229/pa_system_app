@@ -1,6 +1,7 @@
 package com.patoolbox.feature.showrunner
 
 import android.net.Uri
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patoolbox.core.audio.AudioCaptureEngine
@@ -9,18 +10,22 @@ import com.patoolbox.core.audio.SoundCuePlayer
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
 import com.patoolbox.core.data.JobRepository
+import com.patoolbox.core.data.PlannedShowRepository
 import com.patoolbox.core.data.ScheduleRepository
 import com.patoolbox.core.data.ShowModeController
 import com.patoolbox.core.data.SoundCueRepository
 import com.patoolbox.core.data.UserPreferencesRepository
 import com.patoolbox.core.model.Job
 import com.patoolbox.core.dsp.FeedbackDetector
+import com.patoolbox.core.dsp.FeedbackSensitivity
+import com.patoolbox.core.dsp.FeedbackTracker
 import com.patoolbox.core.dsp.OctaveSmoothing
 import com.patoolbox.core.dsp.SpectrumPipeline
 import com.patoolbox.core.dsp.amplitudeToDb
 import com.patoolbox.core.dsp.rms
 import com.patoolbox.core.model.AudioInputType
 import com.patoolbox.core.model.CalibrationProfile
+import com.patoolbox.core.model.PlannedShow
 import com.patoolbox.core.model.ProStatus
 import com.patoolbox.core.model.ScheduleTimeline
 import com.patoolbox.core.model.ShowModeSettings
@@ -76,14 +81,13 @@ data class ShowRunnerUiState(
     val running: Boolean = false,
     val elapsedMillis: Long = 0,
 
-    /** 追加フォームの下書き */
-    val draftTitle: String = "",
-    val draftMinutes: Int = DEFAULT_DRAFT_MINUTES,
-
     /** 延長フォームの下書き。プリセットを押すと仮選択され、微調整してから適用する */
     val draftExtendMinutes: Int = DEFAULT_EXTEND_MINUTES,
 
-    /** 進行表全体の開始予定時刻。null なら時刻は出さず、分表示だけにする */
+    /**
+     * 進行表全体の開始予定時刻。取り込んだ進行表（案件の搬入時刻）から入る。
+     * null なら時刻は出さず、分表示だけにする
+     */
     val anchorEpochMs: Long? = null,
 
     /** SE パッド・同期音源。[com.patoolbox.feature.sfx.SfxScreen] と同じ保存先を見ている */
@@ -115,8 +119,32 @@ data class ShowRunnerUiState(
     ),
     val monitorError: String? = null,
 
-    /** 「案件から取り込む」ダイアログ用の案件一覧 */
+    /** ハウリングの履歴。ハウリング検出の画面と同じ集計をここでも持つ */
+    val feedbackTracks: List<FeedbackTracker.Track> = emptyList(),
+    val feedbackElapsedMs: Long = 0,
+    val sensitivity: FeedbackSensitivity = FeedbackSensitivity.NORMAL,
+    val feedbackSort: FeedbackTracker.Sort = FeedbackTracker.Sort.TOTAL_TIME,
+
+    /** 「進行表を取り込む」ダイアログ用の案件一覧 */
     val availableJobs: List<Job> = emptyList(),
+
+    /** 今日の日付が入っている進行表。ホームの案内と同じものを見ている */
+    val todayShows: List<PlannedShow> = emptyList(),
+
+    /** いま取り込んでいる進行表の名前。null なら手で組んだもの */
+    val loadedShowName: String? = null,
+
+    /** その進行表が自動で入ったのか（日付と時刻が今日に当たっていた）どうか */
+    val autoLoaded: Boolean = false,
+
+    /**
+     * いまの時刻が当たっている項目。まだ何も走っていないときだけ入る。
+     * 「予定ではもう始まっています。開始しますか？」を出すのに使う
+     */
+    val suggestedItemId: Long? = null,
+
+    /** その項目の予定開始時刻。押した時点で「何分前に始まっていたか」を数えるのに使う */
+    val suggestedStartEpochMs: Long? = null,
 ) {
     /** 無料版でこれ以上パッドを増やせるか。SE パッド画面と同じ上限を共有する */
     val canAddMorePads: Boolean
@@ -156,6 +184,21 @@ data class ShowRunnerUiState(
     /** 全項目の合計時間（分）。進行表が空のときは 0 */
     val totalScheduleMinutes: Int get() = schedule.sumOf { it.totalMinutes }
 
+    /** 予定では始まっているのに、まだ開始を押していない項目 */
+    val suggestedItem: ScheduleItem?
+        get() = suggestedItemId?.let { id -> schedule.firstOrNull { it.id == id } }
+
+    /**
+     * いちばん潰すべきハウリング1本。
+     *
+     * 「いま出ている中で一番大きいもの」ではなく **累計で一番長く鳴っているもの**。
+     * 一瞬の派手な発振より、鳴り続けている方が本番を壊す。
+     */
+    val worstFeedback: FeedbackTracker.Track?
+        get() = feedbackTracks.maxWithOrNull(
+            compareBy<FeedbackTracker.Track> { it.totalRingingMs }.thenBy { it.longestRunMs },
+        )
+
     /**
      * 進行表に時刻を付けたもの。[anchorEpochMs] が無ければ空（分表示だけにする）。
      *
@@ -192,7 +235,6 @@ data class ShowRunnerUiState(
     }
 
     companion object {
-        const val DEFAULT_DRAFT_MINUTES = 5
         const val DEFAULT_EXTEND_MINUTES = 5
         const val MILLIS_PER_MINUTE = 60_000L
         const val SILENCE_DB = -200.0
@@ -230,6 +272,7 @@ class ShowRunnerViewModel @Inject constructor(
     private val showModeController: ShowModeController,
     private val jobRepository: JobRepository,
     private val scheduleRepository: ScheduleRepository,
+    private val plannedShowRepository: PlannedShowRepository,
     proGate: ProGate,
 ) : ViewModel() {
 
@@ -252,14 +295,20 @@ class ShowRunnerViewModel @Inject constructor(
     private var accumulatedMillis = 0L
     private var nextId = 1L
 
+    /** 自分で外したあとに自動取り込みを止めるための札 */
+    private var autoApplyBlocked = false
+
     /** 開始した項目に紐付いた SE を、遅延ぶん待ってから鳴らすジョブ。項目切り替えで必ずキャンセルする */
     private var pendingCueJob: CoroutineJob? = null
 
     private val pipeline = SpectrumPipeline(sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE)
-    private val feedbackDetector = FeedbackDetector(
-        sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE,
-        fftSize = pipeline.fftSize,
-    )
+    private var feedbackDetector = createDetector(FeedbackSensitivity.NORMAL)
+
+    /**
+     * ハウリングの履歴。モニタを止めても消さない。
+     * リハで拾った周波数を本番の合間に見返す、というのがこの画面での使い道になる。
+     */
+    private val feedbackTracker = FeedbackTracker()
     private var framesSinceFeedback = Int.MAX_VALUE
 
     @Volatile
@@ -288,17 +337,119 @@ class ShowRunnerViewModel @Inject constructor(
                 local.update { it.copy(availableJobs = jobs) }
             }
         }
+
+        // 日付の入った進行表を見張る。今日のものがあり、まだ何も組んでいなければ
+        // そのまま入れる——本番直前に「取り込む」を探させないための自動適用
+        viewModelScope.launch {
+            plannedShowRepository.observeToday().collect { shows ->
+                local.update { it.copy(todayShows = shows) }
+                autoApplyToday(shows)
+            }
+        }
+    }
+
+    // --- 今日の進行表の自動適用 ---
+
+    /**
+     * 今日の進行表を自動で入れる。
+     *
+     * 入れるのは **画面がまだ空のときだけ**。手で組んだものや、別の進行表を
+     * 選んで取り込んだものを黙って置き換えると、本番中に何が起きたのか分からなくなる。
+     */
+    private fun autoApplyToday(shows: List<PlannedShow>) {
+        if (autoApplyBlocked) return
+        if (local.value.schedule.isNotEmpty()) return
+        val show = PlannedShow.pick(shows, System.currentTimeMillis()) ?: return
+        applyPlannedShow(show, auto = true)
+    }
+
+    /**
+     * 進行表を1本まるごと画面に載せる。
+     *
+     * 案件に入っている搬入（または本番）の時刻をそのまま全体の開始時刻に使うので、
+     * 取り込んだ直後から各項目に時刻が並ぶ。
+     */
+    fun applyPlannedShow(show: PlannedShow, auto: Boolean = false) {
+        val items = show.items.map { coreItem ->
+            ScheduleItem(
+                id = nextId++,
+                title = coreItem.title,
+                plannedMinutes = coreItem.durationMinutes,
+                fixedStartEpochMs = coreItem.startAtEpochMs,
+            )
+        }
+        stopTicker()
+        cancelPendingCue()
+        local.update {
+            it.copy(
+                schedule = items,
+                anchorEpochMs = show.anchorEpochMs,
+                loadedShowName = show.job.name,
+                autoLoaded = auto,
+                activeItemId = null,
+                running = false,
+                elapsedMillis = 0,
+            )
+        }
+        refreshSchedulePosition()
+    }
+
+    /**
+     * 「予定ではもう始まっている項目」を洗い直す。
+     *
+     * 時計が進んでも Flow は流れないので、画面に戻ったときと進行表が変わったときに
+     * 呼ぶ。走っている項目があるときは何も出さない——本番中に
+     * 「別の項目を始めますか？」と聞かれても邪魔なだけ。
+     */
+    fun refreshSchedulePosition() {
+        val state = local.value
+        if (state.activeItemId != null || state.schedule.isEmpty()) {
+            local.update { it.copy(suggestedItemId = null, suggestedStartEpochMs = null) }
+            return
+        }
+        val now = System.currentTimeMillis()
+        val entry = state.projectedTimeline(now).firstOrNull { entry ->
+            now >= entry.startAtEpochMs && now < entry.endAtEpochMs
+        }
+        local.update {
+            it.copy(
+                suggestedItemId = entry?.item?.id,
+                suggestedStartEpochMs = entry?.startAtEpochMs,
+            )
+        }
+    }
+
+    /**
+     * 「予定ではもう始まっています」から開始する。
+     *
+     * 予定の開始時刻からの経過ぶんを最初から乗せる。19:00 開始の項目を 19:04 に
+     * 押したなら、カウントダウンは4分減った状態から始まる——現実に合わない
+     * 残り時間を出すくらいなら、押していることを最初から見せた方がいい。
+     */
+    fun startSuggested() {
+        val id = local.value.suggestedItemId ?: return
+        val plannedStart = local.value.suggestedStartEpochMs
+        val elapsed = plannedStart
+            ?.let { (System.currentTimeMillis() - it).coerceAtLeast(0) }
+            ?: 0L
+        startItem(id, elapsedMillis = elapsed)
+    }
+
+    /**
+     * ホームの「スタートしますか？」から入ってきたときの開始。
+     * 当たっている項目があればそこから、無ければ先頭から始める。
+     */
+    fun startFromNow() {
+        if (local.value.activeItemId != null) return
+        if (local.value.suggestedItemId != null) {
+            startSuggested()
+            return
+        }
+        val first = local.value.schedule.firstOrNull() ?: return
+        startItem(first.id)
     }
 
     // --- 進行表 ---
-
-    fun setDraftTitle(value: String) {
-        local.update { it.copy(draftTitle = value) }
-    }
-
-    fun setDraftMinutes(minutes: Int) {
-        local.update { it.copy(draftMinutes = minutes.coerceIn(0, 600)) }
-    }
 
     /**
      * 案件管理の進行表をまとめて取り込む。
@@ -306,25 +457,15 @@ class ShowRunnerViewModel @Inject constructor(
      */
     fun importFromJob(jobId: Long) {
         viewModelScope.launch {
+            val job = local.value.availableJobs.firstOrNull { it.id == jobId } ?: return@launch
             val items = scheduleRepository.observeForJob(jobId).first()
-            if (items.isEmpty()) return@launch
-            val newItems = items.map { coreItem ->
-                ScheduleItem(
-                    id = nextId++,
-                    title = coreItem.title,
-                    plannedMinutes = coreItem.durationMinutes,
-                    fixedStartEpochMs = coreItem.startAtEpochMs,
-                )
+            val show = PlannedShow.from(job, items)
+            if (show == null) {
+                local.update { it.copy(error = "その進行表にはまだ項目がありません") }
+                return@launch
             }
-            local.update { it.copy(schedule = it.schedule + newItems) }
+            applyPlannedShow(show)
         }
-    }
-
-    fun addScheduleItem() {
-        val title = local.value.draftTitle.trim()
-        if (title.isEmpty()) return
-        val item = ScheduleItem(id = nextId++, title = title, plannedMinutes = local.value.draftMinutes)
-        local.update { it.copy(schedule = it.schedule + item, draftTitle = "") }
     }
 
     fun removeScheduleItem(id: Long) {
@@ -360,17 +501,7 @@ class ShowRunnerViewModel @Inject constructor(
         }
     }
 
-    /** 進行表全体の開始予定時刻。null を渡すと時刻表示自体をやめる。 */
-    fun setAnchorTime(epochMs: Long?) {
-        local.update { it.copy(anchorEpochMs = epochMs) }
-    }
-
     // --- SE 連動・遅延 ---
-
-    /** 「本番は19:00固定」のような、この項目だけ譲れない開始時刻。null で解除する。 */
-    fun setItemFixedTime(itemId: Long, epochMs: Long?) {
-        updateItem(itemId) { it.copy(fixedStartEpochMs = epochMs) }
-    }
 
     fun setCueLink(itemId: Long, soundCueId: Long?) {
         updateItem(itemId) { it.copy(linkedSoundCueId = soundCueId, cueDelayMs = if (soundCueId == null) 0 else it.cueDelayMs) }
@@ -410,13 +541,26 @@ class ShowRunnerViewModel @Inject constructor(
 
     // --- カウントダウン ---
 
-    /** この項目からカウントダウンを開始する。走っていた別の項目があれば止めて切り替える。 */
-    fun startItem(id: Long) {
+    /**
+     * この項目からカウントダウンを開始する。走っていた別の項目があれば止めて切り替える。
+     *
+     * @param elapsedMillis すでに経っていることにする時間。予定の時刻から遅れて
+     *   押したときに、その遅れをそのまま持ち込むために使う
+     */
+    fun startItem(id: Long, elapsedMillis: Long = 0) {
         stopTicker()
         cancelPendingCue()
-        accumulatedMillis = 0
+        accumulatedMillis = elapsedMillis.coerceAtLeast(0)
         runStartNanos = System.nanoTime()
-        local.update { it.copy(activeItemId = id, running = true, elapsedMillis = 0) }
+        local.update {
+            it.copy(
+                activeItemId = id,
+                running = true,
+                elapsedMillis = accumulatedMillis,
+                suggestedItemId = null,
+                suggestedStartEpochMs = null,
+            )
+        }
         startTicker()
         scheduleLinkedCue(id)
     }
@@ -449,10 +593,27 @@ class ShowRunnerViewModel @Inject constructor(
         startItem(id)
     }
 
-    fun stopAll() {
+    /**
+     * 取り込んだ進行表を捨てて空にする。別の現場の表に入れ替えるときに使う。
+     * 以降この画面では自動取り込みをしない——外したものが黙って戻ってきては困る。
+     */
+    fun clearSchedule() {
+        autoApplyBlocked = true
         stopTicker()
         cancelPendingCue()
-        local.update { it.copy(activeItemId = null, running = false, elapsedMillis = 0) }
+        local.update {
+            it.copy(
+                schedule = emptyList(),
+                activeItemId = null,
+                running = false,
+                elapsedMillis = 0,
+                anchorEpochMs = null,
+                loadedShowName = null,
+                autoLoaded = false,
+                suggestedItemId = null,
+                suggestedStartEpochMs = null,
+            )
+        }
     }
 
     // --- 本番モード ---
@@ -585,6 +746,7 @@ class ShowRunnerViewModel @Inject constructor(
         pipeline.reset()
         feedbackDetector.reset()
         framesSinceFeedback = Int.MAX_VALUE
+        // 履歴（feedbackTracker）はここでは消さない。リハで拾ったものを本番で見返せるようにする
         lastLevelDb = ShowRunnerUiState.SILENCE_DB
         runningMaxDb = ShowRunnerUiState.SILENCE_DB
         local.update { it.copy(feedback = null) }
@@ -606,7 +768,17 @@ class ShowRunnerViewModel @Inject constructor(
 
     fun stopMonitor() {
         captureEngine.stop()
-        local.update { it.copy(monitoring = false, feedback = null) }
+        // 履歴は残すが、一覧は取り直す。最後のフレームの「発振中」が残ったままだと、
+        // 止めた後もまだ鳴っているように見える
+        val closedAt = now() + feedbackTracker.gapToleranceMs + 1
+        feedbackTracker.update(emptyList(), closedAt)
+        local.update {
+            it.copy(
+                monitoring = false,
+                feedback = null,
+                feedbackTracks = feedbackTracker.snapshot(closedAt, it.feedbackSort, MIN_TOTAL_MS),
+            )
+        }
     }
 
     fun toggleMonitor() {
@@ -621,6 +793,40 @@ class ShowRunnerViewModel @Inject constructor(
         local.update { it.copy(lastFeedback = null) }
     }
 
+    /**
+     * 検出の厳しさ。検出器は作り直すが履歴は残す——
+     * 感度を上げ下げしながら同じ現場を見るのが普通で、そのたびに集計が消えると比べられない。
+     */
+    fun setSensitivity(sensitivity: FeedbackSensitivity) {
+        if (local.value.sensitivity == sensitivity) return
+        feedbackDetector = createDetector(sensitivity)
+        local.update { it.copy(sensitivity = sensitivity) }
+    }
+
+    fun setFeedbackSort(sort: FeedbackTracker.Sort) {
+        local.update {
+            it.copy(
+                feedbackSort = sort,
+                feedbackTracks = feedbackTracker.snapshot(now(), sort, MIN_TOTAL_MS),
+            )
+        }
+    }
+
+    /** 履歴を捨てる。転換のあと、次のバンドで取り直すときに使う */
+    fun clearFeedbackHistory() {
+        feedbackTracker.reset()
+        feedbackDetector.reset()
+        pipeline.clearPeakHold()
+        local.update {
+            it.copy(
+                feedbackTracks = emptyList(),
+                feedbackElapsedMs = 0,
+                lastFeedback = null,
+                peakHoldDb = FloatArray(0),
+            )
+        }
+    }
+
     private fun onMonitorFrame(frame: FloatArray) {
         val offset = local.value.calibration.offsetDb
         val snapshot = pipeline.analyze(
@@ -629,7 +835,11 @@ class ShowRunnerViewModel @Inject constructor(
             offsetDb = offset,
             peakHold = true,
         )
-        val alert = detectFeedback(frame)
+        val found = feedbackDetector.process(frame)
+        val now = now()
+        // 空のフレームも必ず渡す。渡さないと鳴り止んだことが分からず、連続時間が伸び続ける
+        feedbackTracker.update(found, now)
+        val alert = holdFeedback(found)
 
         local.update {
             it.copy(
@@ -641,13 +851,15 @@ class ShowRunnerViewModel @Inject constructor(
                 frequencies = pipeline.frequencies,
                 feedback = alert,
                 lastFeedback = alert ?: it.lastFeedback,
+                feedbackTracks = feedbackTracker.snapshot(now, it.feedbackSort, MIN_TOTAL_MS),
+                feedbackElapsedMs = feedbackTracker.elapsedMs(now),
             )
         }
     }
 
     /** 一番突出している1本だけ出す。3本並べても打つ手は変わらないし、表示が増えるほど読みにくい */
-    private fun detectFeedback(frame: FloatArray): FeedbackAlert? {
-        val best = feedbackDetector.process(frame).firstOrNull()
+    private fun holdFeedback(found: List<FeedbackDetector.Candidate>): FeedbackAlert? {
+        val best = found.firstOrNull()
 
         if (best != null) {
             framesSinceFeedback = 0
@@ -682,8 +894,24 @@ class ShowRunnerViewModel @Inject constructor(
         if (local.value.showModeActive) showModeController.exit()
     }
 
+    private fun createDetector(sensitivity: FeedbackSensitivity) = FeedbackDetector(
+        sampleRate = AudioCaptureEngine.DEFAULT_SAMPLE_RATE,
+        fftSize = pipeline.fftSize,
+        prominenceThresholdDb = sensitivity.prominenceDb,
+        sustainFrames = sensitivity.sustainFrames,
+    )
+
+    /** 履歴の時刻。単調増加していればよいので、時刻合わせの影響を受けない方を使う */
+    private fun now(): Long = SystemClock.elapsedRealtime()
+
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
+
+        /**
+         * 一覧に残す最低の累計時間。
+         * これ未満は拍手や物音で1〜2フレーム立っただけの成分として扱う
+         */
+        const val MIN_TOTAL_MS = 200L
         const val TICK_MS = 100L
         const val NANOS_PER_MILLI = 1_000_000L
         const val MAX_CUE_DELAY_MS = 60_000L

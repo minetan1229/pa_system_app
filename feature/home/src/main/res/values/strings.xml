@@ -26,6 +26,14 @@
     <string name="home_calibration_confidence_fair">手動校正（内蔵マイク）</string>
     <string name="home_calibration_confidence_good">校正器または外部マイクで校正済み</string>
 
+    <!-- 今日の進行表 -->
+    <string name="home_today_title">今日の本番</string>
+    <string name="home_today_started_title">本番が始まっています</string>
+    <string name="home_today_name">%1$s（%2$s開始・全%3$d分）</string>
+    <string name="home_today_now">いまの予定：%1$s（%2$sまで）</string>
+    <string name="home_today_start">スタートする</string>
+    <string name="home_today_open">本番万能コントローラーで開く</string>
+
     <!-- 近道 -->
     <string name="home_quicklinks_title">本番が始まる前に開く</string>
     <string name="home_quicklinks_body">進行表・SE・ハウリング監視をこれ1つで。本番中に画面を切り替えません。</string>

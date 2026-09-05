@@ -12,6 +12,7 @@ import com.patoolbox.core.model.ProSource
 import com.patoolbox.core.model.ToolId
 import com.patoolbox.core.model.UserPreferences
 import com.patoolbox.core.testing.FakeCalibrationRepository
+import com.patoolbox.core.testing.FakePlannedShowRepository
 import com.patoolbox.core.testing.FakeProGate
 import com.patoolbox.core.testing.FakeUserPreferencesRepository
 import com.patoolbox.core.testing.MainDispatcherRule
@@ -31,6 +32,7 @@ class HomeViewModelTest {
 
     private val proGate = FakeProGate()
     private val calibrationRepository = FakeCalibrationRepository()
+    private val plannedShowRepository = FakePlannedShowRepository()
 
     /**
      * uiState は WhileSubscribed なので、購読者がいないと上流が動かない。
@@ -44,7 +46,7 @@ class HomeViewModelTest {
 
     @Test
     fun `初期状態は検索なし Free お気に入りなし`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         val state = viewModel.uiState.value
@@ -55,7 +57,7 @@ class HomeViewModelTest {
 
     @Test
     fun `検索文字列が状態に反映される`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         viewModel.onQueryChange("SPL")
@@ -65,7 +67,7 @@ class HomeViewModelTest {
 
     @Test
     fun `お気に入りの追加と解除ができる`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         viewModel.onToggleFavorite(ToolId.SPL_METER)
@@ -82,7 +84,7 @@ class HomeViewModelTest {
                 favoriteToolIds = setOf(ToolId.GLOSSARY.name, ToolId.SPL_METER.name),
             ),
         )
-        val viewModel = HomeViewModel(repository, calibrationRepository, proGate)
+        val viewModel = HomeViewModel(repository, calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.favoriteTools)
@@ -95,7 +97,7 @@ class HomeViewModelTest {
         val repository = FakeUserPreferencesRepository(
             UserPreferences.Default.copy(favoriteToolIds = setOf("REMOVED_TOOL")),
         )
-        val viewModel = HomeViewModel(repository, calibrationRepository, proGate)
+        val viewModel = HomeViewModel(repository, calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.favoriteTools).isEmpty()
@@ -103,7 +105,7 @@ class HomeViewModelTest {
 
     @Test
     fun `校正値が無ければ未校正`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         val calibration = viewModel.uiState.value.calibration
@@ -131,7 +133,7 @@ class HomeViewModelTest {
                 ),
             ),
         )
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), repository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), repository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         val calibration = viewModel.uiState.value.calibration
@@ -144,7 +146,7 @@ class HomeViewModelTest {
         val repository = FakeCalibrationRepository(
             listOf(CalibrationProfile.uncalibrated("builtin", AudioInputType.BUILTIN_MIC)),
         )
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), repository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), repository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.calibration.isCalibrated).isFalse()
@@ -152,7 +154,7 @@ class HomeViewModelTest {
 
     @Test
     fun `既定は中級者`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.level).isEqualTo(ExperienceLevel.INTERMEDIATE)
@@ -161,7 +163,7 @@ class HomeViewModelTest {
     @Test
     fun `慣れの度合いを変えると保存されて状態にも出る`() = runTest {
         val repository = FakeUserPreferencesRepository()
-        val viewModel = HomeViewModel(repository, calibrationRepository, proGate)
+        val viewModel = HomeViewModel(repository, calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         viewModel.onLevelChange(ExperienceLevel.BEGINNER)
@@ -177,7 +179,7 @@ class HomeViewModelTest {
                 profile = FieldProfile(console = ConsoleType.ANALOG),
             ),
         )
-        val viewModel = HomeViewModel(repository, calibrationRepository, proGate)
+        val viewModel = HomeViewModel(repository, calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.profile.console).isEqualTo(ConsoleType.ANALOG)
@@ -185,7 +187,7 @@ class HomeViewModelTest {
 
     @Test
     fun `ProGate の状態が UI に伝わる`() = runTest {
-        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, proGate)
+        val viewModel = HomeViewModel(FakeUserPreferencesRepository(), calibrationRepository, plannedShowRepository, proGate)
         subscribe(viewModel)
 
         assertThat(viewModel.uiState.value.proStatus.isPro).isFalse()

@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -36,6 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.patoolbox.core.model.PlannedShow
+import com.patoolbox.core.ui.DateTimeText
+import kotlinx.coroutines.delay
 import com.patoolbox.core.designsystem.component.PaAppMark
 import com.patoolbox.core.designsystem.component.PaCard
 import com.patoolbox.core.designsystem.component.PaIllustration
@@ -59,21 +63,22 @@ import com.patoolbox.core.ui.titleRes
 /**
  * ホーム。
  *
- * **38枚のカードを最初に見せない。** 一覧は「探すための画面」であって
- * 「開いたときに見たい画面」ではない。既定（中級者）でここに置くのは
+ * 上から
  *
- * 1. いま何のアプリを開いたのか（見出しの絵）
- * 2. 最初に一度だけやること（マイク校正）
- * 3. すぐ開きたい4つ（★を付けていればその4つ）
- * 4. 分類から掘る入口
+ * 0. 今日の進行表（あるときだけ。始まっていれば「スタートしますか？」）
+ * 1. おすすめ／★を付けた道具
+ * 2. 最初に一度だけやること（マイク校正）と、本番前に開く近道
+ * 3. すべての道具
+ * 4. まとめ——分類の入口
  *
- * の4つだけにして、全部の道具は [ToolListScreen] へ送る。
- * 検索だけは例外で、この画面に置いたまま結果をその場に出す
- * （現場では「探す」より「打つ」方が速いので、1画面ぶんの移動も惜しい）。
+ * の順に置く。**この並びはどの段でも同じ**にしてある（[landingSections]）。
+ * 段によって置き場所が変わる方が、初心者にも上級者にも覚えにくかった。
+ * [ExperienceLevel] で変えるのは説明の量とカードの密度だけで、
+ * **機能は消さない**——どの段でも全部の道具に手が届く。
  *
- * ただしこの並びが合うのは中級者だけなので、[ExperienceLevel] で作りを3通りに変える。
- * **機能は消さない**——変わるのは並べ方と説明の量だけで、
- * どの段でも全部の道具に手が届く。
+ * 検索はこの画面に置いたまま結果をその場に出す（現場では「探す」より
+ * 「打つ」方が速いので、1画面ぶんの移動も惜しい）。分類で絞った一覧は
+ * [ToolListScreen] に分けてある。
  */
 @Composable
 fun HomeScreen(
@@ -83,6 +88,7 @@ fun HomeScreen(
     onCalibrationGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onStartShow: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,6 +104,7 @@ fun HomeScreen(
         onCalibrationClick = onCalibrationClick,
         onCalibrationGuideClick = onCalibrationGuideClick,
         onSettingsClick = onSettingsClick,
+        onStartShow = onStartShow,
         modifier = modifier,
     )
 }
@@ -116,6 +123,7 @@ internal fun HomeScreen(
     onCalibrationGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onStartShow: () -> Unit = {},
 ) {
     val dimens = LocalPaDimens.current
     val searchIndex = rememberToolSearchIndex()
@@ -208,6 +216,24 @@ internal fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(dimens.spaceMd),
                         modifier = Modifier.padding(top = dimens.spaceMd),
                     ) {
+                        // 今日の進行表があれば何よりも先に出す。始まっているなら
+                        // 「スタートしますか？」まで、この1枚で片が付くようにする
+                        if (query.isEmpty()) {
+                            val now by produceState(initialValue = System.currentTimeMillis()) {
+                                while (true) {
+                                    value = System.currentTimeMillis()
+                                    delay(NOW_TICK_MS)
+                                }
+                            }
+                            uiState.showForNow(now)?.let { show ->
+                                TodayShowCard(
+                                    show = show,
+                                    nowEpochMs = now,
+                                    onStart = onStartShow,
+                                    onOpen = { onToolClick(ToolId.SHOW_RUNNER) },
+                                )
+                            }
+                        }
                         // 上級者では見出しの絵を出さない。情報を持たない絵に
                         // 一画面の1/3を使われるより、道具が1行でも多く見える方がいい
                         if (query.isEmpty() && uiState.level != ExperienceLevel.ADVANCED) {
@@ -249,7 +275,24 @@ internal fun HomeScreen(
     }
 }
 
-/** 検索していないときに出す中身。段によって並びが変わる。 */
+/**
+ * 検索していないときに出す中身。
+ *
+ * 並びはどの段でも同じにしてある。以前は初心者に「分類から掘る入口」だけを見せ、
+ * 上級者にだけ全部を並べていたが、**同じアプリなのに人によって置き場所が違う**のは
+ * 結局どちらの段にとっても覚えにくい。いま置いているのは上から
+ *
+ * 1. おすすめ（★を付けていればその道具）——最初の1タップをここで終わらせる
+ * 2. はじめに（マイク校正）と、本番前に開く近道
+ * 3. すべての道具（分類の見出し付き）
+ * 4. まとめ——分類の入口。**全部を見せたあと**に置く
+ *
+ * 4 を最後にしたのが今回の要点。分類は「探し方の目次」であって、開いたときに
+ * 最初に読みたいものではない。上に置くと、目当ての道具に届くまでに必ず
+ * 一段深く潜ることになり、初心者ほど迷子になっていた。
+ *
+ * 変わるのは並べ方と説明の量だけで、**どの段でも全部の道具に手が届く**。
+ */
 private fun LazyGridScope.landingSections(
     uiState: HomeUiState,
     onToolClick: (ToolId) -> Unit,
@@ -261,6 +304,43 @@ private fun LazyGridScope.landingSections(
     val level = uiState.level
     val compact = level == ExperienceLevel.ADVANCED
 
+    // ① おすすめ（一番上）。
+    // 初心者・中級者には「まず開く4つ」を出す。上級者に自動のおすすめを出さないのは、
+    // その段の人は★で自分の4つを決めているため——勝手に並ぶ方が邪魔になる
+    val hasFavorites = uiState.favoriteTools.isNotEmpty()
+    val quickTools = when {
+        hasFavorites -> uiState.favoriteTools
+        compact -> emptyList()
+        else -> starterTools(uiState.profile)
+    }
+    if (quickTools.isNotEmpty()) {
+        fullSpan {
+            SectionHeader(
+                title = stringResource(
+                    if (hasFavorites) R.string.home_section_favorites else R.string.home_starters,
+                ),
+                subtitle = stringResource(
+                    if (hasFavorites) {
+                        R.string.home_favorites_subtitle
+                    } else {
+                        R.string.home_starters_subtitle
+                    },
+                ),
+            )
+        }
+        items(quickTools, key = { "quick_${it.name}" }) { tool ->
+            ToolCard(
+                tool = tool,
+                isFavorite = tool in uiState.favoriteTools,
+                onClick = { onToolClick(tool) },
+                onToggleFavorite = { onToggleFavorite(tool) },
+                compact = compact,
+                showLevelBadge = level == ExperienceLevel.BEGINNER,
+            )
+        }
+    }
+
+    // ② はじめに（校正）と近道
     fullSpan {
         SectionHeader(
             title = stringResource(R.string.home_section_start),
@@ -275,9 +355,8 @@ private fun LazyGridScope.landingSections(
             onOpenCalibration = onCalibrationClick,
         )
     }
-    // 用語集と本番万能コントローラー(ShowRunner)は、分類を掘ったり検索したりせず
-    // ここから一発で開けるようにする。前者は現場で言葉が飛んできた瞬間に、
-    // 後者は本番が始まる直前に、探す時間なしで開きたい道具
+    // 用語集と本番万能コントローラーは、分類を掘ったり検索したりせずここから一発で開ける。
+    // 前者は現場で言葉が飛んできた瞬間に、後者は本番が始まる直前に開きたい道具
     fullSpan {
         QuickLinksPanel(
             onOpenGlossary = { onToolClick(ToolId.GLOSSARY) },
@@ -285,7 +364,22 @@ private fun LazyGridScope.landingSections(
         )
     }
 
-    // 初心者にだけ「何から開くか」を置く。中級以上には邪魔になるので出さない
+    // ③ すべての道具
+    toolSections(
+        tools = ToolId.entries.toList(),
+        uiState = uiState,
+        keyPrefix = "all",
+        onToolClick = onToolClick,
+        onToggleFavorite = onToggleFavorite,
+    )
+
+    // ④ まとめ（分類の入口）。一番下に置く
+    fullSpan {
+        SectionHeader(
+            title = stringResource(R.string.home_section_categories),
+            subtitle = stringResource(R.string.home_section_categories_subtitle),
+        )
+    }
     if (level == ExperienceLevel.BEGINNER) {
         fullSpan {
             PaNotice(
@@ -294,54 +388,6 @@ private fun LazyGridScope.landingSections(
                 tone = PaTone.INFO,
             )
         }
-    }
-
-    val quickTools = uiState.favoriteTools.ifEmpty { starterTools(uiState.profile) }
-    val hasFavorites = uiState.favoriteTools.isNotEmpty()
-    fullSpan {
-        SectionHeader(
-            title = stringResource(
-                if (hasFavorites) R.string.home_section_favorites else R.string.home_starters,
-            ),
-            subtitle = stringResource(
-                if (hasFavorites) {
-                    R.string.home_favorites_subtitle
-                } else {
-                    R.string.home_starters_subtitle
-                },
-            ),
-        )
-    }
-    items(quickTools, key = { "quick_${it.name}" }) { tool ->
-        ToolCard(
-            tool = tool,
-            isFavorite = tool in uiState.favoriteTools,
-            onClick = { onToolClick(tool) },
-            onToggleFavorite = { onToggleFavorite(tool) },
-            compact = compact,
-            showLevelBadge = level == ExperienceLevel.BEGINNER,
-        )
-    }
-
-    if (compact) {
-        // 上級者は分類の入口を挟まず、全部をそのまま並べる。
-        // 何がどこにあるか分かっている人にとっては、入口が1枚増えるだけ遠くなる
-        toolSections(
-            tools = ToolId.entries.toList(),
-            uiState = uiState,
-            keyPrefix = "all",
-            onToolClick = onToolClick,
-            onToggleFavorite = onToggleFavorite,
-        )
-        fullSpan { ProStatusLine(uiState) }
-        return
-    }
-
-    fullSpan {
-        SectionHeader(
-            title = stringResource(R.string.home_section_categories),
-            subtitle = stringResource(R.string.home_section_categories_subtitle),
-        )
     }
     ToolCategory.entries.forEach { category ->
         fullSpan(key = "category_${category.name}") {
@@ -358,6 +404,82 @@ private fun LazyGridScope.landingSections(
                 Text(stringResource(R.string.home_all_tools, ToolId.entries.size))
             }
             ProStatusLine(uiState)
+        }
+    }
+}
+
+/**
+ * 今日の進行表。
+ *
+ * 日付の入った進行表（案件管理で作るもの）のうち、今日のものだけをホームに出す。
+ * すでに予定の時刻を過ぎているなら「始まっています。スタートしますか？」まで言う——
+ * 本番中に道具を探させないための1枚なので、押す先は1つに絞ってある。
+ */
+@Composable
+private fun TodayShowCard(
+    show: PlannedShow,
+    nowEpochMs: Long,
+    onStart: () -> Unit,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalPaDimens.current
+    val started = show.hasStarted(nowEpochMs)
+    val current = show.entryAt(nowEpochMs)
+
+    PaCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = if (started) {
+            MaterialTheme.colorScheme.errorContainer
+        } else {
+            MaterialTheme.colorScheme.secondaryContainer
+        },
+        borderColor = if (started) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.outlineVariant
+        },
+        contentPadding = dimens.space,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+    ) {
+        Text(
+            text = stringResource(
+                if (started) R.string.home_today_started_title else R.string.home_today_title,
+            ),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(
+                R.string.home_today_name,
+                show.job.name,
+                DateTimeText.formatTime(show.startAtEpochMs),
+                show.totalMinutes,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        current?.let { entry ->
+            Text(
+                text = stringResource(
+                    R.string.home_today_now,
+                    entry.item.title,
+                    DateTimeText.formatTime(entry.endAtEpochMs),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        if (started) {
+            Button(
+                onClick = onStart,
+                modifier = Modifier.fillMaxWidth().height(dimens.minTouch * 1.3f),
+            ) {
+                Text(stringResource(R.string.home_today_start))
+            }
+        }
+        OutlinedButton(onClick = onOpen, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.home_today_open))
         }
     }
 }
@@ -857,3 +979,6 @@ private fun ProStatusLine(
         modifier = modifier,
     )
 }
+
+/** 今日の進行表の「いま」を数え直す間隔。分単位で足りるので粗くていい */
+private const val NOW_TICK_MS = 30_000L

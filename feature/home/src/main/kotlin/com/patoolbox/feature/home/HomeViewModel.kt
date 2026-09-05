@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patoolbox.core.billing.ProGate
 import com.patoolbox.core.data.CalibrationRepository
+import com.patoolbox.core.data.PlannedShowRepository
 import com.patoolbox.core.data.UserPreferencesRepository
 import com.patoolbox.core.model.CalibrationConfidence
 import com.patoolbox.core.model.CalibrationProfile
@@ -23,6 +24,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     calibrationRepository: CalibrationRepository,
+    plannedShowRepository: PlannedShowRepository,
     proGate: ProGate,
 ) : ViewModel() {
 
@@ -35,7 +37,10 @@ class HomeViewModel @Inject constructor(
         // 校正値は入力機器ごとに保存されている。ホームでは合計を見るだけなので
         // 録音を始めずに済む observeAll を使う（observe は起動中のセッションのキーが要る）
         calibrationRepository.observeAll(),
-    ) { query, preferences, proStatus, profiles ->
+        // 今日の進行表。本番万能コントローラーと同じものを見て、
+        // 「もう始まっています」をホームからも出す
+        plannedShowRepository.observeToday(),
+    ) { query, preferences, proStatus, profiles, todayShows ->
         HomeUiState(
             query = query,
             proStatus = proStatus,
@@ -45,6 +50,7 @@ class HomeViewModel @Inject constructor(
             calibration = profiles.toSummary(),
             profile = preferences.profile,
             hasChosenExperienceLevel = preferences.hasChosenExperienceLevel,
+            todayShows = todayShows,
         )
     }.stateIn(
         scope = viewModelScope,

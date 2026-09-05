@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="showrunner_tab_progress">進行</string>
-    <string name="showrunner_tab_monitor">モニター</string>
-    <string name="showrunner_tab_pads">SEパッド</string>
 
-    <!-- 本番モード -->
-    <string name="showrunner_show_mode_title">本番モード</string>
-    <string name="showrunner_show_mode_on">有効中 — 通知などを制限しています</string>
-    <string name="showrunner_show_mode_off">オフ — タップして有効にする</string>
-    <string name="showrunner_show_mode_silence">通知をミュート</string>
-    <string name="showrunner_show_mode_silence_desc">おやすみモードで通知を止めます</string>
-    <string name="showrunner_show_mode_alarms">アラームは鳴らす</string>
-    <string name="showrunner_show_mode_alarms_desc">通知をミュート中もアラームだけ許可します</string>
-    <string name="showrunner_show_mode_screen">画面を消さない</string>
-    <string name="showrunner_show_mode_screen_desc">本番中にスリープしません</string>
-    <string name="showrunner_show_mode_permission_note">通知のミュートには、設定アプリで「通知ポリシーへのアクセス」を許可してください。</string>
-    <string name="showrunner_show_mode_open_settings">設定アプリを開く</string>
+    <!-- 取り込んだ進行表 -->
+    <string name="showrunner_loaded_auto">今日の進行表を読み込みました</string>
+    <string name="showrunner_loaded_manual">進行表を読み込みました</string>
+    <string name="showrunner_loaded_name">%1$s（%2$s開始・全%3$d分）</string>
+    <string name="showrunner_change_show">別の進行表を読み込む</string>
+    <string name="showrunner_clear_show">この進行表を外す</string>
+    <string name="showrunner_open_schedules">進行表を作る・直す（案件管理）→</string>
+    <string name="showrunner_empty_title">進行表がありません</string>
+    <string name="showrunner_empty_body">「案件管理」で日付と搬入時刻を入れて進行表を作ると、当日はこの画面が自動で読み込みます。</string>
+
+    <!-- もう始まっている、の案内 -->
+    <string name="showrunner_prompt_title">予定では「%1$s」が始まっています</string>
+    <string name="showrunner_prompt_body">%1$s開始の予定です。いま押すと、その時刻からの経過ぶんを引いた残り時間で始まります。</string>
+    <string name="showrunner_prompt_start">ここから始める</string>
+    <string name="showrunner_prompt_later">あとで</string>
 
     <!-- カウントダウン -->
     <string name="showrunner_no_active">まだ何も始まっていません。下の進行表から「開始」を押してください。</string>
@@ -29,53 +29,81 @@
 
     <!-- 進行表 -->
     <string name="showrunner_schedule_title">進行表</string>
-    <string name="showrunner_schedule_subtitle">タイトルを並べて、上から順にカウントダウンします。行をタップで設定変更。</string>
-    <string name="showrunner_draft_title_hint">例: MCコメント、1曲目、転換</string>
-    <string name="showrunner_draft_duration_label">持ち時間</string>
+    <string name="showrunner_schedule_subtitle">上から順にカウントダウンします。行をタップで持ち時間・SE連動を変えられます。</string>
     <string name="showrunner_minutes">%1$d分</string>
     <string name="showrunner_duration_unset">時間未定</string>
     <string name="showrunner_time_range">%1$s–%2$s</string>
     <string name="showrunner_total_duration">合計 %1$d分</string>
-    <string name="showrunner_add">この内容で追加</string>
-    <string name="showrunner_schedule_empty">まだ予定がありません。上のフォームから追加してください。</string>
     <string name="showrunner_active">進行中</string>
     <string name="showrunner_start">開始</string>
     <string name="showrunner_remove">削除</string>
     <string name="showrunner_remove_confirm">「%1$s」を削除しますか？</string>
     <string name="showrunner_remove_cancel">キャンセル</string>
 
-    <!-- アンカー時刻 -->
-    <string name="showrunner_anchor_label">全体の開始時刻（任意）</string>
-    <string name="showrunner_anchor_hint">例: 19:00</string>
-    <string name="showrunner_anchor_note">設定すると各項目の開始・終了時刻が表示されます</string>
-    <string name="showrunner_anchor_clear">時刻表示をやめる</string>
-
     <!-- 項目設定シート -->
     <string name="showrunner_item_edit_title">項目名</string>
     <string name="showrunner_item_edit_duration">持ち時間</string>
     <string name="showrunner_item_edit_save">変更</string>
-    <string name="showrunner_item_fixed_time">ピン留め時刻（任意）</string>
-    <string name="showrunner_item_fixed_time_note">「本番は19:00固定」など、この項目だけ時刻を固定したいとき</string>
     <string name="showrunner_item_cue_badge">SE連動あり</string>
     <string name="showrunner_item_cue_label">開始時に鳴らすSE</string>
     <string name="showrunner_item_cue_none">なし</string>
     <string name="showrunner_item_cue_delay">遅延</string>
     <string name="showrunner_item_cue_delay_seconds">%1$.1f秒</string>
 
-    <!-- モニタータブ -->
-    <string name="showrunner_monitor_title">レベル・ハウリングモニター</string>
-    <string name="showrunner_monitor_hint">本番中にレベルとハウリングを監視します。EQが原因のハウリングは「ハウリング検知」画面で詳しく調べられます。</string>
-    <string name="showrunner_monitor_start">モニタ開始</string>
-    <string name="showrunner_monitor_stop">モニタ停止</string>
+    <!-- ハウリング -->
+    <string name="showrunner_feedback_title">ハウリング検出</string>
+    <string name="showrunner_feedback_hint">マイクで拾って、鳴っている周波数と打つ手をこの画面に出します。</string>
+    <string name="showrunner_monitor_start">検出を始める</string>
+    <string name="showrunner_monitor_stop">検出を止める</string>
     <string name="showrunner_monitor_waiting">計測待ち…</string>
     <string name="showrunner_monitor_level">%1$s / 最大 %2$s %3$s</string>
     <string name="showrunner_monitor_reset_max">最大値を消去</string>
-    <string name="showrunner_to_feedback">→ ハウリング検知で詳しく調べる</string>
-    <string name="showrunner_to_feedback_urgent">ハウリング検知で EQ を調べる ▶</string>
+    <string name="showrunner_feedback_open">直し方をくわしく見る（%1$d本）</string>
+    <string name="showrunner_feedback_open_empty">直し方をくわしく見る</string>
+    <string name="showrunner_feedback_detail_title">ハウリングの直し方</string>
+    <string name="showrunner_feedback_sensitivity">感度</string>
+    <string name="showrunner_feedback_sort">並べ替え</string>
+    <string name="showrunner_feedback_clear">履歴を消す</string>
+    <string name="showrunner_feedback_close">閉じる</string>
+    <string name="showrunner_feedback_elapsed">記録 %1$s</string>
+    <string name="showrunner_feedback_waiting">検出を始めると、鳴った周波数がここに並びます</string>
+    <string name="showrunner_feedback_none">いまは出ていません</string>
+    <string name="showrunner_feedback_empty_body">拾えたものだけを、累計で長く鳴った順に並べます。一瞬の物音は出ません。</string>
+    <string name="showrunner_feedback_worst_caption">累計 %1$s ／ %2$d回 ／ 最長 %3$s</string>
+    <string name="showrunner_feedback_track_title">%1$s Hz（%2$s）</string>
+    <string name="showrunner_feedback_band">%1$s Hz 帯</string>
+    <string name="showrunner_feedback_state_now">鳴っている</string>
+    <string name="showrunner_feedback_state_past">停止</string>
+    <string name="showrunner_feedback_stat_total">累計</string>
+    <string name="showrunner_feedback_stat_longest">最長連続</string>
+    <string name="showrunner_feedback_stat_episodes">回数</string>
+    <string name="showrunner_feedback_stat_times">%1$d回</string>
+    <string name="showrunner_feedback_stat_prominence">突出量</string>
+    <string name="showrunner_feedback_verdict_sustained">ひと続きで長く鳴っています。定在波か機材の共振が疑われます。まずこの帯域を切ってください。</string>
+    <string name="showrunner_feedback_verdict_drifting">周波数が %1$s〜%2$s Hz で動いています。ハウリングではなく楽器の音の可能性があります。</string>
+    <string name="showrunner_feedback_verdict_repeating">何度も鳴っています。演者が動いた位置で出ている可能性があります。</string>
+    <string name="showrunner_feedback_verdict_short">まだ短い発振です。芽の段階なので、様子を見るか少しだけ下げてください。</string>
+    <string name="showrunner_feedback_legend_now">いま鳴っている</string>
+    <string name="showrunner_feedback_legend_past">止まった</string>
+    <string name="showrunner_feedback_legend_peak">ピーク保持</string>
 
-    <!-- SEパッドタブ -->
+    <!-- 本番モード -->
+    <string name="showrunner_show_mode_title">本番モード</string>
+    <string name="showrunner_show_mode_on">有効中 — 通知などを制限しています</string>
+    <string name="showrunner_show_mode_off">オフ — 右のスイッチで有効にする</string>
+    <string name="showrunner_show_mode_silence">通知をミュート</string>
+    <string name="showrunner_show_mode_silence_desc">おやすみモードで通知を止めます</string>
+    <string name="showrunner_show_mode_alarms">アラームは鳴らす</string>
+    <string name="showrunner_show_mode_alarms_desc">通知をミュート中もアラームだけ許可します</string>
+    <string name="showrunner_show_mode_screen">画面を消さない</string>
+    <string name="showrunner_show_mode_screen_desc">本番中にスリープしません</string>
+    <string name="showrunner_show_mode_permission_note">通知のミュートには、設定アプリで「通知ポリシーへのアクセス」を許可してください。</string>
+    <string name="showrunner_show_mode_open_settings">設定アプリを開く</string>
+    <string name="showrunner_show_mode_details">設定を開く</string>
+
+    <!-- SEパッド -->
     <string name="showrunner_pads_title">SEパッド・同期音源</string>
-    <string name="showrunner_pads_subtitle">SEパッド画面と同じ素材です。どちらの画面から取り込んでも反映されます。</string>
+    <string name="showrunner_pads_subtitle">SEパッド画面と同じ素材です。どちらから取り込んでも反映されます。</string>
     <string name="showrunner_pads_stop_all">すべて止める</string>
     <string name="showrunner_pads_limit">無料版のパッド上限に達しています</string>
     <string name="showrunner_import">音声ファイルを取り込む</string>
@@ -85,19 +113,10 @@
     <string name="showrunner_pad_settings_sync">同期音源にする（ループ再生）</string>
     <string name="showrunner_pad_settings_sync_note">オンにすると止めるまで鳴らし続けます。バッキング音源など、ずっと流したい素材向けです。</string>
 
-    <!-- 案件からインポート -->
-    <string name="showrunner_import_from_job">案件の進行表を取り込む</string>
-    <string name="showrunner_import_from_job_desc">「案件管理」で作った進行表をそのまま使います</string>
-    <string name="showrunner_import_from_job_none">案件がありません。先に「案件管理」で作成してください。</string>
+    <!-- 進行表の取り込み -->
+    <string name="showrunner_import_from_job">進行表を取り込む</string>
+    <string name="showrunner_import_from_job_desc">「案件管理」で作った進行表を、日付と搬入時刻ごと読み込みます</string>
+    <string name="showrunner_import_from_job_none">進行表がありません。先に「案件管理」で作成してください。</string>
     <string name="showrunner_import_from_job_cancel">キャンセル</string>
-    <string name="showrunner_import_from_job_done">取り込みました</string>
-
-    <!-- 使い方ガイド -->
-    <string name="showrunner_guide_title">使い方（3ステップ）</string>
-    <string name="showrunner_guide_step1_label">① 仕込み</string>
-    <string name="showrunner_guide_step1_body">進行表に項目を追加。SE連動・ピン留め時刻も設定</string>
-    <string name="showrunner_guide_step2_label">② 本番</string>
-    <string name="showrunner_guide_step2_body">「開始」を押すとカウントダウン。押し・巻きは延長で調整</string>
-    <string name="showrunner_guide_step3_label">③ モニター</string>
-    <string name="showrunner_guide_step3_body">モニタータブでハウリングを監視。EQが原因なら検知画面へ</string>
+    <string name="showrunner_import_job_date">%1$s</string>
 </resources>

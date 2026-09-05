@@ -61,7 +61,14 @@ data object HomeRoute
  * Phase が進んで画面が増えても、ホーム側は ToolId を渡すだけで済む。
  */
 @Serializable
-data class ToolRoute(val toolId: String)
+data class ToolRoute(
+    val toolId: String,
+    /**
+     * 開いた直後に走らせるか。いまは本番万能コントローラーだけが見ている
+     * （ホームの「もう始まっています。スタートしますか？」から入ったとき true）。
+     */
+    val autoStart: Boolean = false,
+)
 
 /**
  * 道具の一覧。
@@ -128,6 +135,11 @@ fun PaNavHost(
                 onCalibrationClick = { navController.navigate(CalibrationRoute) },
                 onCalibrationGuideClick = { navController.navigate(CalibrationGuideRoute) },
                 onSettingsClick = { navController.navigate(SettingsRoute) },
+                onStartShow = {
+                    navController.navigate(
+                        ToolRoute(ToolId.SHOW_RUNNER.name, autoStart = true),
+                    )
+                },
             )
         }
 
@@ -141,6 +153,7 @@ fun PaNavHost(
             } else {
                 ToolDestination(
                     tool = tool,
+                    autoStart = route.autoStart,
                     onBack = { navController.popBackStack() },
                     onOpenCalibration = { navController.navigate(CalibrationRoute) },
                     onOpenPatchSheet = { sheetId ->
@@ -152,7 +165,10 @@ fun PaNavHost(
                     },
                     onOpenSnapshot = { id -> navController.navigate(SnapshotRoute(id)) },
                     onOpenInvoice = { id -> navController.navigate(InvoiceRoute(id)) },
-                    onOpenFeedback = { navController.navigate(ToolRoute(ToolId.FEEDBACK_FINDER.name)) },
+                    // 進行表そのものは案件管理側で作る。本番の画面からもそこへ行けるようにする
+                    onOpenSchedules = {
+                        navController.navigate(ToolRoute(ToolId.RUN_SHEET.name))
+                    },
                 )
             }
         }
@@ -222,6 +238,7 @@ fun PaNavHost(
 @Composable
 private fun ToolDestination(
     tool: ToolId,
+    autoStart: Boolean,
     onBack: () -> Unit,
     onOpenCalibration: () -> Unit,
     onOpenPatchSheet: (Long) -> Unit,
@@ -229,7 +246,7 @@ private fun ToolDestination(
     onOpenStagePlot: (Long) -> Unit,
     onOpenSnapshot: (Long) -> Unit,
     onOpenInvoice: (Long) -> Unit,
-    onOpenFeedback: () -> Unit,
+    onOpenSchedules: () -> Unit,
 ) {
     when (tool) {
         ToolId.SPL_METER -> SplScreen(
@@ -292,7 +309,8 @@ private fun ToolDestination(
 
         ToolId.SHOW_RUNNER -> ShowRunnerScreen(
             onBack = onBack,
-            onOpenFeedback = onOpenFeedback,
+            autoStart = autoStart,
+            onOpenSchedules = onOpenSchedules,
         )
 
         ToolId.SFX_PADS -> SfxScreen(onBack = onBack)

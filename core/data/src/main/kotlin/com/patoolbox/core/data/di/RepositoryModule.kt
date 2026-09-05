@@ -25,6 +25,8 @@ import com.patoolbox.core.data.RoomStagePlotRepository
 import com.patoolbox.core.data.StagePlotRepository
 import com.patoolbox.core.data.RoomScheduleRepository
 import com.patoolbox.core.data.ScheduleRepository
+import com.patoolbox.core.data.DefaultPlannedShowRepository
+import com.patoolbox.core.data.PlannedShowRepository
 import com.patoolbox.core.data.DataStoreUserPreferencesRepository
 import com.patoolbox.core.data.RoomCalibrationRepository
 import com.patoolbox.core.data.UserPreferencesRepository
@@ -63,6 +65,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindScheduleRepository(impl: RoomScheduleRepository): ScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPlannedShowRepository(
+        impl: DefaultPlannedShowRepository,
+    ): PlannedShowRepository
 
     @Binds
     @Singleton
